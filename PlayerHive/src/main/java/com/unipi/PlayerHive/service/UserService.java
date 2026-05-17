@@ -398,4 +398,8 @@ public class UserService {
         String userId = getAuthenticatedUser().getId();
         return userNeo4jRepository.getGamingTwins(userId, 10);
     }
+
+    public List<SocialButterflyDTO> getSocialButterflies(int limit) {
+        return userNeo4jRepository.getSocialButterflies(limit);
+    }
 }

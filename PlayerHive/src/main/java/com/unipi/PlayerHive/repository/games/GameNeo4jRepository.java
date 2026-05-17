@@ -2,6 +2,7 @@ package com.unipi.PlayerHive.repository.games;
 
 import com.unipi.PlayerHive.DTO.games.HiddenGemDTO;
 import com.unipi.PlayerHive.DTO.games.PlaytimeAchievementsDTO;
+import com.unipi.PlayerHive.DTO.games.FriendMagnetDTO;
 import com.unipi.PlayerHive.DTO.games.GameRecommendationDTO;
 import com.unipi.PlayerHive.DTO.games.TrendingGameDTO;
 import com.unipi.PlayerHive.DTO.users.GameOwnerDTO;
@@ -42,6 +43,7 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
     // 5. Efficient Global Query: "Trending Games Among Friend Groups"
     // todo fix return values
     // todo maybe move to analytics
+    // really heavy query
     @Query("MATCH (u1:User)-[:FRIENDS_WITH]->(u2:User) " +
             "WHERE elementId(u1) < elementId(u2) " +
             "MATCH (u1)-[:PLAYED]->(g:Game)<-[:PLAYED]-(u2) " +
@@ -55,13 +57,22 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
     @Query("MATCH (u:User {id: $userId})-[:FRIENDS_WITH]-(friend)-[:PLAYED]->(game:Game) " +
             "WHERE NOT (u)-[:PLAYED]->(game) " +
             "WITH game, count(DISTINCT friend) AS friendsPlaying " +
+            "LIMIT 50" +
             "MATCH (game)<-[:PLAYED]-(globalPlayer) " +
+            "LIMIT 50" +
             "WITH game, friendsPlaying, count(globalPlayer) AS globalPopularity " +
             "WHERE globalPopularity < $nicheThreshold " +
             "RETURN game.name AS name, friendsPlaying AS friendsPlaying, globalPopularity AS globalPopularity " +
             "ORDER BY friendsPlaying DESC, globalPopularity ASC " +
             "LIMIT $limit")
     List<HiddenGemDTO> getHiddenGems(String userId, int nicheThreshold, int limit);
+
+    @Query("MATCH (g:Game {id: $gameId})<-[:PLAYED]-(u:User)-[:PLAYED]->(other:Game) " +
+        "WHERE g <> other " +
+        "RETURN other.name AS name, count(DISTINCT u) AS sharedPlayers " +
+        "ORDER BY sharedPlayers DESC " +
+        "LIMIT $limit")
+    List<FriendMagnetDTO> getFriendMagnet(String gameId, int limit);
 
 
 }

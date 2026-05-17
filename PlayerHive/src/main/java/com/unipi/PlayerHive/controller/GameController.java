@@ -175,4 +175,13 @@ public class GameController {
     public ResponseEntity<List<HiddenGemDTO>> getHiddenGems(){
         return ResponseEntity.ok(gameService.getHiddenGems());
     }
+
+    @GetMapping("/{gameId}/friendMagnet")
+    @Operation(summary = "Friend Magnet", description = "Games most co-played by players of this game — 'if you liked this, you'll like these'.")
+    @ApiResponse(responseCode = "200", description = "List returned")
+    public ResponseEntity<List<FriendMagnetDTO>> getFriendMagnet(
+            @PathVariable String gameId,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(gameService.getFriendMagnet(gameId, limit));
+    }
 }
