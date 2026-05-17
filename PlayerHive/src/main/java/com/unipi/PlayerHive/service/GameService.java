@@ -3,6 +3,7 @@ package com.unipi.PlayerHive.service;
 import com.unipi.PlayerHive.DTO.analytics.GenreStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.OsPlatformStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.ReleaseYearStatsDTO;
+import com.unipi.PlayerHive.DTO.containers.GameReviewContainerDTO;
 import com.unipi.PlayerHive.DTO.games.*;
 import com.unipi.PlayerHive.DTO.reviews.*;
 import com.unipi.PlayerHive.config.Exceptions.ResourceAlreadyExistsException;
@@ -80,7 +81,7 @@ public class GameService {
         return new GameSearchContainerDTO(result.getContent(),result.isLast());
     }
 
-    public ReviewContainerDTO getGameReviews(String gameId, int page, int size) {
+    public GameReviewContainerDTO getGameReviews(String gameId, int page, int size) {
 
         if(!gameRepository.existsById(gameId))
             throw new NoSuchElementException("The game does not exist");
@@ -91,7 +92,7 @@ public class GameService {
         // array) therefore we need to calculate the requested array portion using the ArrayPager class
         ArrayPager pager = new ArrayPager(reviewNumber,page,size);
 
-        List<ReviewDTO> reviews;
+        List<GameReviewDTO> reviews;
         int numPages;
         boolean isLastPage;
 
@@ -102,7 +103,7 @@ public class GameService {
             List<String> reviewIds = reviewLightDocList.stream()
                     .map(oldGameReviewDTO -> oldGameReviewDTO.getReviewId().toString()).toList();
 
-            reviews = reviewRepository.findByIdInOrderByTimestampDesc(reviewIds);
+            reviews = reviewRepository.findGameReviewsByIdIn(reviewIds);
             numPages = pager.getNumPages();
             isLastPage = pager.isLastPage();
 
@@ -112,7 +113,7 @@ public class GameService {
             isLastPage = true;
         }
 
-        return new ReviewContainerDTO(reviews,numPages,isLastPage);
+        return new GameReviewContainerDTO(reviews,numPages,isLastPage);
     }
 
     @Transactional
@@ -134,7 +135,7 @@ public class GameService {
         // the review is saved in the Review collection ...
         Review savedReview = reviewRepository.save(review);
 
-        ReviewDTO recentReview = reviewMapper.reviewToRecentReviewDTO(savedReview);
+        GameReviewDTO recentReview = reviewMapper.reviewToRecentReviewDTO(savedReview);
 
         OldGameReviewDTO oldReview = new OldGameReviewDTO(new ObjectId(recentReview.getId()),addReviewDTO.getScore());
 
@@ -144,7 +145,7 @@ public class GameService {
             throw new RuntimeException("An error has occurred when adding the review to the game");
 
         // the review id and the game id are added to the user document as well
-        UserReviewDTO userReview = new UserReviewDTO(new ObjectId(savedReview.getId()), new ObjectId(gameId));
+        OldUserReviewDTO userReview = new OldUserReviewDTO(new ObjectId(savedReview.getId()), new ObjectId(gameId));
         userRepository.addReviewToUser(userId, userReview);
     }
 

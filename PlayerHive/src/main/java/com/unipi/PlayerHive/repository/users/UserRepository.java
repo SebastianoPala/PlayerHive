@@ -1,8 +1,8 @@
 package com.unipi.PlayerHive.repository.users;
 
-import com.unipi.PlayerHive.DTO.listContainers.FriendRequestMongoArrayDTO;
-import com.unipi.PlayerHive.DTO.listContainers.UserReviewArrayDTO;
-import com.unipi.PlayerHive.DTO.reviews.UserReviewDTO;
+import com.unipi.PlayerHive.DTO.containers.FriendRequestMongoContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.OldUserReviewContainerDTO;
+import com.unipi.PlayerHive.DTO.reviews.OldUserReviewDTO;
 import com.unipi.PlayerHive.DTO.users.*;
 import com.unipi.PlayerHive.DTO.users.friends.FriendRequestMongoDTO;
 import com.unipi.PlayerHive.model.user.User;
@@ -58,7 +58,7 @@ public interface UserRepository extends MongoRepository<User,String> {
             "{ '$match': { '_id': ?0 } }",
             "{ '$project': { 'friendRequests': { '$slice': ['$friendRequests', ?1, ?2] } } }"
     })
-    FriendRequestMongoArrayDTO findFriendRequestsById(String id, int skip, int limit);
+    FriendRequestMongoContainerDTO findFriendRequestsById(String id, int skip, int limit);
 
     @Query("{ '_id' : ?0 }")
     @Update("{ '$inc' : { 'friends' : ?1 } }")
@@ -92,12 +92,12 @@ public interface UserRepository extends MongoRepository<User,String> {
             "{ '$match': { '_id': ?0 } }",
             "{ '$project': { 'reviews': { '$slice': ['$reviewIds', ?1, ?2] } } }"
     })
-    UserReviewArrayDTO getUserReviews(String userId, int skip, int limit);
+    OldUserReviewContainerDTO getUserReviews(String userId, int skip, int limit);
 
     // push a new {reviewId, gameId} pair into the user's reviewIds array when they write a review
     @Query("{ '_id': ?0 }")
     @Update("{ '$push': { 'reviewIds': ?1 } }")
-    void addReviewToUser(String userId, UserReviewDTO review);
+    void addReviewToUser(String userId, OldUserReviewDTO review);
 
     // pull the review entry out of reviewIds when the review is deleted
     @Query("{ '_id': ?0 }")

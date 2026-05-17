@@ -32,7 +32,23 @@ admin_user = {
     "_id": {"$oid": uuid.uuid4().hex[:24]},
     "username": "admin",
     "password": bcrypt.hashpw("admin".encode('utf-8'), bcrypt.gensalt(rounds=NUM_ROUNDS)).decode('utf-8'),
-    "email": "admin@admin.com",
+    "email": "admin@hotmail.com",
+    "birthdate": datetime(1776, 12, 4), 
+    "registrationDate": datetime.now() - timedelta(days=5 * 365),
+    "role": "ADMIN",
+    "friendRequests": [],
+    "friends": 0,
+    "numGames": 0,
+    "hoursPlayed": 0.0,
+    "pfpURL": f"/Playerhive/pfp/{uuid.uuid4().hex}",
+    "reviewIds": []
+}
+
+default_user = {
+    "_id": {"$oid": uuid.uuid4().hex[:24]},
+    "username": "BrunoStrati",
+    "password": bcrypt.hashpw("BrunoStrati".encode('utf-8'), bcrypt.gensalt(rounds=NUM_ROUNDS)).decode('utf-8'),
+    "email": "BrunoStrati@hotmail.com",
     "birthdate": datetime(1776, 12, 4), 
     "registrationDate": datetime.now() - timedelta(days=5 * 365),
     "role": "ADMIN",
@@ -216,7 +232,16 @@ def main():
         sys.exit(1)
         
     games_list = []
+    seen_names = set()
+
     for app_id, game_data in original_games.items():
+
+        # duplicate filtering
+        game_name = game_data.get("name", "").strip()
+        if not game_name or game_name.lower() in seen_names:
+            continue
+        seen_names.add(game_name.lower())
+
         supported_os = [os for os in ["windows", "mac", "linux"] if game_data.get(os)]
         raw_tags = game_data.get("tags")
         flat_genres = []
@@ -284,8 +309,9 @@ def main():
             print(f"   -> Generated {i + 1}/{NUM_USERS} users...", end='\r')
     print(f"   -> Generated {NUM_USERS}/{NUM_USERS} users...", end='\r')
     print()
-    print("Adding the admin account...")
+    print("Adding the admin account and default account...")
     users_list.append(admin_user)
+    users_list.append(default_user)
     print()
 
     # 3. ASSIGN REVIEWS
@@ -315,8 +341,10 @@ def main():
                 "user_id": user['_id']['$oid'],
                 "username": user['username'],
                 "pfpURL": user["pfpURL"],
+                "game_name": game["name"],
+                "game_image": game["image"], 
                 "review_text": random.choice(review_texts),
-                "score": float(round(random.uniform(0.0, 10.0), 1)),
+                "score": float(round(random.uniform(1.0, 10.0), 1)),
                 "timestamp": generate_random_date() 
             }
             game["raw_reviews"].append(review_doc)

@@ -1,4 +1,4 @@
-package com.unipi.PlayerHive.DTO.users;
+package com.unipi.PlayerHive.DTO.containers;
 
 import com.unipi.PlayerHive.DTO.games.LibraryGameDTO;
 import lombok.AllArgsConstructor;

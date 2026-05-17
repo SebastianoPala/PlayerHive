@@ -1,6 +1,6 @@
 package com.unipi.PlayerHive.DTO.games;
 
-import com.unipi.PlayerHive.DTO.reviews.ReviewDTO;
+import com.unipi.PlayerHive.DTO.reviews.GameReviewDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,7 @@ public class GameInfoDTO {
 
     private String description;
 
-    private List<ReviewDTO> recentReviews;
+    private List<GameReviewDTO> recentReviews;
 
     private String imageURL;
     private List<String> supportedOS;

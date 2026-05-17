@@ -5,7 +5,7 @@ import com.unipi.PlayerHive.DTO.analytics.OsPlatformStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.ReleaseYearStatsDTO;
 import com.unipi.PlayerHive.DTO.games.*;
 import com.unipi.PlayerHive.DTO.reviews.AddReviewDTO;
-import com.unipi.PlayerHive.DTO.reviews.ReviewContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.GameReviewContainerDTO;
 import com.unipi.PlayerHive.service.GameService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -54,9 +54,9 @@ public class GameController {
     @Operation(summary = "Show reviews", description = "Returns a paginated list of reviews associated with a specific game.")
     @ApiResponse(responseCode = "200", description = "Reviews retrieved successfully")
     @ApiResponse(responseCode = "404", description = "Game not found")
-    public ResponseEntity<ReviewContainerDTO> showGameReviews(@PathVariable @NotNull  @Size(min = 24, max = 24) String gameId,
-                                                           @RequestParam(defaultValue = "0") @Min(0) int page,
-                                                           @RequestParam(defaultValue = "25") @Min(1) @Max(100) int size){
+    public ResponseEntity<GameReviewContainerDTO> showGameReviews(@PathVariable @NotNull  @Size(min = 24, max = 24) String gameId,
+                                                                  @RequestParam(defaultValue = "0") @Min(0) int page,
+                                                                  @RequestParam(defaultValue = "25") @Min(1) @Max(100) int size){
         return ResponseEntity.ok(gameService.getGameReviews(gameId,page,size));
     }
 

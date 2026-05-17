@@ -3,9 +3,9 @@ package com.unipi.PlayerHive.repository.games;
 import com.unipi.PlayerHive.DTO.analytics.GenreStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.OsPlatformStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.ReleaseYearStatsDTO;
+import com.unipi.PlayerHive.DTO.containers.OldGameReviewContainerDTO;
 import com.unipi.PlayerHive.DTO.games.*;
-import com.unipi.PlayerHive.DTO.listContainers.OldGameReviewArrayDTO;
-import com.unipi.PlayerHive.DTO.reviews.ReviewDTO;
+import com.unipi.PlayerHive.DTO.reviews.GameReviewDTO;
 import com.unipi.PlayerHive.DTO.reviews.OldGameReviewDTO;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Pageable;
@@ -47,7 +47,7 @@ public interface GameRepository extends MongoRepository<Game, String> {
             "    } " +
             "}, " +
             "'$inc' :{ 'countScore': 1, 'sumScore' : ?3} }")
-    int addReviewToGame(String gameId, OldGameReviewDTO oldReview, ReviewDTO recentReview, float score);
+    int addReviewToGame(String gameId, OldGameReviewDTO oldReview, GameReviewDTO recentReview, float score);
 
     @Query("{ '_id': ?0, 'allReviews.review_id': ObjectId(?1) }")
     @Update("{" +
@@ -69,7 +69,7 @@ public interface GameRepository extends MongoRepository<Game, String> {
             "{ '$match': { '_id': ?0 } }",
             "{ '$project': { '_id': 0, 'reviews': { '$slice': ['$allReviews', ?1, ?2] } } }"
     })
-    OldGameReviewArrayDTO getGameReviews(String gameId, int skip, int limit);
+    OldGameReviewContainerDTO getGameReviews(String gameId, int skip, int limit);
 
     // INTERESTING QUERIES ===========================================
 

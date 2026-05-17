@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class ReviewDTO {
+public class GameReviewDTO {
 
     @Id
     private String id;

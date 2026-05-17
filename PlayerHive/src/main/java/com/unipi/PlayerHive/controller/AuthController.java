@@ -43,7 +43,7 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@RequestBody UserLoginDTO dto){
         try{
             String token = authService.loginUser(dto);
-            if(token != null)
+            if(token != null) // todo can we return the username and pfp together with the token?
                 return ResponseEntity.ok(new AccessTokenDTO(token));
             else
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");

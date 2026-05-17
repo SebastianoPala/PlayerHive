@@ -1,6 +1,6 @@
 package com.unipi.PlayerHive.model.user;
 
-import com.unipi.PlayerHive.DTO.reviews.UserReviewDTO;
+import com.unipi.PlayerHive.DTO.reviews.OldUserReviewDTO;
 import com.unipi.PlayerHive.DTO.users.friends.FriendRequestDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Past;
@@ -53,6 +53,6 @@ public class User {
 
     // every review the user has ever written, stored as lightweight {reviewId, gameId} pairs
     // used to clean up game documents when a user is deleted, and to show a user's review history
-    private List<UserReviewDTO> reviewIds;
+    private List<OldUserReviewDTO> reviewIds;
 
 }

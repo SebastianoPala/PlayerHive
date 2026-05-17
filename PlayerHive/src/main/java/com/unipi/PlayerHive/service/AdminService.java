@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.beans.FeatureDescriptor;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
@@ -108,9 +109,35 @@ public class AdminService {
 
         Game game = gameRepository.findById(gameId).orElseThrow(() -> new NoSuchElementException("The Game with id:\"" + gameId + "\" does not exist"));
 
-        if (!game.getName().equals(editGame.getName()) && gameRepository.existsByName(editGame.getName())) { // avoids throwing an exception if I modify the game name to itself
-            throw new ResourceAlreadyExistsException("Game "+ editGame.getName() +" already exists");
+        boolean updateReviewInfo = false;
+        String gameName = game.getName();
+        String gameImg = game.getImageURL();
+
+        if(!gameName.equals(editGame.getName())){
+            if (gameRepository.existsByName(editGame.getName())) { // avoids throwing an exception if I modify the game name to itself
+                throw new ResourceAlreadyExistsException("Game "+ editGame.getName() +" already exists");
+            }else{
+                updateReviewInfo = true;
+                gameName = editGame.getName();
+            }
         }
+
+        if(gameImg != null && !gameImg.equals(editGame.getImageURL()) ||
+                        gameImg == null && editGame.getImageURL() != null){
+
+            updateReviewInfo = true;
+            gameImg = editGame.getImageURL();
+        }
+
+        //TODO TEST
+        if(updateReviewInfo && !game.getAllReviews().isEmpty()){
+            List<String> reviews = game.getAllReviews().stream().map(old -> old.getReviewId().toString()).toList();
+            long modified = reviewRepository.editInfoIn(reviews, gameName, gameImg);
+            System.out.println(modified + " reviews had their info updated");
+        }
+
+
+
 
         copyNonNullProperties(editGame,game);
 

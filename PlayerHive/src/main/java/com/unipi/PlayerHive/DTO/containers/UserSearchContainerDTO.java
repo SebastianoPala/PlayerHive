@@ -1,5 +1,6 @@
-package com.unipi.PlayerHive.DTO.users;
+package com.unipi.PlayerHive.DTO.containers;
 
+import com.unipi.PlayerHive.DTO.users.UserSearchDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

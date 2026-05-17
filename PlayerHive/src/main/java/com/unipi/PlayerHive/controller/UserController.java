@@ -1,6 +1,8 @@
 package com.unipi.PlayerHive.controller;
 
-import com.unipi.PlayerHive.DTO.reviews.ReviewContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.LibraryContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.UserReviewContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.UserSearchContainerDTO;
 import com.unipi.PlayerHive.DTO.users.*;
 import com.unipi.PlayerHive.DTO.users.friends.FriendContainerDTO;
 import com.unipi.PlayerHive.DTO.users.friends.FriendRecommendationDTO;
@@ -77,8 +79,8 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User library retrieved successfully")
     @ApiResponse(responseCode = "404", description = "User not found")
     public ResponseEntity<LibraryContainerDTO> showUserLibrary(@PathVariable @NotNull  @Size(min = 24, max = 24) String userId,
-                                                                 @RequestParam(defaultValue = "0") @Min(0) int page,
-                                                                 @RequestParam(defaultValue = "25") @Min(1) @Max(50) int size){
+                                                               @RequestParam(defaultValue = "0") @Min(0) int page,
+                                                               @RequestParam(defaultValue = "25") @Min(1) @Max(50) int size){
         return ResponseEntity.ok(userService.getLibraryById(userId, page, size));
     }
 
@@ -86,7 +88,7 @@ public class UserController {
     @Operation(summary = "My library", description = "Returns the paginated game library of the currently authenticated user.")
     @ApiResponse(responseCode = "200", description = "Library retrieved successfully")
     public ResponseEntity<LibraryContainerDTO> showOwnLibrary(@RequestParam(defaultValue = "0") @Min(0) int page,
-                                                        @RequestParam(defaultValue = "25") @Min(10) @Max(50) int size){
+                                                        @RequestParam(defaultValue = "25") @Min(1) @Max(50) int size){
         String requestingUserId = getAuthenticatedUserId();
         return ResponseEntity.ok(userService.getLibraryById(requestingUserId ,page,size));
     }
@@ -175,17 +177,17 @@ public class UserController {
     @Operation(summary = "Get user reviews", description = "Returns the paginated list of reviews written by a specific user.")
     @ApiResponse(responseCode = "200", description = "Reviews retrieved successfully")
     @ApiResponse(responseCode = "404", description = "User not found")
-    public ResponseEntity<ReviewContainerDTO> getUserReviews(@PathVariable @NotNull @Size(min = 24, max = 24) String userId,
-                                                             @RequestParam(defaultValue = "0") @Min(0) int page,
-                                                             @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size){
+    public ResponseEntity<UserReviewContainerDTO> getUserReviews(@PathVariable @NotNull @Size(min = 24, max = 24) String userId,
+                                                                 @RequestParam(defaultValue = "0") @Min(0) int page,
+                                                                 @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size){
         return ResponseEntity.ok(userService.getUserReviews(userId,page,size));
     }
 
     @GetMapping("/MyReviews")
     @Operation(summary = "My reviews", description = "Returns the paginated list of reviews written by the currently authenticated user.")
     @ApiResponse(responseCode = "200", description = "Reviews retrieved successfully")
-    public ResponseEntity<ReviewContainerDTO> getOwnReviews(@RequestParam(defaultValue = "0") @Min(0) int page,
-                                                          @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size){
+    public ResponseEntity<UserReviewContainerDTO> getOwnReviews(@RequestParam(defaultValue = "0") @Min(0) int page,
+                                                                @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size){
 
         return ResponseEntity.ok(userService.getUserReviews(getAuthenticatedUserId(),page,size));
     }

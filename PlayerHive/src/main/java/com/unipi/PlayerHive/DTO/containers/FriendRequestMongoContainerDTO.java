@@ -1,4 +1,4 @@
-package com.unipi.PlayerHive.DTO.listContainers;
+package com.unipi.PlayerHive.DTO.containers;
 
 import com.unipi.PlayerHive.DTO.users.friends.FriendRequestMongoDTO;
 import lombok.AllArgsConstructor;
@@ -8,6 +8,6 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class FriendRequestMongoArrayDTO {
-    List<FriendRequestMongoDTO> friendRequests;
+public class FriendRequestMongoContainerDTO {
+    public List<FriendRequestMongoDTO> friendRequests;
 }

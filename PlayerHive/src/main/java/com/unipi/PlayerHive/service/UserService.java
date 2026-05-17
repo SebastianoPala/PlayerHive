@@ -1,10 +1,11 @@
 package com.unipi.PlayerHive.service;
 
+import com.unipi.PlayerHive.DTO.containers.LibraryContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.UserReviewContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.UserSearchContainerDTO;
 import com.unipi.PlayerHive.DTO.games.LibraryGameDTO;
 import com.unipi.PlayerHive.DTO.games.PlaytimeAchievementsDTO;
-import com.unipi.PlayerHive.DTO.reviews.ReviewContainerDTO;
-import com.unipi.PlayerHive.DTO.reviews.ReviewDTO;
-import com.unipi.PlayerHive.DTO.reviews.UserReviewDTO;
+import com.unipi.PlayerHive.DTO.reviews.*;
 import com.unipi.PlayerHive.DTO.users.*;
 import com.unipi.PlayerHive.DTO.users.friends.*;
 import com.unipi.PlayerHive.config.Exceptions.ResourceAlreadyExistsException;
@@ -74,6 +75,7 @@ public class UserService {
         // more information is provided if the user requests his own profile
         OwnProfileDTO ownProfile = userMapper.userToOwnProfileDTO(user);
 
+        // todo either embed this number in the document or get the friend requests
         ownProfile.setFriendRequestsNumber(userRepository.getFriendRequestsNumber(user.getId()));
 
         return ownProfile;
@@ -292,11 +294,11 @@ public class UserService {
 
     }
 
-    public ReviewContainerDTO getUserReviews(String userId, int page, int size) {
+    public UserReviewContainerDTO getUserReviews(String userId, int page, int size) {
         if(!userRepository.existsById(userId))
             throw new NoSuchElementException("The user does not exist");
 
-        List<ReviewDTO> reviews;
+        List<UserReviewDTO> reviews;
         int numPages;
         boolean isLastPage;
 
@@ -307,11 +309,11 @@ public class UserService {
 
         if(reviewNumber >= 0 && !pager.isOutOfBounds()) {
 
-            List<UserReviewDTO> userReviews = userRepository.getUserReviews(userId, pager.getStart(), pager.getLimit()).getReviews();
+            List<OldUserReviewDTO> userReviews = userRepository.getUserReviews(userId, pager.getStart(), pager.getLimit()).getReviews();
 
             List<String> reviewIds = userReviews.stream().map(userReviewDTO -> userReviewDTO.getReviewId().toString()).toList();
 
-            reviews = reviewRepository.findByIdInOrderByTimestampDesc(reviewIds);
+            reviews = reviewRepository.findUserReviewsByIdIn(reviewIds);
             numPages = pager.getNumPages();
             isLastPage = pager.isLastPage();
         } else{
@@ -320,7 +322,7 @@ public class UserService {
             isLastPage = true;
         }
 
-        return new ReviewContainerDTO(reviews,numPages,isLastPage);
+        return new UserReviewContainerDTO(reviews,numPages,isLastPage);
     }
 
 
