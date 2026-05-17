@@ -2,7 +2,7 @@ package com.unipi.PlayerHive.repository.users;
 
 import com.unipi.PlayerHive.DTO.games.LibraryGameDTO;
 import com.unipi.PlayerHive.DTO.users.GamingTwinDTO;
-import com.unipi.PlayerHive.DTO.users.SocialButterflyDTO;
+
 import com.unipi.PlayerHive.DTO.users.friends.FriendDTO;
 import com.unipi.PlayerHive.DTO.users.friends.FriendRecommendationDTO;
 import com.unipi.PlayerHive.model.user.UserNeo4j;
@@ -122,15 +122,5 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserNeo4j,String> {
             "ORDER BY jaccardSimilarity DESC " +
             "LIMIT $limit")
     List<GamingTwinDTO> getGamingTwins(String userId, int limit);
-
-    @Query("MATCH (u:User)-[:FRIENDS_WITH]->(friend:User) " +
-        "WITH u, count(friend) AS friendCount " +
-        "MATCH (u)-[:PLAYED]->(g:Game) " +
-        "WITH u, friendCount, count(g) AS gamesPlayed " +
-        "RETURN u.username AS username, friendCount, gamesPlayed, " +
-        "(friendCount + gamesPlayed) AS socialScore " +
-        "ORDER BY socialScore DESC " +
-        "LIMIT $limit")
-    List<SocialButterflyDTO> getSocialButterflies(int limit);
 
 }

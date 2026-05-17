@@ -227,12 +227,4 @@ public class UserController {
         return ResponseEntity.ok(userService.getGamingTwins());
     }
 
-    @GetMapping("/socialButterflies")
-    @Operation(summary = "Social Butterflies", description = "Users with the most friends and games played combined.")
-    @ApiResponse(responseCode = "200", description = "List returned")
-    public ResponseEntity<List<SocialButterflyDTO>> getSocialButterflies(
-            @RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(userService.getSocialButterflies(limit));
-    }
-
 }
