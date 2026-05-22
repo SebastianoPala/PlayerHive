@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>playerHive | My Profile</title>
+    <style>
+        /* =========================================
+           STYLE VARIABLES - "CONSOLE GLASS" VIBE
+           ========================================= */
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #2a0845, #1a1a24, #0b0c10); 
+            --glass-bg: rgba(20, 22, 28, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --accent-glow: #e0f2fe; 
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --danger-color: #ff6b6b;
+            --success-color: #4caf50;
+            --font-main: 'system-ui', -apple-system, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Schermata di Login Overlay se manca il Token */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-gradient);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+        }
+        .login-box {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            padding: 40px; border-radius: 24px; text-align: center; width: 350px;
+            backdrop-filter: blur(16px);
+        }
+        .auth-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            color: white; padding: 12px 15px; border-radius: 12px; outline: none; margin: 20px 0;
+        }
+        .auth-btn {
+            width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border);
+            color: white; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold;
+        }
+
+        .app-wrapper { width: 100%; max-width: 1800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+        header.glass-nav {
+            height: 80px; background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; display: flex;
+            align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0;
+        }
+        .logo { font-size: 1.6rem; font-weight: 300; letter-spacing: 2px; display: flex; align-items: center; }
+        .logo b { font-weight: 700; }
+        .logo::after { content: ""; width: 8px; height: 8px; background: var(--accent-glow); border-radius: 50%; margin-left: 8px; box-shadow: 0 0 10px var(--accent-glow); }
+        .nav-links a { color: var(--text-primary); text-decoration: none; padding: 8px 20px; background: rgba(255,255,255,0.05); border-radius: 16px; border: 1px solid var(--glass-border); }
+
+        .dashboard-layout { display: flex; gap: 20px; flex: 1; height: calc(100vh - 140px); }
+
+        main.glass-content {
+            flex: 3; background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 30px; position: relative;
+        }
+
+        .profile-container { display: flex; flex-direction: column; align-items: center; gap: 15px; text-align: center; }
+        .profile-avatar { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; border: 3px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); }
+        .profile-meta h1 { font-size: 2.5rem; margin-bottom: 5px; }
+        .meta-row { display: flex; gap: 10px; font-size: 0.85rem; color: var(--text-secondary); align-items: center; justify-content: center; }
+        
+        .options-btn {
+            position: absolute; top: 30px; right: 30px; background: transparent; border: none;
+            color: white; font-size: 1.5rem; cursor: pointer; padding: 10px; border-radius: 50%;
+            transition: 0.2s;
+        }
+        .options-btn:hover { background: rgba(255,255,255,0.1); }
+
+        .profile-tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border);
+            color: var(--text-primary); padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600;
+        }
+        .tab-btn.active { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-glow); color: var(--accent-glow); }
+
+        .dynamic-window { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 20px; }
+        .sub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+
+        /* Componenti grafici interni alle finestre */
+        .lib-card, .friend-item, .req-item {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; position: relative;
+        }
+        .lib-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; }
+        .action-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-top: 5px; }
+        .action-btn.danger { background: rgba(255, 107, 107, 0.15); color: var(--danger-color); }
+        .action-btn.success { background: rgba(76, 175, 80, 0.15); color: var(--success-color); }
+
+        .friend-item { flex-direction: row; align-items: center; justify-content: space-between; }
+        .friend-info { display: flex; align-items: center; gap: 15px; }
+        .friend-info img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid var(--glass-border); }
+
+        .req-item { flex-direction: row; align-items: center; justify-content: space-between; }
+        .req-actions { display: flex; gap: 10px; }
+
+        .mini-search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .mini-search-bar input { flex: 1; padding: 10px 15px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; }
+
+        /* Sidebar Destra Stats */
+        aside.glass-sidebar { flex: 1; max-width: 300px; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+        .stat-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--accent-glow); }
+
+        /* Finestre Modali Overlay */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background: #1a1a24; border: 1px solid var(--glass-border); padding: 30px;
+            border-radius: 20px; width: 350px; display: flex; flex-direction: column; gap: 15px;
+        }
+        .modal-content input { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; border-radius: 8px; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-actions button { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: bold; }
+        .btn-cancel { background: rgba(255,255,255,0.1); }
+        .btn-save { background: var(--success-color); }
+        .btn-delete { background: var(--danger-color); }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay">
+        <div class="login-box">
+            <div class="logo" style="justify-content: center; margin-bottom: 20px;">player<b>Hive</b></div>
+            <h3>Identify Yourself</h3>
+            <p style="font-size: 0.8rem; color: var(--text-secondary);">Enter username to access My Profile</p>
+            <input type="text" id="usernameInput" class="auth-input" placeholder="Username...">
+            <button class="auth-btn" onclick="attemptAutoLogin()">Login</button>
+            <div id="loginError" style="color: var(--danger-color); margin-top: 10px; font-size: 0.85rem;"></div>
+        </div>
+    </div>
+
+    <div class="app-wrapper">
+        <header class="glass-nav">
+            <div class="logo">player<b>Hive</b></div>
+            <nav class="nav-links">
+                <a href="usersearch.html">← Search Users</a>
+            </nav>
+            <div class="user-actions">
+                <button class="action-btn danger" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <div class="dashboard-layout">
+            <main class="glass-content">
+                <button class="options-btn" onclick="openOptionsModal()">⋮</button>
+                
+                <div class="profile-container">
+                    <img id="myAvatar" class="profile-avatar" src="" alt="My Avatar">
+                    <div class="profile-meta">
+                        <h1 id="myUsername">---</h1>
+                        <div class="meta-row">
+                            <span id="myRole" style="color: var(--accent-glow); font-weight: bold; text-transform: uppercase;">---</span> • 
+                            <span id="myEmail">---</span>
+                        </div>
+                        <div class="meta-row" style="margin-top: 5px;">
+                            <span id="myRegDate">---</span>
+                        </div>
+                        <div class="meta-row" style="margin-top: 5px;">
+                            <span id="myBirthDate">---</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-tabs">
+                    <button id="btnLibrary" class="tab-btn" onclick="switchTab('library')">My Library</button>
+                    <button id="btnFriends" class="tab-btn" onclick="switchTab('friends')">My Friends</button>
+                    <button id="btnRequests" class="tab-btn" onclick="switchTab('requests')">Friend Requests <span id="reqBadge" style="color:var(--danger-color)"></span></button>
+                    <button id="btnReviews" class="tab-btn" onclick="switchTab('reviews')">My Reviews</button>
+                </div>
+
+                <div id="dynamicWindow" class="dynamic-window" style="display: none;">
+                    <h3 id="windowTitle" style="color: var(--accent-glow);">Content</h3>
+                    <div id="windowTopArea"></div> 
+                    <div id="windowContent"></div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+                        <button id="subPrevBtn" class="action-btn" onclick="changeSubPage(-1)">Previous</button>
+                        <span id="subPageDisplay" style="color: var(--text-secondary); font-size: 0.9rem; align-self: center;">Page 0</span>
+                        <button id="subNextBtn" class="action-btn" onclick="changeSubPage(1)">Next</button>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="glass-sidebar">
+                <div style="font-weight: bold; color: var(--text-secondary); letter-spacing: 1px;">MY STATS</div>
+                <div class="stat-card"><span id="statGames" class="stat-value">0</span><span style="font-size: 0.8rem;">Games Owned</span></div>
+                <div class="stat-card"><span id="statHours" class="stat-value">0</span><span style="font-size: 0.8rem;">Hours Played</span></div>
+                <div class="stat-card"><span id="statFriends" class="stat-value">0</span><span style="font-size: 0.8rem;">Friends</span></div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="editGameModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color: var(--accent-glow);">Edit Game</h3>
+            <input type="hidden" id="editGameId">
+            <div>
+                <label style="font-size: 0.8rem; color: var(--text-secondary);">Hours Played</label>
+                <input type="number" id="editHours" step="0.1" min="0">
+            </div>
+            <div>
+                <label style="font-size: 0.8rem; color: var(--text-secondary);">Achievements Obtained</label>
+                <input type="number" id="editAchievs" min="0">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+                <button class="btn-delete" onclick="removeGameFromLibrary()">Remove From Library</button>
+                <button class="btn-save" onclick="saveGameEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="optionsModal" class="modal-overlay">
+        <div class="modal-content" style="text-align: center;">
+            <h3>Account Options</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">Warning: This action is completely irreversible.</p>
+            <button class="btn-delete" style="padding: 15px; font-size: 1.1rem;" onclick="fakeDeleteAccount()">DELETE ACCOUNT</button>
+            <button class="btn-cancel" style="margin-top: 10px;" onclick="closeModals()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let pfpFiles = [];
+        let currentTab = '';
+        let currentSubPage = 0;
+        const pageSize = 8; 
+
+        window.onload = async () => {
+            await loadPfpList();
+            if (!localStorage.getItem('accessToken')) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            } else {
+                document.getElementById('loginOverlay').style.display = 'none';
+                fetchMyProfile();
+            }
+        };
+
+        // Caricamento asincrono iniziale dei percorsi locali da pfps.txt
+        async function loadPfpList() {
+            try {
+                const response = await fetch('../../pfps.txt');
+                if (response.ok) {
+                    const text = await response.text();
+                    pfpFiles = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                }
+            } catch (err) { console.error("pfps.txt non trovato."); }
+        }
+
+        // Algoritmo di hashing deterministico globale (Uguale a prima)
+        function getUserPfpPath(username) {
+            const basePath = '/home/sebastiano_pala/Pictures/Sfondi/';
+            if (pfpFiles.length === 0 || !username) return 'https://via.placeholder.com/150/1a1a24/e0f2fe?text=U';
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            return basePath + pfpFiles[Math.abs(hash) % pfpFiles.length];
+        }
+
+        function getHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+            };
+        }
+
+        async function attemptAutoLogin() {
+            const user = document.getElementById('usernameInput').value.trim();
+            if (!user) return;
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: `${user}@hotmail.com`, password: user })
+                });
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                localStorage.setItem('accessToken', data.accessToken);
+                document.getElementById('loginOverlay').style.display = 'none';
+                fetchMyProfile();
+            } catch (err) {
+                document.getElementById('loginError').innerText = "Error authenticating user.";
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            window.location.reload();
+        }
+
+        // Recupero Info Profilo Personale (/api/user/MyProfile)
+        async function fetchMyProfile() {
+            try {
+                const res = await fetch('http://localhost:8080/api/user/MyProfile', { headers: getHeaders() });
+                if (!res.ok) { logout(); return; }
+                const profile = await res.json();
+                
+                document.getElementById('myUsername').innerText = profile.username;
+                document.getElementById('myRole').innerText = profile.role;
+                document.getElementById('myEmail').innerText = profile.email;
+                document.getElementById('myRegDate').innerText = `Member since ${new Date(profile.registrationDate).toLocaleDateString()}`;
+                document.getElementById('myBirthDate').innerText = `Birthday: ${new Date(profile.registrationDate).toLocaleDateString()}`;
+    
+                
+                document.getElementById('statGames').innerText = profile.numGames || 0;
+                document.getElementById('statHours').innerText = (profile.hoursPlayed || 0).toFixed(1);
+                document.getElementById('statFriends').innerText = profile.friends || 0;
+                document.getElementById('reqBadge').innerText = profile.friendRequestsNumber > 0 ? `(${profile.friendRequestsNumber})` : '';
+
+                // Foto profilo dell'account loggato presa dal percorso locale richiesto
+                document.getElementById('myAvatar').src = getUserPfpPath(profile.username);
+            } catch (err) { console.error(err); }
+        }
+
+        async function switchTab(tabName) {
+            currentTab = tabName;
+            currentSubPage = 0;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+            
+            document.getElementById('dynamicWindow').style.display = 'flex';
+            document.getElementById('windowTopArea').innerHTML = ''; 
+            await fetchTabContent();
+        }
+
+        async function fetchTabContent() {
+            const content = document.getElementById('windowContent');
+            content.innerHTML = '<p style="text-align:center;">Fetching content...</p>';
+            
+            let endpoint = '';
+            if (currentTab === 'library') endpoint = 'MyLibrary';
+            else if (currentTab === 'friends') endpoint = 'MyFriends';
+            else if (currentTab === 'reviews') endpoint = 'MyReviews';
+            else if (currentTab === 'requests') endpoint = 'friendRequests';
+
+            let url = `http://localhost:8080/api/user/${endpoint}?page=${currentSubPage}&size=${pageSize}`;
+            
+            try {
+                const res = await fetch(url, { headers: getHeaders() });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                renderTabWindow(data);
+            } catch (err) {
+                content.innerHTML = '<p style="color:var(--danger-color); text-align:center;">Failed to execute request.</p>';
+            }
+        }
+
+        function changeSubPage(dir) { currentSubPage += dir; fetchTabContent(); }
+
+        // RENDERING DELLE FINESTRE DENTRO IL TAB CORRENTE
+        function renderTabWindow(data) {
+            const content = document.getElementById('windowContent');
+            const topArea = document.getElementById('windowTopArea');
+            content.innerHTML = '';
+            
+            document.getElementById('subPageDisplay').innerText = `Page ${currentSubPage}`;
+            document.getElementById('subPrevBtn').disabled = (currentSubPage <= 0);
+            document.getElementById('subNextBtn').disabled = data.lastPage;
+
+            // 1. LIBRERIA PERSONALE CON TASTO EDIT
+            if (currentTab === 'library') {
+                document.getElementById('windowTitle').innerText = "My Game Library";
+                const items = data.library || [];
+                if(items.length === 0) { content.innerHTML = '<p>Your library is empty.</p>'; return; }
+                
+                const grid = document.createElement('div'); grid.className = 'sub-grid';
+                items.forEach(g => {
+                    grid.innerHTML += `
+                        <div class="lib-card" id="game-${g.id}">
+                            <img src="${g.image || 'https://via.placeholder.com/200x100?text=No+Cover'}" alt="${g.name}">
+                            <h4 style="margin-top:5px;">${g.name}</h4>
+                            <p style="font-size:0.8rem; color:var(--text-secondary);">Played: ${g.hoursPlayed.toFixed(1)} hrs</p>
+                            <p style="font-size:0.75rem; color:var(--accent-glow);">Achievements: ${g.achievementsObtained}/${g.achievements}</p>
+                            <button class="action-btn" onclick="openEditGame('${g.id}', ${g.hoursPlayed}, ${g.achievementsObtained})">Edit Status</button>
+                        </div>`;
+                });
+                content.appendChild(grid);
+            } 
+            
+            // 2. LISTA AMICI CON RIMOZIONE E BARRA DI RICERCA UTENTI INTERNA (SIZE 4)
+            else if (currentTab === 'friends') {
+                document.getElementById('windowTitle').innerText = "My Hive Friends";
+                
+                if (topArea.innerHTML === '') {
+                    topArea.innerHTML = `
+                        <div class="mini-search-bar">
+                            <input type="text" id="friendSearchQuery" placeholder="Search a username to add...">
+                            <button class="action-btn" onclick="searchUsersToFriend()">Search Network</button>
+                        </div>
+                        <div id="searchResultsArea"></div>
+                    `;
+                    // Listener per l'invio sulla mini-barra
+                    document.getElementById('friendSearchQuery').addEventListener('keypress', (ev) => {
+                        if(ev.key === 'Enter') searchUsersToFriend();
+                    });
+                }
+
+                const items = data.friends || [];
+                if(items.length === 0) { content.innerHTML = '<p>You haven\'t added any friends yet.</p>'; return; }
+
+                const grid = document.createElement('div'); grid.className = 'sub-grid';
+                items.forEach(f => {
+                    grid.innerHTML += `
+                        <div class="friend-item" id="friend-${f.id}">
+                            <div class="friend-info">
+                                <img src="${getUserPfpPath(f.username)}" alt="${f.username}">
+                                <span>${f.username}</span>
+                            </div>
+                            <button class="action-btn danger" onclick="removeFriend('${f.id}')">Remove</button>
+                        </div>`;
+                });
+                content.appendChild(grid);
+            } 
+            
+            // 3. RICHIESTE DI AMICIZIA CON TASTO ACCETTA / RIFIUTA
+            else if (currentTab === 'requests') {
+                document.getElementById('windowTitle').innerText = "Incoming Friend Requests";
+                const items = data.friendRequests || [];
+                if(items.length === 0) { content.innerHTML = '<p>No pending friend requests.</p>'; return; }
+
+                const list = document.createElement('div'); list.style.display = 'flex'; list.style.flexDirection = 'column'; list.style.gap = '12px';
+                items.forEach(r => {
+                    list.innerHTML += `
+                        <div class="req-item" id="req-${r.userId}">
+                            <div class="friend-info">
+                                <img src="${getUserPfpPath(r.username)}" alt="${r.username}">
+                                <div>
+                                    <div style="font-weight:bold;">${r.username}</div>
+                                    <div style="font-size:0.75rem; color:var(--text-secondary);">Sent on ${new Date(r.timestamp).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                            <div class="req-actions">
+                                <button class="action-btn success" onclick="handleRequest('${r.userId}', 'approve', 'POST')">Accept</button>
+                                <button class="action-btn danger" onclick="handleRequest('${r.userId}', 'deny', 'DELETE')">Deny</button>
+                            </div>
+                        </div>`;
+                });
+                content.appendChild(list);
+            }
+
+            // 4. LE MIE RECENSIONI COMPRENSIVE DI COPERTINA GIOCO E NOME (Endpoint modificato)
+            else if (currentTab === 'reviews') {
+                document.getElementById('windowTitle').innerText = "My Posted Reviews";
+                const items = data.reviews || [];
+                if(items.length === 0) { content.innerHTML = '<p>You haven\'t written any reviews yet.</p>'; return; }
+
+                const list = document.createElement('div'); list.style.display = 'flex'; list.style.flexDirection = 'column'; list.style.gap = '15px';
+                items.forEach(r => {
+                    const formattedDate = r.timestamp ? new Date(r.timestamp).toLocaleDateString() : '';
+                    list.innerHTML += `
+                        <div class="review-item" style="background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); border-radius: 14px; padding: 20px; display: flex; gap: 20px; align-items: center;">
+                            <img src="${r.gameImg || 'https://via.placeholder.com/120x70?text=No+Image'}" alt="${r.gameName}" style="width: 120px; height: 70px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--glass-border);" onerror="this.src='https://via.placeholder.com/120x70?text=No+Image'">
+                            <div class="review-body" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                                <div class="review-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600; font-size: 1.05rem; color: var(--text-primary);">${r.gameName}</span>
+                                    <span style="color: var(--accent-glow); font-size: 0.85rem; font-weight: bold; background: rgba(224,242,254,0.05); padding: 2px 8px; border-radius: 6px;">★ ${r.score.toFixed(1)}</span>
+                                </div>
+                                <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.4;">"${r.reviewText}"</p>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); align-self: flex-end;">${formattedDate}</span>
+                            </div>
+                        </div>`;
+                });
+                content.appendChild(list);
+            }
+        }
+
+        // --- MICRO LOGICA INTERAZIONI FRONTIERA ---
+
+        // Ricerca Utenti da dentro la finestra Friends (Dimensione Paginata Ridotta a 4)
+        async function searchUsersToFriend() {
+            const query = document.getElementById('friendSearchQuery').value.trim();
+            if(!query) return;
+            const resArea = document.getElementById('searchResultsArea');
+            resArea.innerHTML = '<p style="font-size:0.85rem; color:var(--text-secondary); margin-top:10px;">Searching network...</p>';
+            
+            try {
+                const res = await fetch(`http://localhost:8080/api/user/search/${encodeURIComponent(query)}?page=0&size=4`);
+                const data = await res.json();
+                
+                if(!data.searchResult || data.searchResult.length === 0) {
+                    resArea.innerHTML = '<p style="font-size:0.85rem; color:var(--text-secondary); margin-top:10px;">No users found matching that name.</p>';
+                    return;
+                }
+
+                let html = '<div class="sub-grid" style="grid-template-columns: 1fr 1fr; margin-top: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 20px; gap: 15px;">';
+                data.searchResult.forEach(u => {
+                    html += `
+                        <div class="friend-item" style="background: rgba(255, 255, 255, 0.05); padding: 10px 15px;">
+                            <div class="friend-info">
+                                <img src="${getUserPfpPath(u.username)}" style="width:38px; height:38px;">
+                                <span style="font-size:0.85rem;">${u.username}</span>
+                            </div>
+                            <button id="sendReqBtn-${u.id}" class="action-btn" onclick="sendFriendRequest('${u.id}')" style="margin-top:0;">Send Request</button>
+                        </div>`;
+                });
+                html += '</div>';
+                resArea.innerHTML = html;
+            } catch(e) { resArea.innerHTML = '<p style="color:var(--danger-color);">Error connecting to API.</p>'; }
+        }
+
+        async function sendFriendRequest(targetId) {
+            try {
+                const res = await fetch(`http://localhost:8080/api/user/sendFriendRequest/${targetId}`, { method: 'POST', headers: getHeaders() });
+                if(res.ok) {
+                    const btn = document.getElementById(`sendReqBtn-${targetId}`);
+                    btn.innerText = "Request Sent";
+                    btn.className = "action-btn success";
+                    btn.disabled = true;
+                } else alert("Unable to send friend request.");
+            } catch(e) { alert("Network Error."); }
+        }
+
+        // Rimozione Amico Diretto
+        async function removeFriend(friendId) {
+            if(!confirm("Are you sure you want to remove this friend?")) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/user/removeFriend/${friendId}`, { method: 'DELETE', headers: getHeaders() });
+                if(res.ok) {
+                    document.getElementById(`friend-${friendId}`).remove();
+                    fetchMyProfile(); 
+                } else alert("Error processing friend removal.");
+            } catch(e) { alert("An error occurred."); }
+        }
+
+        // Gestione Richiesta d'Amicizia Ricevuta (Accetta/Rifiuta)
+        async function handleRequest(targetId, action, method) {
+            const url = `http://localhost:8080/api/user/${action}FriendRequest/${targetId}`;
+            try {
+                const res = await fetch(url, { method: method, headers: getHeaders() });
+                if(res.ok) {
+                    document.getElementById(`req-${targetId}`).remove();
+                    fetchMyProfile(); 
+                } else alert("Operation failed on server.");
+            } catch(e) { alert("An error occurred."); }
+        }
+
+        // Finestra Modale Modifica Gioco Libreria
+        function openEditGame(gameId, hours, achievs) {
+            document.getElementById('editGameId').value = gameId;
+            document.getElementById('editHours').value = hours;
+            document.getElementById('editAchievs').value = achievs;
+            document.getElementById('editGameModal').style.display = 'flex';
+        }
+
+        async function saveGameEdit() {
+            const gameId = document.getElementById('editGameId').value;
+            const payload = {
+                gameId: gameId,
+                hoursPlayed: parseFloat(document.getElementById('editHours').value),
+                achievements: parseInt(document.getElementById('editAchievs').value)
+            };
+            try {
+                const res = await fetch('http://localhost:8080/api/user/editLibrary', {
+                    method: 'POST', headers: getHeaders(), body: JSON.stringify(payload)
+                });
+                if(res.ok) {
+                    closeModals();
+                    fetchTabContent(); 
+                } else alert("Failed to save changes.");
+            } catch(e) { alert("An error occurred."); }
+        }
+
+        async function removeGameFromLibrary() {
+            if(!confirm("Are you sure you want to remove this game from your library?")) return;
+            const gameId = document.getElementById('editGameId').value;
+            try {
+                const res = await fetch(`http://localhost:8080/api/user/removeFromLibrary/${gameId}`, {
+                    method: 'DELETE', headers: getHeaders()
+                });
+                if(res.ok) {
+                    closeModals();
+                    document.getElementById(`game-${gameId}`).remove();
+                    fetchMyProfile(); 
+                } else alert("Failed to drop game from library.");
+            } catch(e) { alert("An error occurred."); }
+        }
+
+        // Modale Opzioni Account (Tasto 3 puntini)
+        function openOptionsModal() { document.getElementById('optionsModal').style.display = 'flex'; }
+        function fakeDeleteAccount() { alert("Account deleted successfully! (Simulation only)"); closeModals(); }
+        function closeModals() {
+            document.getElementById('editGameModal').style.display = 'none';
+            document.getElementById('optionsModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

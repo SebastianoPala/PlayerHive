@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>playerHive | Login</title>
+    <style>
+        /* =========================================
+           STYLE VARIABLES - "CONSOLE GLASS" VIBE
+           ========================================= */
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #2a0845, #1a1a24, #0b0c10); 
+            --glass-bg: rgba(20, 22, 28, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            
+            --accent-glow: #e0f2fe; 
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --font-main: 'system-ui', -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .app-wrapper {
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* =========================================
+           FLOATING GLASS HEADER
+           ========================================= */
+        header.glass-nav {
+            height: 80px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo b {
+            font-weight: 700;
+        }
+
+        .logo::after {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-glow);
+            border-radius: 50%;
+            margin-left: 8px;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* =========================================
+           LOGIN AREA
+           ========================================= */
+        .login-layout {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            height: calc(100vh - 140px);
+        }
+
+        .glass-login-panel {
+            width: 100%;
+            max-width: 420px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .login-header {
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Form Styles */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 8px rgba(224, 242, 254, 0.15);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background: var(--text-primary);
+            color: #000;
+            margin-top: 5px;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-glow);
+            box-shadow: 0 0 15px rgba(224, 242, 254, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin: 5px 0;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .auth-divider::before { margin-right: 15px; }
+        .auth-divider::after { margin-left: 15px; }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        
+        <header class="glass-nav">
+            <div class="logo">player<b>Hive</b></div>
+        </header>
+
+        <div class="login-layout">
+            
+            <main class="glass-login-panel">
+                <div class="login-header">
+                    <h1>Welcome Back</h1>
+                    <p>Enter your credentials to access the hive</p>
+                </div>
+
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" class="form-control" placeholder="player@hive.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+
+                <div class="auth-divider">OR</div>
+
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='register.html'">
+                    Don't have an account? Sign up
+                </button>
+            </main>
+
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent standard form submission
+
+            // Build the requested JSON object
+            const loginData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+
+            // Log it to the console (you can replace this with your API fetch call)
+            console.log("JSON Payload ready for API:", JSON.stringify(loginData, null, 2));
+            
+            // Example of how you would send it:
+            /*
+            fetch('YOUR_API_ENDPOINT', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginData)
+            }).then(response => ...)
+            */
+        });
+    </script>
+
+</body>
+</html>

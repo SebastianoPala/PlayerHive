@@ -1,0 +1,81 @@
+========================================================================
+                 MAPPATURA ACCESSIBILITA' ENDPOINT
+========================================================================
+
+------------------------------------------------------------------------
+1. ACCESSIBILI A TUTTI (PUBBLICI - permitAll)
+------------------------------------------------------------------------
+Documentazione:
+* GET /v3/api-docs/**
+* GET /swagger-ui/**
+* GET /swagger-ui.html
+
+Autenticazione (Auth Controller):
+* POST /api/auth/register 	FATTO
+* POST /api/auth/login 		FATTO
+
+Giochi (Game Controller) - Tutte le GET tranne le eccezioni:
+* GET /api/games/{gameId} 		FATTO
+* GET /api/games/search/{gameName} 	FATTO
+* GET /api/games/reviews/{gameId} 	FATTO
+* GET /api/games/getDeals 
+* GET /api/games/getInvestments 
+* GET /api/games/getDiscussed 
+* GET /api/games/getTopGames 
+* GET /api/games/getTrending 
+* GET /api/games/getGenreStats 		NO
+* GET /api/games/getOsPlatformStats 	NO
+* GET /api/games/releaseYearStats 	NO
+
+Utenti (User Controller) - Tutte le GET tranne le eccezioni:
+* GET /api/user/{userId} 		FATTO
+* GET /api/user/search/{query} 		FATTO
+* GET /api/user/library/{userId} 	FATTO
+* GET /api/user/friends/{userId} 	FATTO
+* GET /api/user/reviews/{userId} 	FATTO
+* GET /api/user/getHardcoreGamers 
+* GET /api/user/getKeyboardWarriors 
+* GET /api/user/getMostActiveGamers 
+
+** NOTA BENE: Sebbene i commenti Swagger di /getGenreStats, /getOsPlatformStats e /releaseYearStats indichino "Admin only", la regola `requestMatchers(HttpMethod.GET, "/api/games/**").permitAll()` in SecuritySpringBoot.java li rende attualmente accessibili a tutti.
+
+
+------------------------------------------------------------------------
+2. ACCESSIBILI A CHI E' REGISTRATO (AUTENTICATO - authenticated)
+------------------------------------------------------------------------
+Giochi (Game Controller):
+* GET /api/games/getRecommendations 
+* GET /api/games/getHiddenGems 
+* POST /api/games/addReview/{gameId} 
+* DELETE /api/games/deleteReview/{reviewId} 
+
+Utenti - Consultazione Profilo Personale (User Controller):
+* GET /api/user/MyProfile 	FATTO	sistema bottone goofy e sistema embedding friend requests, nel senso: restituisci subito le prime 10?
+* GET /api/user/MyLibrary 	FATTO
+* GET /api/user/MyFriends 	FATTO
+* GET /api/user/MyReviews 	FATTO
+
+Utenti - Funzionalità Social e Raccomandazioni:
+* GET /api/user/friendRequests 		FATTO
+* GET /api/user/friendRecommendations 
+* GET /api/user/gamingTwins 
+
+Utenti - Operazioni (POST, DELETE):
+* POST /api/user/editLibrary 				FATTO
+* DELETE /api/user/removeFromLibrary/{gameId} 		FATTO
+* POST /api/user/sendFriendRequest/{targetUserId} 	FATTO
+* POST /api/user/approveFriendRequest/{targetUserId} 	FATTO
+* DELETE /api/user/denyFriendRequest/{targetUserId}	FATTO
+* DELETE /api/user/removeFriend/{friendId}		FATTO
+* DELETE /api/user/deleteAccount			FATTO
+
+
+------------------------------------------------------------------------
+3. ACCESSIBILI A CHI E' ADMIN (hasRole("ADMIN"))
+------------------------------------------------------------------------
+Amministrazione (Admin Controller):
+* POST /api/admin/addGame
+* PATCH /api/admin/editGame/{gameId}
+* DELETE /api/admin/deleteGame/{gameId}
+* DELETE /api/admin/deleteUser/{userId}
+========================================================================

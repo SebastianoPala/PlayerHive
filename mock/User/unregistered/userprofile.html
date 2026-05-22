@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>playerHive | User Profile</title>
+    <style>
+        /* =========================================
+           STYLE VARIABLES - "CONSOLE GLASS" VIBE
+           ========================================= */
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #2a0845, #1a1a24, #0b0c10); 
+            --glass-bg: rgba(20, 22, 28, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            
+            --accent-glow: #e0f2fe; 
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --font-main: 'system-ui', -apple-system, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .app-wrapper {
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* =========================================
+           FLOATING GLASS HEADER
+           ========================================= */
+        header.glass-nav {
+            height: 80px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            flex-shrink: 0;
+        }
+
+        .logo { font-size: 1.6rem; font-weight: 300; letter-spacing: 2px; display: flex; align-items: center; }
+        .logo b { font-weight: 700; }
+        .logo::after { content: ""; width: 8px; height: 8px; background: var(--accent-glow); border-radius: 50%; margin-left: 8px; box-shadow: 0 0 10px var(--accent-glow); }
+
+        .nav-links { display: flex; gap: 30px; }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 8px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--text-secondary); }
+
+        /* =========================================
+           DASHBOARD PANELS
+           ========================================= */
+        .dashboard-layout {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            height: calc(100vh - 140px);
+        }
+
+        /* LEFT PANEL: MAIN PROFILE INFO & DYNAMIC INTERFACE */
+        main.glass-content {
+            flex: 3;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+        }
+
+        /* Foto profilo grande */
+        .profile-avatar {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(224, 242, 254, 0.1);
+            transition: 0.3s;
+        }
+        .profile-avatar:hover { transform: scale(1.02); border-color: rgba(255,255,255,0.2); }
+
+        .profile-meta h1 { font-size: 2.6rem; font-weight: 700; margin-bottom: 4px; }
+        .meta-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        
+        .user-role { 
+            font-size: 0.7rem; 
+            font-weight: 600;
+            color: var(--text-secondary); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .reg-date { font-size: 0.9rem; color: var(--text-secondary); }
+
+        /* Tasti di azione del Profilo (Tab) */
+        .profile-tabs {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255,255,255,0.2); }
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-glow);
+            color: var(--accent-glow);
+            box-shadow: 0 0 15px rgba(224, 242, 254, 0.1);
+        }
+
+        /* FINESTRA CONTENUTI DINAMICI SOTTOSTANTE */
+        .dynamic-window {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .window-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-glow);
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 10px;
+        }
+
+        /* Griglie interne per i diversi tipi di dati */
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        /* Card dei Giochi in Libreria */
+        .lib-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .lib-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; background: #131419; }
+        .lib-info h4 { font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .lib-info p { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
+
+        /* Card degli Amici */
+        .friend-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .friend-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); }
+        .friend-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .friend-item span { font-weight: 600; font-size: 0.95rem; }
+
+        /* Lista Recensioni (Adattata per mostrare le copertine dei giochi) */
+        .reviews-list { display: flex; flex-direction: column; gap: 15px; }
+        .review-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        /* Copertina del gioco rettangolare anziché avatar utente circolare */
+        .review-item img { 
+            width: 120px; 
+            height: 70px; 
+            border-radius: 8px; 
+            object-fit: cover; 
+            flex-shrink: 0; 
+            border: 1px solid var(--glass-border);
+        }
+        .review-body { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; }
+        .review-game { font-weight: 600; font-size: 1.05rem; color: var(--text-primary); }
+        .review-score { color: var(--accent-glow); font-size: 0.85rem; font-weight: bold; background: rgba(224,242,254,0.05); padding: 2px 8px; border-radius: 6px; }
+        .review-text { font-size: 0.9rem; color: #cbd5e1; line-height: 1.4; }
+        .review-date { font-size: 0.75rem; color: var(--text-secondary); align-self: flex-end; }
+
+        /* Controlli di paginazione della finestrella */
+        .sub-pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+        .sub-nav-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+        .sub-nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.15); }
+        .sub-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+        .sub-page-display { font-size: 0.85rem; color: var(--text-secondary); }
+
+        /* RIGHT PANEL: STATS SIDEBAR */
+        aside.glass-sidebar {
+            flex: 1;
+            max-width: 350px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-title { font-size: 1.1rem; font-weight: 600; letter-spacing: 1px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 10px; }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--accent-glow); text-shadow: 0 0 15px rgba(224, 242, 254, 0.2); }
+        .stat-label { font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        
+        <header class="glass-nav">
+            <div class="logo">player<b>Hive</b></div>
+            <nav class="nav-links">
+                <a href="usersearch.html" class="back-btn">← Back to Search</a>
+            </nav>
+            <div class="user-actions"></div>
+        </header>
+
+        <div class="dashboard-layout" id="profileLayout" style="display: none;">
+            
+            <main class="glass-content">
+                <div class="profile-container">
+                    <img id="userAvatar" class="profile-avatar" src="" alt="User Avatar">
+                    <div class="profile-meta">
+                        <h1 id="usernameDisplay">---</h1>
+                        <div class="meta-row">
+                            <span id="roleDisplay" class="user-role">---</span>
+                            <span id="regDateDisplay" class="reg-date">---</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-tabs">
+                    <button id="btnLibrary" class="tab-btn" onclick="switchTab('library')">Show Library</button>
+                    <button id="btnFriends" class="tab-btn" onclick="switchTab('friends')">Show Friends</button>
+                    <button id="btnReviews" class="tab-btn" onclick="switchTab('reviews')">Show Reviews</button>
+                </div>
+
+                <div id="dynamicWindow" class="dynamic-window" style="display: none;">
+                    <div id="windowTitle" class="window-title">Content</div>
+                    
+                    <div id="windowContent"></div>
+                    
+                    <div class="sub-pagination">
+                        <button id="subPrevBtn" class="sub-nav-btn" onclick="changeSubPage(-1)">Previous</button>
+                        <span id="subPageDisplay" class="sub-page-display">Page 0</span>
+                        <button id="subNextBtn" class="sub-nav-btn" onclick="changeSubPage(1)">Next</button>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="glass-sidebar">
+                <div class="sidebar-title">Hive Stats</div>
+                <div class="stat-card"><span id="gamesDisplay" class="stat-value">0</span><span class="stat-label">Games Owned</span></div>
+                <div class="stat-card"><span id="hoursDisplay" class="stat-value">0</span><span class="stat-label">Hours Played</span></div>
+                <div class="stat-card"><span id="friendsDisplay" class="stat-value">0</span><span class="stat-label">Total Friends</span></div>
+            </aside>
+
+        </div>
+
+        <div id="statusMessage" style="text-align: center; color: var(--text-secondary); margin-top: 150px; font-size: 1.2rem;">
+            Loading profile...
+        </div>
+
+    </div>
+
+    <script>
+        const profileLayout = document.getElementById('profileLayout');
+        const statusMessage = document.getElementById('statusMessage');
+        const dynamicWindow = document.getElementById('dynamicWindow');
+        const windowTitle = document.getElementById('windowTitle');
+        const windowContent = document.getElementById('windowContent');
+        const subPrevBtn = document.getElementById('subPrevBtn');
+        const subNextBtn = document.getElementById('subNextBtn');
+        const subPageDisplay = document.getElementById('subPageDisplay');
+
+        let pfpFiles = [];
+        let targetUserId = '';
+        
+        let currentTab = '';
+        let currentSubPage = 0;
+        const pageSize = 8; 
+
+        async function loadPfpList() {
+            try {
+                const response = await fetch('../../pfps.txt');
+                if (response.ok) {
+                    const text = await response.text();
+                    pfpFiles = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                }
+            } catch (err) { console.error("Impossibile caricare pfps.txt", err); }
+        }
+
+        function getUserPfpPath(username) {
+            const basePath = '/home/sebastiano_pala/Pictures/Sfondi/';
+            if (pfpFiles.length === 0 || !username) {
+                return 'https://via.placeholder.com/150/1a1a24/e0f2fe?text=U';
+            }
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) {
+                hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return basePath + pfpFiles[Math.abs(hash) % pfpFiles.length];
+        }
+
+        async function fetchUserProfile() {
+            targetUserId = localStorage.getItem('selectedUserId');
+            if (!targetUserId) {
+                statusMessage.innerHTML = '<span style="color: #ff6b6b;">Error: No user specified.</span>';
+                return;
+            }
+            try {
+                await loadPfpList();
+                const response = await fetch(`http://localhost:8080/api/user/${targetUserId}`);
+                if (!response.ok) throw new Error();
+                const user = await response.json();
+                renderProfile(user);
+            } catch (err) {
+                statusMessage.innerHTML = '<span style="color: #ff6b6b;">Error: API Offline or Profile not found.</span>';
+            }
+        }
+
+        function renderProfile(user) {
+            document.getElementById('usernameDisplay').innerText = user.username;
+            document.getElementById('roleDisplay').innerText = user.role;
+            if(user.registrationDate) {
+                document.getElementById('regDateDisplay').innerText = `Joined ${new Date(user.registrationDate).toLocaleDateString()}`;
+            }
+            document.getElementById('gamesDisplay').innerText = user.numGames;
+            document.getElementById('hoursDisplay').innerText = user.hoursPlayed.toLocaleString(undefined, {maximumFractionDigits: 1});
+            document.getElementById('friendsDisplay').innerText = user.friends;
+
+            const avatarImg = document.getElementById('userAvatar');
+            avatarImg.src = getUserPfpPath(user.username);
+
+            statusMessage.style.display = 'none';
+            profileLayout.style.display = 'flex';
+        }
+
+        async function switchTab(tabName) {
+            currentTab = tabName;
+            currentSubPage = 0;
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (tabName === 'library') document.getElementById('btnLibrary').classList.add('active');
+            if (tabName === 'friends') document.getElementById('btnFriends').classList.add('active');
+            if (tabName === 'reviews') document.getElementById('btnReviews').classList.add('active');
+
+            dynamicWindow.style.display = 'flex';
+            await fetchTabContent();
+        }
+
+        async function fetchTabContent() {
+            windowContent.innerHTML = '<p style="text-align:center; color:var(--text-secondary);">Fetching data...</p>';
+            let url = `http://localhost:8080/api/user/${currentTab}/${targetUserId}?page=${currentSubPage}&size=${pageSize}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                renderTabWindow(data);
+            } catch (err) {
+                windowContent.innerHTML = '<p style="text-align:center; color:#ff6b6b;">Failed to load section data.</p>';
+            }
+        }
+
+        function renderTabWindow(data) {
+            windowContent.innerHTML = '';
+            subPageDisplay.innerText = `Page ${currentSubPage}`;
+            subPrevBtn.disabled = (currentSubPage <= 0);
+            subNextBtn.disabled = data.lastPage;
+
+            if (currentTab === 'library') {
+                windowTitle.innerText = "User Library";
+                const items = data.library || [];
+                if(items.length === 0) { windowContent.innerHTML = '<p>No games in library.</p>'; return; }
+                
+                const grid = document.createElement('div');
+                grid.className = 'sub-grid';
+                items.forEach(g => {
+                    grid.innerHTML += `
+                        <div class="lib-card">
+                            <img src="${g.image || 'https://via.placeholder.com/200x100?text=No+Image'}" alt="${g.name}">
+                            <div class="lib-info">
+                                <h4>${g.name}</h4>
+                                <p>Played: ${g.hoursPlayed.toFixed(1)} hrs</p>
+                                <p style="font-size:0.75rem; color:var(--accent-glow)">Achievements: ${g.achievementsObtained}/${g.achievements}</p>
+                            </div>
+                        </div>`;
+                });
+                windowContent.appendChild(grid);
+            } 
+            
+            else if (currentTab === 'friends') {
+                windowTitle.innerText = "Friends List";
+                const items = data.friends || [];
+                if(items.length === 0) { windowContent.innerHTML = '<p>No friends found.</p>'; return; }
+
+                const grid = document.createElement('div');
+                grid.className = 'sub-grid';
+                items.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'friend-item';
+                    card.onclick = () => {
+                        localStorage.setItem('selectedUserId', f.id);
+                        window.location.reload(); 
+                    };
+                    card.innerHTML = `
+                        <img src="${getUserPfpPath(f.username)}" alt="${f.username}">
+                        <span>${f.username}</span>
+                    `;
+                    grid.appendChild(card);
+                });
+                windowContent.appendChild(grid);
+            } 
+            
+            else if (currentTab === 'reviews') {
+                windowTitle.innerText = "User Reviews";
+                const items = data.reviews || [];
+                if(items.length === 0) { windowContent.innerHTML = '<p>No reviews posted yet.</p>'; return; }
+
+                const list = document.createElement('div');
+                list.className = 'reviews-list';
+                items.forEach(r => {
+                    const formattedDate = r.timestamp ? new Date(r.timestamp).toLocaleDateString() : '';
+                    // Utilizza r.gameImg reale e mappa r.gameName
+                    list.innerHTML += `
+                        <div class="review-item">
+                            <img src="${r.gameImg || 'https://via.placeholder.com/120x70/1a1a24/e0f2fe?text=No+Image'}" alt="${r.gameName}" onerror="this.src='https://via.placeholder.com/120x70/1a1a24/e0f2fe?text=No+Image'">
+                            <div class="review-body">
+                                <div class="review-header">
+                                    <span class="review-game">${r.gameName}</span>
+                                    <span class="review-score">★ ${r.score.toFixed(1)}</span>
+                                </div>
+                                <p class="review-text">"${r.reviewText}"</p>
+                                <span class="review-date">${formattedDate}</span>
+                            </div>
+                        </div>`;
+                });
+                windowContent.appendChild(list);
+            }
+        }
+
+        function changeSubPage(direction) {
+            currentSubPage += direction;
+            fetchTabContent();
+        }
+
+        fetchUserProfile();
+    </script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>playerHive | Game Details</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #2a0845, #1a1a24, #0b0c10); 
+            --glass-bg: rgba(20, 22, 28, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-glow: #e0f2fe;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: var(--bg-gradient); color: white; display: flex; height: 100vh; padding: 20px; overflow: hidden; }
+
+        .app-wrapper { width: 100%; display: flex; flex-direction: column; gap: 20px; }
+
+        header.glass-nav {
+            height: 80px; background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
+        }
+        .logo a { color: white; text-decoration: none; font-size: 1.6rem; letter-spacing: 2px; }
+        .logo b { font-weight: 700; }
+        .login-btn { background: transparent; border: 1px solid var(--glass-border); color: white; padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: 0.2s;}
+        .login-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .dashboard-layout { display: flex; gap: 20px; flex: 1; height: calc(100vh - 140px); }
+
+        main.glass-content { flex: 2.5; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; overflow-y: auto; }
+        
+        .hero { width: 100%; height: 350px; background-size: cover; background-position: center; position: relative; border-bottom: 1px solid var(--glass-border);}
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,12,16,1), transparent); display: flex; align-items: flex-end; padding: 40px; }
+
+        .content-body { padding: 40px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 30px;}
+        .description { font-size: 1.05rem; }
+
+        /* Griglia Metadati Gioco */
+        .game-metadata {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            padding: 25px;
+            border-radius: 16px;
+        }
+        .meta-item { display: flex; flex-direction: column; gap: 5px; }
+        .meta-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-glow); }
+        .meta-value { font-size: 0.95rem; color: var(--text-primary); }
+        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag-badge { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; color: var(--text-primary); border: 1px solid var(--glass-border);}
+
+        aside.glass-sidebar { flex: 1.2; max-width: 550px; display: flex; flex-direction: column; gap: 20px; }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.8rem; font-weight: bold; color: var(--accent-glow); display: block; text-shadow: 0 0 10px rgba(224, 242, 254, 0.3); }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
+
+        .buy-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 24px;
+            backdrop-filter: blur(16px);
+        }
+        .price-big { font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; color: #4caf50; }
+        
+        .btn-disabled { 
+            width: 100%; padding: 15px; 
+            background: #333333; color: #7a7a7a; 
+            border: 1px solid #444; border-radius: 12px; 
+            font-weight: bold; cursor: not-allowed; 
+        }
+
+        .reviews-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: hidden;
+        }
+        .reviews-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 10px;
+        }
+        .review-item { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 0; }
+        .review-user { color: var(--accent-glow); font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
+        .review-pfp { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--glass-border); }
+        
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px;
+        }
+        .pagination-btn {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border);
+            color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination-btn:not(:disabled):hover { background: rgba(255, 255, 255, 0.2); }
+        .size-select {
+            background: rgba(0, 0, 0, 0.4); color: white; border: 1px solid var(--glass-border);
+            padding: 4px 8px; border-radius: 6px; outline: none;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <header class="glass-nav">
+            <div class="logo"><a href="index.html">player<b>Hive</b></a></div>
+            <button class="login-btn" onclick="window.location.href='login.html'">Login</button>
+        </header>
+
+        <div class="dashboard-layout">
+            <main class="glass-content" id="mainBody">
+                <p style="padding: 40px;">Loading game data...</p>
+            </main>
+
+            <aside class="glass-sidebar" id="sideBody">
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        const gameId = localStorage.getItem('selectedGameId') || "sample-id";
+        let currentReviewPage = 0;
+        let currentReviewSize = 5;
+        let pfpFiles = [];
+
+        // Caricamento della lista di immagini per i profili delle recensioni dal path specificato
+        async function loadPfpList() {
+            try {
+                const response = await fetch('../../pfps.txt');
+                if (response.ok) {
+                    const text = await response.text();
+                    pfpFiles = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                }
+            } catch (err) { console.error("Impossibile caricare ../../pfps.txt", err); }
+        }
+
+        function getUserPfpPath(username) {
+            const basePath = '/home/sebastiano_pala/Pictures/Sfondi/';
+            if (pfpFiles.length === 0 || !username) {
+                return 'https://via.placeholder.com/150/1a1a24/e0f2fe?text=U';
+            }
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) {
+                hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return basePath + pfpFiles[Math.abs(hash) % pfpFiles.length];
+        }
+
+        async function loadGame() {
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/${gameId}`);
+                if (!res.ok) throw new Error("Network response was not ok");
+                const g = await res.json();
+                
+                const userScoreFormatted = (g.userScore || 0).toFixed(1);
+                const avgPlaytimeFormatted = (g.averagePlaytime || 0).toFixed(1);
+                const priceFormatted = (g.finalPrice || 0).toFixed(2);
+                
+                // Formattazione Array in badges
+                const genresHtml = (g.genres || []).map(genre => `<span class="tag-badge">${genre}</span>`).join('');
+                const osHtml = (g.supportedOS || []).map(os => `<span class="tag-badge">${os}</span>`).join('');
+                
+                // Formattazione Array Testuali
+                const devs = (g.developers || []).join(', ') || 'N/A';
+                const pubs = (g.publishers || []).join(', ') || 'N/A';
+                const releaseDate = g.releaseDate ? new Date(g.releaseDate).toLocaleDateString() : 'N/A';
+
+                document.getElementById('mainBody').innerHTML = `
+                    <div class="hero" style="background-image: url('${g.imageURL || ''}')">
+                        <div class="hero-overlay">
+                            <h1>${g.name || 'Unknown Game'}</h1>
+                        </div>
+                    </div>
+                    <div class="content-body">
+                        <div class="description">
+                            ${g.description || 'No description available for this game.'}
+                        </div>
+                        
+                        <div class="game-metadata">
+                            <div class="meta-item" style="grid-column: 1 / -1;">
+                                <span class="meta-label">Genres</span>
+                                <div class="tags-container">${genresHtml || 'N/A'}</div>
+                            </div>
+                            
+                            <div class="meta-item">
+                                <span class="meta-label">Developers</span>
+                                <span class="meta-value">${devs}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Publishers</span>
+                                <span class="meta-value">${pubs}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Release Date</span>
+                                <span class="meta-value">${releaseDate}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Total Achievements</span>
+                                <span class="meta-value">${g.achievements || 0}</span>
+                            </div>
+
+                            <div class="meta-item" style="grid-column: 1 / -1; margin-top: 10px;">
+                                <span class="meta-label">Supported OS</span>
+                                <div class="tags-container">${osHtml || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('sideBody').innerHTML = `
+                    <div class="stats-container">
+                        <div class="stat-box">
+                            <span class="stat-value">${userScoreFormatted}</span>
+                            <span class="stat-label">User Score</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value">${avgPlaytimeFormatted}h</span>
+                            <span class="stat-label">Avg Playtime</span>
+                        </div>
+                    </div>
+                    <div class="buy-box">
+                        <div class="price-big">€${priceFormatted}</div>
+                        <button class="btn-disabled" disabled>ADD TO LIBRARY</button>
+                    </div>
+                    <div class="reviews-section" id="reviewsContainer">
+                        <h4 style="margin-bottom:15px; color: var(--text-primary);">Community Reviews</h4>
+                        <div id="reviewsList" class="reviews-list">
+                            <p style="font-size:0.85rem; color:var(--text-secondary);">Loading reviews...</p>
+                        </div>
+                        <div id="paginationControls" class="pagination-controls"></div>
+                    </div>
+                `;
+
+                loadReviews();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('mainBody').innerHTML = "<p style='padding:40px; color:#ff6b6b;'>Error loading game data.</p>";
+            }
+        }
+
+        async function loadReviews() {
+            const listEl = document.getElementById('reviewsList');
+            const pagEl = document.getElementById('paginationControls');
+            if(!listEl || !pagEl) return;
+
+            listEl.innerHTML = '<p style="font-size:0.85rem; color:var(--text-secondary);">Fetching reviews...</p>';
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/reviews/${gameId}?page=${currentReviewPage}&size=${currentReviewSize}`);
+                const data = await res.json();
+
+                if (data.reviews && data.reviews.length > 0) {
+                    listEl.innerHTML = data.reviews.map(r => {
+                        const scoreFormatted = (r.score || 0).toFixed(1);
+                        const dateFormatted = r.timestamp ? new Date(r.timestamp).toLocaleDateString() : '';
+                        
+                        // Generazione dinamica della foto profilo con il trick del pfps.txt
+                        const pfpPath = getUserPfpPath(r.username);
+                        
+                        return `
+                            <div class="review-item">
+                                <div class="review-user">
+                                    <img src="${pfpPath}" class="review-pfp" alt="${r.username}">
+                                    <span>${r.username} <span style="color:var(--text-secondary); font-weight:normal; margin-left: 5px;">• ${scoreFormatted}/10</span></span>
+                                </div>
+                                <p style="font-size:0.85rem; margin-top:10px; line-height: 1.5; color: #cbd5e1;">${r.reviewText}</p>
+                                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:8px;">${dateFormatted}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    listEl.innerHTML = `<p style="font-size:0.85rem; color:var(--text-secondary);">No reviews found for this game yet.</p>`;
+                }
+
+                const totalPages = data.numPages || 1;
+                const isLastPage = data.lastPage;
+
+                pagEl.innerHTML = `
+                    <div>
+                        <label>Size: </label>
+                        <select class="size-select" onchange="changeReviewSize(this.value)">
+                            <option value="5" ${currentReviewSize === 5 ? 'selected' : ''}>5</option>
+                            <option value="25" ${currentReviewSize === 25 ? 'selected' : ''}>25</option>
+                            <option value="75" ${currentReviewSize === 75 ? 'selected' : ''}>75</option>
+                            <option value="100" ${currentReviewSize === 100 ? 'selected' : ''}>100</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="pagination-btn" onclick="changeReviewPage(-1)" ${currentReviewPage === 0 ? 'disabled' : ''}>Prev</button>
+                        <span style="margin: 0 10px;">Page ${currentReviewPage + 1} / ${totalPages}</span>
+                        <button class="pagination-btn" onclick="changeReviewPage(1)" ${isLastPage ? 'disabled' : ''}>Next</button>
+                    </div>
+                `;
+
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = "<p style='font-size:0.85rem; color:#ff6b6b;'>Error loading reviews.</p>";
+                pagEl.innerHTML = "";
+            }
+        }
+
+        window.changeReviewPage = function(direction) {
+            currentReviewPage += direction;
+            loadReviews();
+        };
+
+        window.changeReviewSize = function(newSize) {
+            currentReviewSize = parseInt(newSize);
+            currentReviewPage = 0; 
+            loadReviews();
+        };
+
+        // Bootstrap App
+        window.onload = async () => {
+            await loadPfpList(); // Carica la lista foto profilo prima di renderizzare
+            if(gameId) loadGame();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+{
+	"pfp" : "/home/sebastiano_pala/Desktop/mockups/user.png",
+	"username" : "Bruno Strati"
+}
