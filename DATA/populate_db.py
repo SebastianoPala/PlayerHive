@@ -144,6 +144,27 @@ def manage_neo4j_indexes(session, action="CREATE"):
         session.run("DROP INDEX user_id_idx IF EXISTS")
         session.run("DROP INDEX game_id_idx IF EXISTS")
 
+def create_mongo_indexes(db):
+    """Creates persistent MongoDB indexes for the application's hot read paths.
+    Built once, after all bulk inserts, so we don't pay index-maintenance cost per insert."""
+    print("   -> Creating MongoDB indexes...")
+
+    # Login + registration lookup (UserRepository.findByEmail, findLightByUsernameOrEmail)
+    # Unique to also enforce email uniqueness at the DB level
+    db.users.create_index("email", unique=True, name="email_1")
+
+    # Game catalogue search (GameRepository.searchByNameContaining)
+    # Non-unique because the imported Steam dataset has some duplicate titles
+    db.games.create_index("name", name="name_1")
+
+    # Cascade delete on account deletion (ReviewRepository.removeByUserId)
+    db.reviews.create_index("user_id", name="user_id_1")
+
+    # Cascade delete on game deletion (ReviewRepository.removeByGameId)
+    db.reviews.create_index("game_id", name="game_id_1")
+
+    print("   -> MongoDB indexes created!")
+
 def upload_to_mongodb(games_data, users_data, all_reviews_data):
     """Uploads the finalized in-memory dictionaries directly to MongoDB."""
     print(f"\n7. Connecting to MongoDB ({MONGO_URI})...")
@@ -212,6 +233,7 @@ def upload_to_mongodb(games_data, users_data, all_reviews_data):
         db.reviews.insert_many(mongo_reviews)
         
     print("   -> MongoDB upload complete!")
+    create_mongo_indexes(db)
     client.close()
 
 
@@ -527,7 +549,9 @@ def main():
             for i in range(0, len(friend_rels), 5000):
                 session.run("UNWIND $pairs AS pair MATCH (u1:User {id: pair.id1}) MATCH (u2:User {id: pair.id2}) MERGE (u1)-[:FRIENDS_WITH]->(u2) MERGE (u2)-[:FRIENDS_WITH]->(u1)", pairs=friend_rels[i:i+5000])
 
-            manage_neo4j_indexes(session, "DROP")
+            # Keep the :User(id) and :Game(id) indexes for the application phase
+            # (created above) instead of dropping them after population.
+            # manage_neo4j_indexes(session, "DROP")
             
         driver.close()
         print("   -> Neo4j upload completed successfully!")
