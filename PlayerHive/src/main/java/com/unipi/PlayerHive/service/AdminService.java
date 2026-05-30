@@ -130,7 +130,7 @@ public class AdminService {
         }
 
         if(updateReviewInfo && !game.getAllReviews().isEmpty()){
-            List<String> reviews = game.getAllReviews().stream().map(old -> old.getReviewId().toString()).toList();
+            List<String> reviews = game.getAllReviews().stream().map(ObjectId::toString).toList();
             long modified = reviewRepository.editInfoIn(reviews, gameName, gameImg);
             System.out.println(modified + " reviews had their info updated");
         }

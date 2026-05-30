@@ -33,6 +33,6 @@ public class OwnProfileDTO {
 
     private Integer friends;
 
-    private Integer friendRequestsNumber; //only the number is sent
+    private Integer requestsNum;
 
 }

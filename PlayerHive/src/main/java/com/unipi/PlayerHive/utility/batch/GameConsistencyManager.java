@@ -64,8 +64,9 @@ public class GameConsistencyManager {
             for (ReviewScoreDTO review : reviews) {
                 Query query = new Query(Criteria.where("_id").is(review.getGameId()));
 
-                Update update = new Update().pull("recentReviews", new Document("_id",review.getId()))
-                        .pull("allReviews", new Document("review_id", new ObjectId(review.getId())))
+                Update update = new Update()
+                        .pull("recentReviews", new Document("_id", new ObjectId(review.getId())))
+                        .pull("allReviews", new ObjectId(review.getId()))
                         .inc("sumScore", -review.getScore())
                         .inc("countScore", -1);
 

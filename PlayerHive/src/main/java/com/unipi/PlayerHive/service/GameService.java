@@ -98,10 +98,8 @@ public class GameService {
 
         if(reviewNumber >= 0 && !pager.isOutOfBounds()) {
 
-            List<OldGameReviewDTO> reviewLightDocList = gameRepository.getGameReviews(gameId, pager.getStart(), pager.getLimit()).getReviews();
-
-            List<String> reviewIds = reviewLightDocList.stream()
-                    .map(oldGameReviewDTO -> oldGameReviewDTO.getReviewId().toString()).toList();
+            List<String> reviewIds =  gameRepository.getGameReviews(gameId, pager.getStart(), pager.getLimit()).getReviews()
+                    .stream().map(ObjectId::toString).toList();
 
             reviews = reviewRepository.findGameReviewsByIdIn(reviewIds);
             numPages = pager.getNumPages();
@@ -140,10 +138,8 @@ public class GameService {
 
         GameReviewDTO recentReview = reviewMapper.reviewToRecentReviewDTO(savedReview);
 
-        OldGameReviewDTO oldReview = new OldGameReviewDTO(new ObjectId(recentReview.getId()),addReviewDTO.getScore());
-
         // ... in the recentReviews array (ready for retrieval), and in the allReviews array (as a lightweight version)
-        int modified = gameRepository.addReviewToGame(gameId,oldReview , recentReview, addReviewDTO.getScore());
+        int modified = gameRepository.addReviewToGame(gameId,new ObjectId(recentReview.getId()) , recentReview, addReviewDTO.getScore());
         if(modified != 1)
             throw new RuntimeException("An error has occurred when adding the review to the game");
 
@@ -179,7 +175,7 @@ public class GameService {
             throw new RuntimeException("The server couldn't delete the review due to inconsistencies");
 
         // clean the entry out of the user's reviewIds array too
-        userRepository.removeReviewFromUser(requestingUser.getId(), new ObjectId(reviewId));
+        userRepository.removeReviewFromUser(deletedReview.getUserId().toString(), new ObjectId(reviewId));
     }
 
     // INTERESTING QUERIES ====================
@@ -201,6 +197,25 @@ public class GameService {
         return gameRepository.getTopRatedGames(minReviews);
     }
 
+    public List<GameRecommendationDTO> getRecommendations(){
+        return gameNeo4jRepository.getGameRecommendations(getAuthenticatedUser().getId(),10);
+    }
+
+    public List<TrendingGameDTO> getTrendingGames(){
+        return gameNeo4jRepository.getTrendingGamesAmongFriends(100);
+    }
+
+    public List<HiddenGemDTO> getHiddenGems(int nicheThreshold){
+
+        return gameNeo4jRepository.getHiddenGems(getAuthenticatedUser().getId(),nicheThreshold);
+    }
+
+    public List<FriendMagnetDTO> getRelatedGames(String gameId, int limit) {
+        return gameNeo4jRepository.getRelatedGames(gameId, limit);
+    }
+
+    // admin analytics
+
     public List<GenreStatsDTO> getGenreStats(){
         return gameRepository.getGenreStats();
     }
@@ -211,23 +226,6 @@ public class GameService {
 
     public List<ReleaseYearStatsDTO> getReleaseYearStats(){
         return gameRepository.getReleaseYearStats();
-    }
-
-    public List<GameRecommendationDTO> getRecommendations(){
-        return gameNeo4jRepository.getGameRecommendations(getAuthenticatedUser().getId(),10);
-    }
-
-    public List<TrendingGameDTO> getTrendingGames(){
-        return gameNeo4jRepository.getTrendingGamesAmongFriends(100);
-    }
-
-    public List<HiddenGemDTO> getHiddenGems(){
-
-        return gameNeo4jRepository.getHiddenGems(getAuthenticatedUser().getId(),10,10);
-    }
-
-    public List<FriendMagnetDTO> getRelatedGames(String gameId, int limit) {
-        return gameNeo4jRepository.getRelatedGames(gameId, limit);
     }
 
 }

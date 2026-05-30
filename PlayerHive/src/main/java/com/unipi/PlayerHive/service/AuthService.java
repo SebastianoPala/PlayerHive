@@ -63,6 +63,7 @@ public class AuthService {
         newUser.setHoursPlayed(0);
         newUser.setFriends(0);
         newUser.setFriendRequests(new ArrayList<>());
+        newUser.setRequestsNum(0);
         newUser.setReviewIds(new ArrayList<>());
 
         User savedUser = userRepository.save(newUser);

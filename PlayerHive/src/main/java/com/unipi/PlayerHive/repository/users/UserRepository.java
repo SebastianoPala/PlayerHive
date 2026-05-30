@@ -35,23 +35,18 @@ public interface UserRepository extends MongoRepository<User,String> {
     Slice<UserSearchDTO> searchByUsernameContaining(String username, Pageable pageable);
 
     @Query("{ '_id' : ?0, 'friendRequests.user_id' : { '$ne': ?1 } }")
-    @Update("{ '$push' : { 'friendRequests' : ?2 } }")
+    @Update("{ '$push' : { 'friendRequests' : ?2 }, '$inc' : { 'requestsNum' : 1 } }")
     int addFriendRequest(String targetUserId, ObjectId senderUserId, FriendRequestMongoDTO request);
 
     @Query("{ '_id' : ?0, 'friendRequests.user_id' : ?1 }")
     @Update("{ '$pull' : { 'friendRequests' : { 'user_id' : ?1 } }, " +
-            "  '$inc' : { 'friends' : 1 } }")
+            "  '$inc' : { 'friends' : 1, 'requestsNum' : -1 } }")
     int acceptFriendRequest(String userId, ObjectId userToAccept);
 
-    @Query("{ '_id' : ?0 }")
-    @Update("{ '$pull' : { 'friendRequests' : { 'user_id' : ?1 } } }")
+    @Query("{ '_id' : ?0, 'friendRequests.user_id' : ?1 }")
+    @Update("{ '$pull' : { 'friendRequests' : { 'user_id' : ?1 } }, " +
+            "  '$inc' : { 'requestsNum' : -1 } }")
     int removeFriendRequest(String userId, ObjectId userToRemove);
-
-    @Aggregation(pipeline = {
-            "{ '$match' : { '_id' : ?0 } }",
-            "{ '$project' : { 'count' : { '$size': '$friendRequests' } } }"
-    })
-    int getFriendRequestsNumber(String userId);
 
     // TODO ADD CONTAINER
     @Aggregation(pipeline = {

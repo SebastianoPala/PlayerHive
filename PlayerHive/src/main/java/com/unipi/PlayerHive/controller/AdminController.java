@@ -1,9 +1,13 @@
 package com.unipi.PlayerHive.controller;
 
 
+import com.unipi.PlayerHive.DTO.analytics.GenreStatsDTO;
+import com.unipi.PlayerHive.DTO.analytics.OsPlatformStatsDTO;
+import com.unipi.PlayerHive.DTO.analytics.ReleaseYearStatsDTO;
 import com.unipi.PlayerHive.DTO.games.AddGameDTO;
 import com.unipi.PlayerHive.DTO.games.EditGameDTO;
 import com.unipi.PlayerHive.service.AdminService;
+import com.unipi.PlayerHive.service.GameService;
 import com.unipi.PlayerHive.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,6 +18,8 @@ import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin")
 
@@ -21,10 +27,12 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
     private final AdminService adminService;
     private final UserService userService;
+    private final GameService gameService;
 
-    public AdminController(AdminService adminService, UserService userService) {
+    public AdminController(AdminService adminService, UserService userService, GameService gameService) {
         this.adminService = adminService;
         this.userService = userService;
+        this.gameService = gameService;
     }
 
     @PostMapping("/addGame")
@@ -62,5 +70,38 @@ public class AdminController {
     public ResponseEntity<String> deleteUser(@PathVariable @NotNull @Size(min = 24, max = 24) String userId){
         userService.deleteUser(userId);
         return  ResponseEntity.ok("The user has been deleted successfully");
+    }
+
+
+    // analytics
+
+    @GetMapping("/getGenreStats")
+    @Operation(
+            summary = "Genre analytics",
+            description = "Returns average rating and average hours played per player, grouped by genre. Admin only."
+    )
+    @ApiResponse(responseCode = "200", description = "Stats retrieved successfully")
+    public ResponseEntity<List<GenreStatsDTO>> getGenreStats(){
+        return ResponseEntity.ok(gameService.getGenreStats());
+    }
+
+    @GetMapping("/getOsPlatformStats")
+    @Operation(
+            summary = "OS platform analytics",
+            description = "Returns average rating grouped by number of supported operating systems (1, 2, or 3). Admin only."
+    )
+    @ApiResponse(responseCode = "200", description = "Stats retrieved successfully")
+    public ResponseEntity<List<OsPlatformStatsDTO>> getOsPlatformStats(){
+        return ResponseEntity.ok(gameService.getOsPlatformStats());
+    }
+
+    @GetMapping("/releaseYearStats")
+    @Operation(
+            summary = "Release year analytics",
+            description = "Returns average rating and total game count grouped by release year. Admin only."
+    )
+    @ApiResponse(responseCode = "200", description = "Stats retrieved successfully")
+    public ResponseEntity<List<ReleaseYearStatsDTO>> getReleaseYearStats() {
+        return ResponseEntity.ok(gameService.getReleaseYearStats());
     }
 }

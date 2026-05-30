@@ -1,8 +1,5 @@
 package com.unipi.PlayerHive.controller;
 
-import com.unipi.PlayerHive.DTO.analytics.GenreStatsDTO;
-import com.unipi.PlayerHive.DTO.analytics.OsPlatformStatsDTO;
-import com.unipi.PlayerHive.DTO.analytics.ReleaseYearStatsDTO;
 import com.unipi.PlayerHive.DTO.games.*;
 import com.unipi.PlayerHive.DTO.reviews.AddReviewDTO;
 import com.unipi.PlayerHive.DTO.containers.GameReviewContainerDTO;
@@ -131,49 +128,22 @@ public class GameController {
         return ResponseEntity.ok(gameService.getTopGames(minReviews));
     }
 
-    @GetMapping("/getGenreStats")
-    @Operation(
-        summary = "Genre analytics",
-        description = "Returns average rating and average hours played per player, grouped by genre. Admin only."
-    )
-    @ApiResponse(responseCode = "200", description = "Stats retrieved successfully")
-    public ResponseEntity<List<GenreStatsDTO>> getGenreStats(){
-        return ResponseEntity.ok(gameService.getGenreStats());
-    }
-
-    @GetMapping("/getOsPlatformStats")
-    @Operation(
-        summary = "OS platform analytics",
-        description = "Returns average rating grouped by number of supported operating systems (1, 2, or 3). Admin only."
-    )
-    @ApiResponse(responseCode = "200", description = "Stats retrieved successfully")
-    public ResponseEntity<List<OsPlatformStatsDTO>> getOsPlatformStats(){
-        return ResponseEntity.ok(gameService.getOsPlatformStats());
-    }
-
-    @GetMapping("/releaseYearStats")
-    @Operation(
-        summary = "Release year analytics",
-        description = "Returns average rating and total game count grouped by release year. Admin only."
-    )
-    @ApiResponse(responseCode = "200", description = "Stats retrieved successfully")
-    public ResponseEntity<List<ReleaseYearStatsDTO>> getReleaseYearStats() {
-        return ResponseEntity.ok(gameService.getReleaseYearStats());
-    }
-
     @GetMapping("/getRecommendations")
     public ResponseEntity<List<GameRecommendationDTO>> getRecommendations(){
         return ResponseEntity.ok(gameService.getRecommendations());
     }
 
+    // todo unanchored query
     @GetMapping("/getTrending")
     public ResponseEntity<List<TrendingGameDTO>> getTrendingGames(){
         return ResponseEntity.ok(gameService.getTrendingGames());
     }
 
     @GetMapping("/getHiddenGems")
-    public ResponseEntity<List<HiddenGemDTO>> getHiddenGems(){
-        return ResponseEntity.ok(gameService.getHiddenGems());
+    public ResponseEntity<List<HiddenGemDTO>> getHiddenGems(
+            @RequestParam(defaultValue = "5") @Min(3) int nicheThreshold
+    ){
+        return ResponseEntity.ok(gameService.getHiddenGems(nicheThreshold));
     }
 
     @GetMapping("/{gameId}/friendMagnet")

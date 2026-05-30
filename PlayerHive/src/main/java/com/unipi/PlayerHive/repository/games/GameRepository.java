@@ -3,10 +3,9 @@ package com.unipi.PlayerHive.repository.games;
 import com.unipi.PlayerHive.DTO.analytics.GenreStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.OsPlatformStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.ReleaseYearStatsDTO;
-import com.unipi.PlayerHive.DTO.containers.OldGameReviewContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.ReviewIdContainerDTO;
 import com.unipi.PlayerHive.DTO.games.*;
 import com.unipi.PlayerHive.DTO.reviews.GameReviewDTO;
-import com.unipi.PlayerHive.DTO.reviews.OldGameReviewDTO;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -47,13 +46,13 @@ public interface GameRepository extends MongoRepository<Game, String> {
             "    } " +
             "}, " +
             "'$inc' :{ 'countScore': 1, 'sumScore' : ?3} }")
-    int addReviewToGame(String gameId, OldGameReviewDTO oldReview, GameReviewDTO recentReview, float score);
+    int addReviewToGame(String gameId, ObjectId oldReview, GameReviewDTO recentReview, float score);
 
-    @Query("{ '_id': ?0, 'allReviews.review_id': ObjectId(?1) }")
+    @Query("{ '_id': ?0, 'allReviews': ObjectId(?1) }")
     @Update("{" +
             "  '$inc': { 'countScore': -1, 'sumScore': ?2 }," +
             "  '$pull': {" +
-            "    'allReviews': { 'review_id': ObjectId(?1) }," +
+            "    'allReviews': ObjectId(?1)," +
             "    'recentReviews': { '_id': ObjectId(?1) }" +
             "  }" +
             "}")
@@ -69,7 +68,7 @@ public interface GameRepository extends MongoRepository<Game, String> {
             "{ '$match': { '_id': ?0 } }",
             "{ '$project': { '_id': 0, 'reviews': { '$slice': ['$allReviews', ?1, ?2] } } }"
     })
-    OldGameReviewContainerDTO getGameReviews(String gameId, int skip, int limit);
+    ReviewIdContainerDTO getGameReviews(String gameId, int skip, int limit);
 
     @Query("{ '_id': ?0 }" +
             "{ '$project': { '_id' : 0, 'name' : 1, 'image' : 1 } }")
@@ -135,6 +134,8 @@ public interface GameRepository extends MongoRepository<Game, String> {
             "{ $limit: 15 }",
     })
     List<GameStatsDTO> getTopRatedGames(int minReviews);
+
+    //admin analytics
 
     @Aggregation(pipeline = {
         "{ $match: { countScore: { $gt: 0 }, numPlayers: { $gt: 0 } } }",

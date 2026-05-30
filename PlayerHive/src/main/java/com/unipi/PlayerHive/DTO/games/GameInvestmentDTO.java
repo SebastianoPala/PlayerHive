@@ -24,7 +24,7 @@ public class GameInvestmentDTO {
 
     private Double finalPrice;
 
-    private Double avgRating;
+    //private Double avgRating;
 
     private Double avgTimePlayed;
     private Integer numPlayers;

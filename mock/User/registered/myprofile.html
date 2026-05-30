@@ -329,7 +329,10 @@
                 document.getElementById('statGames').innerText = profile.numGames || 0;
                 document.getElementById('statHours').innerText = (profile.hoursPlayed || 0).toFixed(1);
                 document.getElementById('statFriends').innerText = profile.friends || 0;
-                document.getElementById('reqBadge').innerText = profile.friendRequestsNumber > 0 ? `(${profile.friendRequestsNumber})` : '';
+
+                // Gestione robusta del contatore richieste di amicizia
+                const reqNum = parseInt(profile.requestsNum) || 0;
+                document.getElementById('reqBadge').innerText = reqNum > 0 ? `(${reqNum})` : '';
 
                 // Foto profilo dell'account loggato presa dal percorso locale richiesto
                 document.getElementById('myAvatar').src = getUserPfpPath(profile.username);
@@ -541,7 +544,7 @@
                 const res = await fetch(`http://localhost:8080/api/user/removeFriend/${friendId}`, { method: 'DELETE', headers: getHeaders() });
                 if(res.ok) {
                     document.getElementById(`friend-${friendId}`).remove();
-                    fetchMyProfile(); 
+                    await fetchMyProfile(); 
                 } else alert("Error processing friend removal.");
             } catch(e) { alert("An error occurred."); }
         }
@@ -552,9 +555,19 @@
             try {
                 const res = await fetch(url, { method: method, headers: getHeaders() });
                 if(res.ok) {
-                    document.getElementById(`req-${targetId}`).remove();
-                    fetchMyProfile(); 
-                } else alert("Operation failed on server.");
+                    const itemToRemove = document.getElementById(`req-${targetId}`);
+                    if (itemToRemove) itemToRemove.remove();
+                    
+                    // Attendiamo l'aggiornamento del profilo e dei badge (effettua la fetch al server)
+                    await fetchMyProfile(); 
+                    
+                    // Se siamo nella tab requests e abbiamo svuotato la pagina, forziamo il ricaricamento del contenuto visivo
+                    if (currentTab === 'requests' && document.querySelectorAll('.req-item').length === 0) {
+                        fetchTabContent();
+                    }
+                } else {
+                    alert("Operation failed on server.");
+                }
             } catch(e) { alert("An error occurred."); }
         }
 
@@ -594,7 +607,7 @@
                 if(res.ok) {
                     closeModals();
                     document.getElementById(`game-${gameId}`).remove();
-                    fetchMyProfile(); 
+                    await fetchMyProfile(); 
                 } else alert("Failed to drop game from library.");
             } catch(e) { alert("An error occurred."); }
         }

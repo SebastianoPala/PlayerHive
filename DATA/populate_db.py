@@ -24,9 +24,7 @@ MAX_USER_REVIEWS = 40
 MAX_GAMES = 40
 MAX_FRIENDS = 20
 
-
 fake = Faker()
-
 
 admin_user = {
     "_id": {"$oid": uuid.uuid4().hex[:24]},
@@ -37,6 +35,7 @@ admin_user = {
     "registrationDate": datetime.now() - timedelta(days=5 * 365),
     "role": "ADMIN",
     "friendRequests": [],
+    "requestsNum": 0,
     "friends": 0,
     "numGames": 0,
     "hoursPlayed": 0.0,
@@ -53,6 +52,7 @@ default_user = {
     "registrationDate": datetime.now() - timedelta(days=5 * 365),
     "role": "ADMIN",
     "friendRequests": [],
+    "requestsNum": 0,
     "friends": 0,
     "numGames": 0,
     "hoursPlayed": 0.0,
@@ -161,13 +161,9 @@ def upload_to_mongodb(games_data, users_data, all_reviews_data):
         g_copy = g.copy()
         g_copy["_id"] = ObjectId(g["_id"]["$oid"])
         
-        # Format ObjectIds in allReviews array containing dictionaries
         g_copy["allReviews"] = [
-            {
-                "review_id": ObjectId(r["review_id"]),
-                "score": r["score"]  
-            } 
-            for r in g_copy.get("allReviews", [])
+            ObjectId(r_id) 
+            for r_id in g_copy.get("allReviews", [])
         ]
         
         # Format user_ids inside recentReviews array
@@ -208,7 +204,6 @@ def upload_to_mongodb(games_data, users_data, all_reviews_data):
     
     if mongo_reviews:
         print("   -> Inserting Review documents into MongoDB...")
-        # Per inserimenti enormi in futuro, usa batch o ordered=False
         db.reviews.insert_many(mongo_reviews)
         
     print("   -> MongoDB upload complete!")
@@ -222,7 +217,7 @@ def main():
     # 0. CHECK CONNECTIONS
     check_neo4j_connection()
     
-    # 1. CLEAN GAMES (convert.py logic)
+    # 1. CLEAN GAMES
     print("1. Loading and cleaning Games data (from games.json)...")
     try:
         with open('games.json', 'r', encoding='utf-8') as f:
@@ -235,8 +230,6 @@ def main():
     seen_names = set()
 
     for app_id, game_data in original_games.items():
-
-        # duplicate filtering
         game_name = game_data.get("name", "").strip()
         if not game_name or game_name.lower() in seen_names:
             continue
@@ -261,7 +254,6 @@ def main():
             discount = random.choice(range(0, 95, 5))
         
         finalPrice = random_price - (random_price * int(discount)/100)
-        
 
         games_list.append({
             "_id": {"$oid": generate_oid()},
@@ -289,7 +281,6 @@ def main():
         birthdate_raw = fake.date_of_birth(minimum_age=15)
         birthdate_dt = datetime(birthdate_raw.year, birthdate_raw.month, birthdate_raw.day)
         
-        # fix the hotmail stuff
         users_list.append({
             "_id": {"$oid": generate_oid()},
             "username": username,
@@ -299,6 +290,7 @@ def main():
             "registrationDate": generate_registration_date(),
             "role": "USER",
             "friendRequests": [],
+            "requestsNum": 0,
             "friends": 0,
             "numGames": 0,
             "hoursPlayed": 0.0,
@@ -326,10 +318,9 @@ def main():
         print("ERROR: 'reviews.csv' not found.")
         sys.exit(1)
         
-    all_global_reviews = [] # Lista che andrà a popolare la nuova collection 'reviews'
+    all_global_reviews = [] 
         
     for i, user in enumerate(users_list):
-
         M = random.randint(0, MAX_USER_REVIEWS)
         user_reviews_temp = []
         
@@ -351,7 +342,6 @@ def main():
             all_global_reviews.append(review_doc)
             user_reviews_temp.append(review_doc)
             
-        # Ordina cronologicamente (dalla più vecchia alla più recente) e crea array per il record user
         user_reviews_temp.sort(key=lambda x: x["timestamp"])
         user["reviewIds"] = [
             {
@@ -367,7 +357,6 @@ def main():
             
     print("   -> Structuring recentReviews and allReviews for MongoDB optimization...")
     for i, game in enumerate(games_list):
-        # 1. Ordina le recensioni cronologicamente (dalla più vecchia alla più nuova in raw_reviews)
         game["raw_reviews"].sort(key=lambda x: x["timestamp"])
         
         if game["raw_reviews"]:
@@ -377,18 +366,13 @@ def main():
             game["sumScore"] = 0.0
             game["countScore"] = 0
             
-
         game["allReviews"] = [
-            {
-                "review_id": r["_id"]["$oid"], 
-                "score": r["score"]  
-            } 
+            r["_id"]["$oid"]
             for r in game["raw_reviews"]
         ]
         
         recent_25 = game["raw_reviews"][::-1][:25]
         
-        # Rimuoviamo il game_id dai documenti embedded perché è ridondante
         embedded_recent = []
         for r in recent_25:
             r_copy = r.copy()
@@ -396,8 +380,6 @@ def main():
             embedded_recent.append(r_copy)
             
         game["recentReviews"] = embedded_recent
-        
-        # Elimina l'array temporaneo raw_reviews
         del game["raw_reviews"]
             
         if (i + 1) % 1000 == 0 or (i + 1) == len(games_list):
@@ -481,6 +463,7 @@ def main():
                 "pfpURL": user["pfpURL"], "timestamp": generate_recent_timestamp()
             })
             pending_requests.add((u_id, t_id))
+            user_map[t_id]["requestsNum"] += 1 # Incremento del nuovo campo
 
         for t_id in friend_targets:
             established_friendships.add(frozenset([u_id, t_id]))
@@ -493,12 +476,10 @@ def main():
 
     friend_rels = [{"id1": list(pair)[0], "id2": list(pair)[1]} for pair in established_friendships]
 
-    # sorting friend requests
     print("   -> Sorting friend requests chronologically...")
     for user in users_list:
         if user["friendRequests"]:
             user["friendRequests"].sort(key=lambda x: x["timestamp"])
-            
 
     # 6. NEO4J UPLOAD
     print("\n6. Connecting to Neo4j to upload Graph Database...")

@@ -73,12 +73,9 @@ public class UserService {
         User user = getAuthenticatedUser();
 
         // more information is provided if the user requests his own profile
-        OwnProfileDTO ownProfile = userMapper.userToOwnProfileDTO(user);
 
-        // todo either embed this number in the document or get the friend requests
-        ownProfile.setFriendRequestsNumber(userRepository.getFriendRequestsNumber(user.getId()));
-
-        return ownProfile;
+        // todo should we add embedded friend requests?
+        return userMapper.userToOwnProfileDTO(user);
     }
 
     public UserSearchContainerDTO searchUser(String username, int page, int size) {
@@ -172,7 +169,7 @@ public class UserService {
     public FriendRequestContainerDTO getFriendRequests(int page, int size) {
         String userId = getAuthenticatedUser().getId();
 
-        int friendRequestNumber = userRepository.getFriendRequestsNumber(userId);
+        int friendRequestNumber = getAuthenticatedUser().getRequestsNum();
 
         // new friend requests are appended to the array, ArrayPager is needed
         ArrayPager pager = new ArrayPager(friendRequestNumber, page, size);

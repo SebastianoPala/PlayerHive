@@ -28,7 +28,7 @@ public class User {
     private String id;
 
     private String username;
-    private String password; // the salt??
+    private String password;
 
     private String role;
 
@@ -50,6 +50,7 @@ public class User {
     private Integer friends;
 
     private List<FriendRequestDTO> friendRequests;
+    private Integer requestsNum;
 
     // every review the user has ever written, stored as lightweight {reviewId, gameId} pairs
     // used to clean up game documents when a user is deleted, and to show a user's review history

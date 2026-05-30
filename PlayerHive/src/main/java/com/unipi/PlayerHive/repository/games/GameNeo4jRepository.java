@@ -57,15 +57,16 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
     @Query("MATCH (u:User {id: $userId})-[:FRIENDS_WITH]-(friend)-[:PLAYED]->(game:Game) " +
             "WHERE NOT (u)-[:PLAYED]->(game) " +
             "WITH game, count(DISTINCT friend) AS friendsPlaying " +
-            "LIMIT 50" +
+            "WITH game, friendsPlaying " +
+            "ORDER BY friendsPlaying DESC " +
+            "LIMIT 50 " +
             "MATCH (game)<-[:PLAYED]-(globalPlayer) " +
-            "LIMIT 50" +
             "WITH game, friendsPlaying, count(globalPlayer) AS globalPopularity " +
             "WHERE globalPopularity < $nicheThreshold " +
             "RETURN game.name AS name, friendsPlaying AS friendsPlaying, globalPopularity AS globalPopularity " +
             "ORDER BY friendsPlaying DESC, globalPopularity ASC " +
-            "LIMIT $limit")
-    List<HiddenGemDTO> getHiddenGems(String userId, int nicheThreshold, int limit);
+            "LIMIT 10")
+    List<HiddenGemDTO> getHiddenGems(String userId, int nicheThreshold);
 
     @Query("MATCH (g:Game {id: $gameId})<-[:PLAYED]-(u:User)-[:PLAYED]->(other:Game) " +
         "WHERE g <> other " +
