@@ -6,6 +6,7 @@ import com.unipi.PlayerHive.DTO.analytics.OsPlatformStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.ReleaseYearStatsDTO;
 import com.unipi.PlayerHive.DTO.games.AddGameDTO;
 import com.unipi.PlayerHive.DTO.games.EditGameDTO;
+import com.unipi.PlayerHive.DTO.games.TrendingGameDTO;
 import com.unipi.PlayerHive.service.AdminService;
 import com.unipi.PlayerHive.service.GameService;
 import com.unipi.PlayerHive.service.UserService;
@@ -74,6 +75,12 @@ public class AdminController {
 
 
     // analytics
+
+    // todo unanchored query, find explanation
+    @GetMapping("/getTrending")
+    public ResponseEntity<List<TrendingGameDTO>> getTrendingGames(){
+        return ResponseEntity.ok(gameService.getTrendingGames());
+    }
 
     @GetMapping("/getGenreStats")
     @Operation(

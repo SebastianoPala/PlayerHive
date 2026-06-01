@@ -135,14 +135,14 @@ def clear_neo4j(session):
 
 def manage_neo4j_indexes(session, action="CREATE"):
     if action == "CREATE":
-        print("   -> Creating indexes on User.id and Game.id...")
-        session.run("CREATE INDEX user_id_idx IF NOT EXISTS FOR (u:User) ON (u.id)")
-        session.run("CREATE INDEX game_id_idx IF NOT EXISTS FOR (g:Game) ON (g.id)")
-        session.run("CALL db.awaitIndexes()")
+        print("   -> Creating unique constraints on User.id and Game.id...")
+        session.run("CREATE CONSTRAINT user_id_unique IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE")
+        session.run("CREATE CONSTRAINT game_id_unique IF NOT EXISTS FOR (g:Game) REQUIRE g.id IS UNIQUE")
+        session.run("CALL db.awaitIndexes(300)")
     elif action == "DROP":
-        print("   -> Dropping temporary indexes...")
-        session.run("DROP INDEX user_id_idx IF EXISTS")
-        session.run("DROP INDEX game_id_idx IF EXISTS")
+        print("   -> Dropping constraints...")
+        session.run("DROP CONSTRAINT user_id_unique IF EXISTS")
+        session.run("DROP CONSTRAINT game_id_unique IF EXISTS")
 
 def create_mongo_indexes(db):
     """Creates persistent MongoDB indexes for the application's hot read paths.
@@ -152,10 +152,10 @@ def create_mongo_indexes(db):
     # Login + registration lookup (UserRepository.findByEmail, findLightByUsernameOrEmail)
     # Unique to also enforce email uniqueness at the DB level
     db.users.create_index("email", unique=True, name="email_1")
+    db.users.create_index("username", unique=True, name="username_1")
 
     # Game catalogue search (GameRepository.searchByNameContaining)
-    # Non-unique because the imported Steam dataset has some duplicate titles
-    db.games.create_index("name", name="name_1")
+    db.games.create_index("name", unique=True ,name="name_1")
 
     # Cascade delete on account deletion (ReviewRepository.removeByUserId)
     db.reviews.create_index("user_id", name="user_id_1")
@@ -364,7 +364,7 @@ def main():
             all_global_reviews.append(review_doc)
             user_reviews_temp.append(review_doc)
             
-        user_reviews_temp.sort(key=lambda x: x["timestamp"])
+        user_reviews_temp.sort(key=lambda x: x["timestamp"], reverse=True)
         user["reviewIds"] = [
             {
                 "review_id": r["_id"]["$oid"],
@@ -379,7 +379,7 @@ def main():
             
     print("   -> Structuring recentReviews and allReviews for MongoDB optimization...")
     for i, game in enumerate(games_list):
-        game["raw_reviews"].sort(key=lambda x: x["timestamp"])
+        game["raw_reviews"].sort(key=lambda x: x["timestamp"], reverse=True)
         
         if game["raw_reviews"]:
             game["sumScore"] = float(round(sum(r["score"] for r in game["raw_reviews"]), 1))
@@ -393,7 +393,8 @@ def main():
             for r in game["raw_reviews"]
         ]
         
-        recent_25 = game["raw_reviews"][::-1][:25]
+        # Rimosso [::-1] poiché l'array è già ordinato dal più recente
+        recent_25 = game["raw_reviews"][:25]
         
         embedded_recent = []
         for r in recent_25:
@@ -501,7 +502,7 @@ def main():
     print("   -> Sorting friend requests chronologically...")
     for user in users_list:
         if user["friendRequests"]:
-            user["friendRequests"].sort(key=lambda x: x["timestamp"])
+            user["friendRequests"].sort(key=lambda x: x["timestamp"], reverse=True)
 
     # 6. NEO4J UPLOAD
     print("\n6. Connecting to Neo4j to upload Graph Database...")
@@ -511,16 +512,19 @@ def main():
 
     try:
         driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+            
+        # --- 2. POPOLAMENTO ---
         with driver.session() as session:
             clear_neo4j(session)
+            
+            # CREA I CONSTRAINT PRIMA DEGLI INSERT
+            manage_neo4j_indexes(session, "CREATE")
             
             print("   -> Inserting Game Nodes...")
             session.run("UNWIND $games AS game CREATE (g:Game {id: game.id, name: game.name, achievements: game.achievements, image: game.image})", games=neo4j_games)
             
             print("   -> Inserting User Nodes...")
             session.run("UNWIND $users AS user CREATE (u:User {id: user.id, username: user.username, pfpURL: user.pfpURL})", users=neo4j_users)
-            
-            manage_neo4j_indexes(session, "CREATE")
             
             print(f"   -> Inserting {len(played_relationships)} [:PLAYED] relationships...")
             for i in range(0, len(played_relationships), 10000):
@@ -529,7 +533,11 @@ def main():
             print(f"   -> Inserting {len(friend_rels)} mutual [:FRIENDS_WITH] relationship pairs...")
             for i in range(0, len(friend_rels), 5000):
                 session.run("UNWIND $pairs AS pair MATCH (u1:User {id: pair.id1}) MATCH (u2:User {id: pair.id2}) MERGE (u1)-[:FRIENDS_WITH]->(u2) MERGE (u2)-[:FRIENDS_WITH]->(u1)", pairs=friend_rels[i:i+5000])
-
+            
+        driver.close()
+        print("   -> Neo4j upload completed successfully!")
+    except Exception as e:
+        print(f"   -> ERROR during Neo4j operations: {e}")
             # Keep the :User(id) and :Game(id) indexes for the application phase
             # (created above) instead of dropping them after population.
             # manage_neo4j_indexes(session, "DROP")

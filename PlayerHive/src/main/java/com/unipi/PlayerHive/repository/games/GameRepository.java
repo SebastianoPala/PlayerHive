@@ -38,7 +38,10 @@ public interface GameRepository extends MongoRepository<Game, String> {
 
     @Query("{ '_id': ?0 }")
     @Update("{ '$push': { " +
-            "    'allReviews': ?1, " +
+            "    'allReviews': {" +
+            "        '$each': [?1]," +
+            "        '$position': 0" +
+            "    }, " +
             "    'recentReviews': { " +
             "        '$each': [?2], " +
             "        '$position': 0, " +
@@ -58,15 +61,10 @@ public interface GameRepository extends MongoRepository<Game, String> {
             "}")
     int deleteReviewFromGame(ObjectId gameId, String reviewId, Float score);
 
-    @Aggregation(pipeline = {
-            "{ '$match': { '_id': ?0 } }",
-            "{ '$project': { '_id': 0, 'countScore': 1 } }"
-    })
-    int getReviewNumber(String gameId);
 
     @Aggregation(pipeline = {
             "{ '$match': { '_id': ?0 } }",
-            "{ '$project': { '_id': 0, 'reviews': { '$slice': ['$allReviews', ?1, ?2] } } }"
+            "{ '$project': { '_id': 0, 'reviews': { '$slice': ['$allReviews', ?1, ?2] }, 'countScore':1 } }"
     })
     ReviewIdContainerDTO getGameReviews(String gameId, int skip, int limit);
 

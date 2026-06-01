@@ -35,7 +35,7 @@ public interface UserRepository extends MongoRepository<User,String> {
     Slice<UserSearchDTO> searchByUsernameContaining(String username, Pageable pageable);
 
     @Query("{ '_id' : ?0, 'friendRequests.user_id' : { '$ne': ?1 } }")
-    @Update("{ '$push' : { 'friendRequests' : ?2 }, '$inc' : { 'requestsNum' : 1 } }")
+    @Update("{ '$push' : { 'friendRequests' : { '$each' : [ ?2 ], '$position' : 0 } }, '$inc' : { 'requestsNum' : 1 } }")
     int addFriendRequest(String targetUserId, ObjectId senderUserId, FriendRequestMongoDTO request);
 
     @Query("{ '_id' : ?0, 'friendRequests.user_id' : ?1 }")
@@ -48,7 +48,6 @@ public interface UserRepository extends MongoRepository<User,String> {
             "  '$inc' : { 'requestsNum' : -1 } }")
     int removeFriendRequest(String userId, ObjectId userToRemove);
 
-    // TODO ADD CONTAINER
     @Aggregation(pipeline = {
             "{ '$match': { '_id': ?0 } }",
             "{ '$project': { 'friendRequests': { '$slice': ['$friendRequests', ?1, ?2] } } }"
@@ -67,31 +66,25 @@ public interface UserRepository extends MongoRepository<User,String> {
     @Update("{ '$inc': { 'hoursPlayed': ?1, 'numGames': ?2 } }")
     int updateUserStats(String userId, float playtimeToAdd, int gameNumberToAdd);
 
-    @Query(value = "{ 'email': ?0 }", fields = "{ 'friendRequests': 0, 'reviewIds':0 }")
+    @Query(value = "{ 'email': ?0 }", fields = "{ '_id:' 1, 'username' : 1, 'role': 1, 'requestsNum': 1, 'pfpURL': 1}")
     User findByEmail(String email);
 
-    @Query(value = "{ '_id': ?0 }",  fields = "{ 'friendRequests': 0, 'reviewIds':0 }")
+    @Query(value = "{ '_id': ?0 }",  fields = "{ '_id:' 1, 'username' : 1, 'role': 1, 'requestsNum': 1, 'pfpURL': 1}")
     User findByIdLean(String id);
 
-    boolean existsByEmail(String email);
-    
-    boolean existsByUsername(String username);
+    //@Query(value = "{ '_id': ?0 }", fields = "{ 'reviewIds': 0, 'friendRequests': 0 }")
+    @Query(value = "{ '_id': ?0 }", fields = "{ 'reviewIds': 0, 'friendRequests': { $slice: [0, 10] } }")
+    OwnProfileMongoDTO getOwnProfile(String id);
 
     @Aggregation(pipeline = {
             "{ '$match': { '_id': ?0 } }",
-            "{ '$project': { '_id': 0, 'count': { '$size': '$reviewIds' } } }"
-    })
-    int getReviewNumber(String gameId);
-
-    @Aggregation(pipeline = {
-            "{ '$match': { '_id': ?0 } }",
-            "{ '$project': { 'reviews': { '$slice': ['$reviewIds', ?1, ?2] } } }"
+            "{ '$project': { 'reviews': { '$slice': ['$reviewIds', ?1, ?2] } , 'reviewsNum' : { '$size': '$reviewIds'} }  }"
     })
     OldUserReviewContainerDTO getUserReviews(String userId, int skip, int limit);
 
     // push a new {reviewId, gameId} pair into the user's reviewIds array when they write a review
     @Query("{ '_id': ?0 }")
-    @Update("{ '$push': { 'reviewIds': ?1 } }")
+    @Update("{ '$push': { 'reviewIds': { '$each': [ ?1 ], '$position': 0 } } }")
     void addReviewToUser(String userId, OldUserReviewDTO review);
 
     // pull the review entry out of reviewIds when the review is deleted

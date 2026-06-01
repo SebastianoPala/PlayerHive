@@ -81,7 +81,6 @@ public class AdminService {
     @Transactional
     public void addGame(@Nonnull @Valid @RequestBody AddGameDTO newGame) {
 
-        //TODO DO WE NEED INDEXES? THIS OP IS RARE
         if(gameRepository.existsByName(newGame.getName()))
                 throw new ResourceAlreadyExistsException("Game "+ newGame.getName() +" already exists");
 

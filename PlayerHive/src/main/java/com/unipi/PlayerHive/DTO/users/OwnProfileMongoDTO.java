@@ -1,10 +1,11 @@
 package com.unipi.PlayerHive.DTO.users;
 
-import com.unipi.PlayerHive.DTO.users.friends.FriendRequestDTO;
+import com.unipi.PlayerHive.DTO.users.friends.FriendRequestMongoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class OwnProfileDTO {
+public class OwnProfileMongoDTO {
 
 
     private String username;
@@ -35,7 +36,8 @@ public class OwnProfileDTO {
 
     private Integer friends;
 
-    private List<FriendRequestDTO> friendRequests;
+    @Field("friendRequests")
+    private List<FriendRequestMongoDTO> friendRequestsMongo;
 
     private Integer requestsNum;
 

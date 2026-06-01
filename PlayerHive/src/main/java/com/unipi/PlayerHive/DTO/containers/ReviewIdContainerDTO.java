@@ -9,5 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class ReviewIdContainerDTO {
-    List<ObjectId> reviews;
+    private List<ObjectId> reviews;
+    private Integer countScore;
 }

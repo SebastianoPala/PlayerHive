@@ -1,18 +1,18 @@
 package com.unipi.PlayerHive.utility.map;
 
 import com.unipi.PlayerHive.DTO.users.OwnProfileDTO;
+import com.unipi.PlayerHive.DTO.users.OwnProfileMongoDTO;
 import com.unipi.PlayerHive.DTO.users.ProfileDTO;
-import com.unipi.PlayerHive.DTO.users.UserSearchDTO;
+import com.unipi.PlayerHive.DTO.users.friends.FriendRequestDTO;
+import com.unipi.PlayerHive.DTO.users.friends.FriendRequestMongoDTO;
 import com.unipi.PlayerHive.model.user.User;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    public ProfileDTO userToProfileDTO(User user);
+    ProfileDTO userToProfileDTO(User user);
 
-    public OwnProfileDTO userToOwnProfileDTO(User user);
-
-    public UserSearchDTO userToUserSearchDTO(User user);
+    OwnProfileDTO OwnProfileMongoToOwnProfileDTO(OwnProfileMongoDTO ownMongo);
 
 }

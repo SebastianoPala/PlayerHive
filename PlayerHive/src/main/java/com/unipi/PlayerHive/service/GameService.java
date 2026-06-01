@@ -4,6 +4,7 @@ import com.unipi.PlayerHive.DTO.analytics.GenreStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.OsPlatformStatsDTO;
 import com.unipi.PlayerHive.DTO.analytics.ReleaseYearStatsDTO;
 import com.unipi.PlayerHive.DTO.containers.GameReviewContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.ReviewIdContainerDTO;
 import com.unipi.PlayerHive.DTO.games.*;
 import com.unipi.PlayerHive.DTO.reviews.*;
 import com.unipi.PlayerHive.config.Exceptions.ResourceAlreadyExistsException;
@@ -15,7 +16,6 @@ import com.unipi.PlayerHive.repository.ReviewRepository;
 import com.unipi.PlayerHive.repository.games.GameNeo4jRepository;
 import com.unipi.PlayerHive.repository.games.GameRepository;
 import com.unipi.PlayerHive.repository.users.UserRepository;
-import com.unipi.PlayerHive.utility.ArrayPager;
 import com.unipi.PlayerHive.utility.map.GameMapper;
 import com.unipi.PlayerHive.utility.map.ReviewMapper;
 import jakarta.transaction.Transactional;
@@ -81,35 +81,26 @@ public class GameService {
         return new GameSearchContainerDTO(result.getContent(),result.isLast());
     }
 
+    // todo TEST
     public GameReviewContainerDTO getGameReviews(String gameId, int page, int size) {
 
         if(!gameRepository.existsById(gameId))
             throw new NoSuchElementException("The game does not exist");
 
-        int reviewNumber = gameRepository.getReviewNumber(gameId);
+        int skip = page*size;
 
-        // the embedded allReviews array is ordered by timestamp ascending (new reviews are appended at the end of the
-        // array) therefore we need to calculate the requested array portion using the ArrayPager class
-        ArrayPager pager = new ArrayPager(reviewNumber,page,size);
+        ReviewIdContainerDTO reviewContainer = gameRepository.getGameReviews(gameId, skip, size);
 
-        List<GameReviewDTO> reviews;
-        int numPages;
-        boolean isLastPage;
+        List<String> reviewIds =  reviewContainer.getReviews()
+                .stream().map(ObjectId::toString).toList();
 
-        if(reviewNumber >= 0 && !pager.isOutOfBounds()) {
+        List<GameReviewDTO> reviews = reviewRepository.findGameReviewsByIdIn(reviewIds);
 
-            List<String> reviewIds =  gameRepository.getGameReviews(gameId, pager.getStart(), pager.getLimit()).getReviews()
-                    .stream().map(ObjectId::toString).toList();
+        int totalReviews = reviewContainer.getCountScore();
 
-            reviews = reviewRepository.findGameReviewsByIdIn(reviewIds);
-            numPages = pager.getNumPages();
-            isLastPage = pager.isLastPage();
+        int numPages = (totalReviews / size) + ((totalReviews % size > 0) ? 1 : 0);
+        boolean isLastPage = (totalReviews - skip <= size);
 
-        } else{
-            reviews = new ArrayList<>();
-            numPages = 0;
-            isLastPage = true;
-        }
 
         return new GameReviewContainerDTO(reviews,numPages,isLastPage);
     }
@@ -145,6 +136,7 @@ public class GameService {
 
         // the review id and the game id are added to the user document as well
         OldUserReviewDTO userReview = new OldUserReviewDTO(new ObjectId(savedReview.getId()), new ObjectId(gameId));
+
         userRepository.addReviewToUser(userId, userReview);
     }
 
@@ -180,7 +172,6 @@ public class GameService {
 
     // INTERESTING QUERIES ====================
 
-    //TODO USE QUERIES THAT USE THE SCORES IN THE EMBEDDED ARRAY, OR REMOVE THEM
     public List<GameStatsDTO> getDeals(int minReviews, double minPrice, double maxPrice, double minRating){
         return gameRepository.getQualityToPriceGames(minReviews, minPrice, maxPrice, minRating);
     }

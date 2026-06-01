@@ -133,11 +133,6 @@ public class GameController {
         return ResponseEntity.ok(gameService.getRecommendations());
     }
 
-    // todo unanchored query
-    @GetMapping("/getTrending")
-    public ResponseEntity<List<TrendingGameDTO>> getTrendingGames(){
-        return ResponseEntity.ok(gameService.getTrendingGames());
-    }
 
     @GetMapping("/getHiddenGems")
     public ResponseEntity<List<HiddenGemDTO>> getHiddenGems(
@@ -146,10 +141,10 @@ public class GameController {
         return ResponseEntity.ok(gameService.getHiddenGems(nicheThreshold));
     }
 
-    @GetMapping("/{gameId}/friendMagnet")
-    @Operation(summary = "Friend Magnet", description = "Games most co-played by players of this game — 'if you liked this, you'll like these'.")
+    @GetMapping("/{gameId}/getRelatedGames")
+    @Operation(summary = "Related Games", description = "Games most co-played by players of this game — 'if you liked this, you'll like these'.")
     @ApiResponse(responseCode = "200", description = "List returned")
-    public ResponseEntity<List<FriendMagnetDTO>> getFriendMagnet(
+    public ResponseEntity<List<FriendMagnetDTO>> getRelatedGames(
             @PathVariable String gameId,
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(gameService.getRelatedGames(gameId, limit));

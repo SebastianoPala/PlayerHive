@@ -1,6 +1,7 @@
 package com.unipi.PlayerHive.service;
 
 import com.unipi.PlayerHive.DTO.containers.LibraryContainerDTO;
+import com.unipi.PlayerHive.DTO.containers.OldUserReviewContainerDTO;
 import com.unipi.PlayerHive.DTO.containers.UserReviewContainerDTO;
 import com.unipi.PlayerHive.DTO.containers.UserSearchContainerDTO;
 import com.unipi.PlayerHive.DTO.games.LibraryGameDTO;
@@ -16,7 +17,6 @@ import com.unipi.PlayerHive.repository.games.GameRepository;
 import com.unipi.PlayerHive.repository.users.UserNeo4jRepository;
 import com.unipi.PlayerHive.repository.users.UserRepository;
 import com.unipi.PlayerHive.model.user.UserPrincipal;
-import com.unipi.PlayerHive.utility.ArrayPager;
 import com.unipi.PlayerHive.utility.batch.GameConsistencyManager;
 import com.unipi.PlayerHive.utility.map.UserMapper;
 import jakarta.transaction.Transactional;
@@ -46,6 +46,7 @@ public class UserService {
 
     private final ReviewRepository reviewRepository;
 
+
     public UserService(UserRepository userRepository, UserNeo4jRepository userNeo4jRepository, GameRepository gameRepository, UserMapper userMapper, GameNeo4jRepository gameNeo4jRepository, GameConsistencyManager gameConsistencyManager, ReviewRepository reviewRepository) {
         this.userRepository = userRepository;
         this.userNeo4jRepository = userNeo4jRepository;
@@ -70,14 +71,23 @@ public class UserService {
 
     public OwnProfileDTO getOwnProfileById() {
 
-        User user = getAuthenticatedUser();
-
         // more information is provided if the user requests his own profile
+        OwnProfileMongoDTO ownProfileMongo = userRepository.getOwnProfile(getAuthenticatedUser().getId());
 
-        // todo should we add embedded friend requests?
-        return userMapper.userToOwnProfileDTO(user);
+        OwnProfileDTO ownProfileDTO = userMapper.OwnProfileMongoToOwnProfileDTO(ownProfileMongo);
+
+        ownProfileDTO.setFriendRequests(ownProfileMongo.getFriendRequestsMongo()
+                .stream().map(mongo ->
+                new FriendRequestDTO(mongo.getUserId().toString(),
+                        mongo.getUsername(),
+                        mongo.getPfpURL(),
+                        mongo.getTimestamp())
+                ).toList());
+
+        return ownProfileDTO;
     }
 
+    // edit regexp
     public UserSearchContainerDTO searchUser(String username, int page, int size) {
         Pageable pageable = PageRequest.of(page,size);
 
@@ -98,7 +108,6 @@ public class UserService {
 
     @Transactional
     public void editLibrary(@Valid AddGameToLibraryDTO addGame) {
-        // TODO: add to the exception controller the validation failure exception (negative achievements)
 
         if(addGame.getGameId().length() != 24)
             throw new IllegalArgumentException("The provided game Id is not valid");
@@ -151,7 +160,6 @@ public class UserService {
         if(modified<=0)
             throw new RuntimeException("The server was unable to decrease the player's gaming stats");
 
-        // TODO
         modified = gameRepository.updateGameStats(gameId, -userGamePlaytime.floatValue(),-1);
         if(modified<=0)
             throw new RuntimeException("The server was unable to decrease the game's stats");
@@ -171,29 +179,22 @@ public class UserService {
 
         int friendRequestNumber = getAuthenticatedUser().getRequestsNum();
 
-        // new friend requests are appended to the array, ArrayPager is needed
-        ArrayPager pager = new ArrayPager(friendRequestNumber, page, size);
+        int skip = page * size;
 
-        List<FriendRequestDTO> friendRequests = new ArrayList<>();
-        int numPages;
-        boolean isLastPage;
+        List<FriendRequestMongoDTO> friendRequestMongoDTO = userRepository.findFriendRequestsById(userId,skip,size).getFriendRequests();
+        // todo add useful comment
+        List<FriendRequestDTO> friendRequests = friendRequestMongoDTO.stream()
+                .map(mongo ->
+                                new FriendRequestDTO(mongo.getUserId().toString(),
+                                        mongo.getUsername(),
+                                        mongo.getPfpURL(),
+                                        mongo.getTimestamp())
+                                ).toList();
 
-        if(friendRequestNumber >= 0 && !pager.isOutOfBounds()){
 
-            List<FriendRequestMongoDTO> friendRequestsMongo = userRepository.findFriendRequestsById(userId,pager.getStart(),pager.getLimit()).getFriendRequests();
+        int numPages = (friendRequestNumber / size) + ((friendRequestNumber % size > 0) ? 1 : 0);
+        boolean isLastPage = (friendRequestNumber - skip <= size);
 
-            for (int i = friendRequestsMongo.size() - 1; i >= 0; i--){
-                FriendRequestMongoDTO fm = friendRequestsMongo.get(i);
-                friendRequests.add(new FriendRequestDTO(fm.getUserId().toString(),fm.getUsername(),fm.getPfpURL(),fm.getTimestamp()));
-            }
-            // friend requests are now in chronological order
-
-            numPages = pager.getNumPages();
-            isLastPage = pager.isLastPage();
-        } else {
-            numPages = 0;
-            isLastPage = true;
-        }
 
         return new FriendRequestContainerDTO(friendRequests,numPages,isLastPage);
     }
@@ -222,7 +223,6 @@ public class UserService {
 
         FriendRequestMongoDTO requestDTO = new FriendRequestMongoDTO(new ObjectId(userId),user.getUsername(),user.getPfpURL(), LocalDateTime.now());
 
-        // the friend request is appended to the array
         int modified = userRepository.addFriendRequest(targetUserId,requestDTO.getUserId(),requestDTO);
         if(modified != 1)
             throw new ResourceAlreadyExistsException("The friend request is already present");
@@ -295,29 +295,20 @@ public class UserService {
         if(!userRepository.existsById(userId))
             throw new NoSuchElementException("The user does not exist");
 
-        List<UserReviewDTO> reviews;
-        int numPages;
-        boolean isLastPage;
+        int skip = page * size;
 
-        int reviewNumber = userRepository.getReviewNumber(userId);
+        OldUserReviewContainerDTO reviewContainer = userRepository.getUserReviews(userId, skip, size);
 
-        // new user reviews are appended to the array, Array Pager is required
-        ArrayPager pager = new ArrayPager(reviewNumber, page, size);
+        List<OldUserReviewDTO> userReviews = reviewContainer.getReviews();
 
-        if(reviewNumber >= 0 && !pager.isOutOfBounds()) {
+        int reviewNumber =  reviewContainer.getReviewsNum();
 
-            List<OldUserReviewDTO> userReviews = userRepository.getUserReviews(userId, pager.getStart(), pager.getLimit()).getReviews();
+        List<String> reviewIds = userReviews.stream().map(userReviewDTO -> userReviewDTO.getReviewId().toString()).toList();
 
-            List<String> reviewIds = userReviews.stream().map(userReviewDTO -> userReviewDTO.getReviewId().toString()).toList();
+        List<UserReviewDTO> reviews = reviewRepository.findUserReviewsByIdIn(reviewIds);
 
-            reviews = reviewRepository.findUserReviewsByIdIn(reviewIds);
-            numPages = pager.getNumPages();
-            isLastPage = pager.isLastPage();
-        } else{
-            reviews = new ArrayList<>();
-            numPages = 0;
-            isLastPage = true;
-        }
+        int numPages = (reviewNumber / size) + ((reviewNumber % size > 0) ? 1 : 0);
+        boolean isLastPage = (reviewNumber - skip <= size);
 
         return new UserReviewContainerDTO(reviews,numPages,isLastPage);
     }
@@ -397,5 +388,4 @@ public class UserService {
         String userId = getAuthenticatedUser().getId();
         return userNeo4jRepository.getGamingTwins(userId, 10);
     }
-
 }

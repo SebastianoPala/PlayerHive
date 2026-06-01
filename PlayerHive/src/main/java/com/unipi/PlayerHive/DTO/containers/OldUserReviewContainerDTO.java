@@ -10,4 +10,5 @@ import java.util.List;
 @AllArgsConstructor
 public class OldUserReviewContainerDTO {
     private List<OldUserReviewDTO> reviews;
+    private Integer reviewsNum;
 }

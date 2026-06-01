@@ -38,8 +38,6 @@ public class AuthService {
     }
 
     public void registerUser(@Nonnull @Valid @RequestBody UserRegistrationDTO dto){
-        // A single query is performed to look for both username and email matches, instead of two separate ones, idk if the other version is better
-        // todo if we are very fat, we can use access tables to check which operation is better, or add indexes maybe
 
         userRepository.findLightByUsernameOrEmail(dto.username(), dto.email()).ifPresent(user -> {
             if (user.getUsername().equals(dto.username())) {
@@ -57,6 +55,7 @@ public class AuthService {
         newUser.setPassword(encoder.encode(dto.password()));
         newUser.setEmail(dto.email());
         newUser.setBirthdate(dto.birthDate());
+        newUser.setPfpURL(dto.profile_picture());
         newUser.setRegistrationDate(LocalDateTime.now());
         newUser.setRole("USER");
         newUser.setNumGames(0);
@@ -71,6 +70,7 @@ public class AuthService {
         UserNeo4j neo4jUser = new UserNeo4j();
         neo4jUser.setId(savedUser.getId());
         neo4jUser.setUsername(dto.username());
+        neo4jUser.setPfpURL(dto.profile_picture());
 
         userNeo4jRepository.save(neo4jUser);
     }
