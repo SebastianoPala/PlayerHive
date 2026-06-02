@@ -352,7 +352,9 @@ public class UserService {
         System.out.println(modified + " games had their reviews updated");
 
         // deletes all user's reviews
-        modified = reviewRepository.removeByUserId(new ObjectId(userId));
+        //modified = reviewRepository.removeByUserId(new ObjectId(userId));
+        List<String> reviewIds = userRepository.getAllUserReviews(userId).getReviews().stream().map(review -> review.getReviewId().toString()).toList();
+        modified = reviewRepository.removeByIdIn(reviewIds);
 
         System.out.println(modified + " reviews were deleted from the Review Collection");
 

@@ -158,10 +158,10 @@ def create_mongo_indexes(db):
     db.games.create_index("name", unique=True ,name="name_1")
 
     # Cascade delete on account deletion (ReviewRepository.removeByUserId)
-    db.reviews.create_index("user_id", name="user_id_1")
+    # db.reviews.create_index("user_id", name="user_id_1")
 
     # Cascade delete on game deletion (ReviewRepository.removeByGameId)
-    db.reviews.create_index("game_id", name="game_id_1")
+    # db.reviews.create_index("game_id", name="game_id_1")
 
     print("   -> MongoDB indexes created!")
 

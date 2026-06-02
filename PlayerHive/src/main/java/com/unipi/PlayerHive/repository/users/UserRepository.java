@@ -82,6 +82,12 @@ public interface UserRepository extends MongoRepository<User,String> {
     })
     OldUserReviewContainerDTO getUserReviews(String userId, int skip, int limit);
 
+    @Aggregation(pipeline = {
+            "{ '$match': { '_id': ?0 } }",
+            "{ '$project': { 'reviews': '$reviewIds'   }"
+    })
+    OldUserReviewContainerDTO getAllUserReviews(String userId);
+
     // push a new {reviewId, gameId} pair into the user's reviewIds array when they write a review
     @Query("{ '_id': ?0 }")
     @Update("{ '$push': { 'reviewIds': { '$each': [ ?1 ], '$position': 0 } } }")

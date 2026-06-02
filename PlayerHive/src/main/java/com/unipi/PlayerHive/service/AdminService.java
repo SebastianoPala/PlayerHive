@@ -163,7 +163,11 @@ public class AdminService {
         ObjectId gameIdObj = new ObjectId(gameId);
 
         //all reviews are now deleted
-        long deleted = reviewRepository.removeByGameId(gameIdObj);
+        //long deleted = reviewRepository.removeByGameId(gameIdObj);
+
+        List<String> reviewIds = gameRepository.getAllGameReviews(gameId).getReviews().stream().map(ObjectId::toString).toList();
+        long deleted = reviewRepository.removeByIdIn(reviewIds);
+
 
         System.out.println(deleted + " reviews were deleted from the Review Collection");
 
@@ -171,7 +175,7 @@ public class AdminService {
         gameNeo4jRepository.deleteById(gameId);
 
         // all reviews of the game are removed from the reviews array present in every user document
-        deleted = userRepository.removeAllGameReviewsFromUsers(gameIdObj);
+        deleted = userRepository.removeAllGameReviewsFromUsers(gameIdObj); // todo bruh
 
         System.out.println(deleted + " users had their reviews updated");
 
