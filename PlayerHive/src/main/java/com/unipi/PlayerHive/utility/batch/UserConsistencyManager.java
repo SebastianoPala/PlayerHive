@@ -2,8 +2,13 @@ package com.unipi.PlayerHive.utility.batch;
 
 import com.mongodb.bulk.BulkWriteResult;
 import com.unipi.PlayerHive.DTO.users.GameOwnerDTO;
+import com.unipi.PlayerHive.model.Review;
 import com.unipi.PlayerHive.model.user.User;
+import com.unipi.PlayerHive.repository.ReviewRepository;
 import com.unipi.PlayerHive.repository.games.GameNeo4jRepository;
+import com.unipi.PlayerHive.repository.games.GameRepository;
+import com.unipi.PlayerHive.repository.users.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -14,10 +19,15 @@ import java.util.List;
 
 @Component
 public class UserConsistencyManager {
+
+    private final UserRepository userRepository;
+    private final GameRepository gameRepository;
     private final GameNeo4jRepository gameNeo4jRepository;
     private final MongoTemplate mongoTemplate;
 
-    public UserConsistencyManager(GameNeo4jRepository gameNeo4jRepository, MongoTemplate mongoTemplate) {
+    public UserConsistencyManager(UserRepository userRepository, GameRepository gameRepository, GameNeo4jRepository gameNeo4jRepository, MongoTemplate mongoTemplate) {
+        this.userRepository = userRepository;
+        this.gameRepository = gameRepository;
         this.gameNeo4jRepository = gameNeo4jRepository;
         this.mongoTemplate = mongoTemplate;
     }
@@ -59,6 +69,44 @@ public class UserConsistencyManager {
         BulkWriteResult result = bulkOps.execute();
 
         return result.getModifiedCount();
+    }
+
+    public void removeAllGameReviews(String gameId){
+        int page_size = 10000;
+        int skip = 0;
+        boolean reviews_left = true;
+
+        long modified = 0;
+        long deleted_reviews = 0;
+        long updated_users = 0;
+
+        ObjectId gameIdObj = new ObjectId(gameId);
+
+        while(reviews_left){
+            List<String> reviewIds = gameRepository.getGameReviews(gameId,skip,page_size).getReviews().stream().map(ObjectId::toString).toList();
+
+            if(reviewIds.isEmpty())
+                break;
+
+            if(reviewIds.size() < page_size){
+                reviews_left = false;
+            }
+
+            Query query = new Query(Criteria.where("_id").in(reviewIds));
+
+            // Rimuove i documenti dal DB e restituisce la lista delle entità rimosse
+            List<String> userIds = mongoTemplate.findAllAndRemove(query, Review.class).stream().map( review -> review.getUserId().toString()).toList();
+
+            deleted_reviews += userIds.size();
+
+            updated_users += userRepository.removeReviewFromUsersByGame(userIds, gameIdObj);
+
+            skip += page_size;
+
+        }
+
+        System.out.println(deleted_reviews + " reviews have been deleted from the Reviews collection");
+        System.out.println(updated_users + " users had their reviews updated");
     }
 
 }

@@ -105,6 +105,10 @@ public interface UserRepository extends MongoRepository<User,String> {
     @Update("{ '$pull': { 'reviewIds': { 'game_id': ?0 } } }")
     long removeAllGameReviewsFromUsers(ObjectId gameId);
 
+    @Query("{ '_id': { '$in': ?0 } }")
+    @Update("{ '$pull': { 'reviewIds': { 'game_id': ?1 } } }")
+    long removeReviewFromUsersByGame(List<String> userIds, ObjectId gameId);
+
 
     // INTERESTING QUERIES ============================================
 

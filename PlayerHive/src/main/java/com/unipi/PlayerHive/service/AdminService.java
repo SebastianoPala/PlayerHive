@@ -163,21 +163,28 @@ public class AdminService {
         ObjectId gameIdObj = new ObjectId(gameId);
 
         //all reviews are now deleted
-        //long deleted = reviewRepository.removeByGameId(gameIdObj);
 
+        // first version
+        // long deleted = reviewRepository.removeByGameId(gameIdObj);
+
+        // second version
+        /*
         List<String> reviewIds = gameRepository.getAllGameReviews(gameId).getReviews().stream().map(ObjectId::toString).toList();
         long deleted = reviewRepository.removeByIdIn(reviewIds);
 
-
         System.out.println(deleted + " reviews were deleted from the Review Collection");
-
-        //the game node in neo4j is removed
-        gameNeo4jRepository.deleteById(gameId);
 
         // all reviews of the game are removed from the reviews array present in every user document
         deleted = userRepository.removeAllGameReviewsFromUsers(gameIdObj); // todo bruh
 
         System.out.println(deleted + " users had their reviews updated");
+        */
+
+        // third version
+        userConsistencyManager.removeAllGameReviews(gameId);
+
+        //the game node in neo4j is removed
+        gameNeo4jRepository.deleteById(gameId);
 
         //we can finally delete the JSON document
         gameRepository.deleteById(gameId);
