@@ -203,15 +203,16 @@ public class UserController {
     }
 
     // INTERESTING QUERIES ======================================================
-    //TODO ADD VARIABLES
+
     @GetMapping("/getHardcoreGamers")
-    public ResponseEntity<List<PlayerStatsDTO>> getHardcoreGamers(){
-        return ResponseEntity.ok(userService.getHardcoreGamers());
+    public ResponseEntity<List<PlayerStatsDTO>> getHardcoreGamers(@RequestParam(defaultValue = "5") @Min(1) int minGames,
+                                                                  @RequestParam(defaultValue = "100") @Min(100) double minHours){
+        return ResponseEntity.ok(userService.getHardcoreGamers(minGames,minHours));
     }
 
     @GetMapping("/getKeyboardWarriors")
-    public ResponseEntity<List<KeyboardWarriorDTO>> getKeyboardWarriors(){
-        return ResponseEntity.ok(userService.getKeyboardWarriors());
+    public ResponseEntity<List<KeyboardWarriorDTO>> getKeyboardWarriors(@RequestParam(defaultValue = "1") @Min(1) double warriorRatio){
+        return ResponseEntity.ok(userService.getKeyboardWarriors(warriorRatio));
     }
 
     @GetMapping("/getMostActiveGamers")

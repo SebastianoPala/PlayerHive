@@ -22,10 +22,6 @@ Giochi (Game Controller) - Tutte le GET tranne le eccezioni:
 * GET /api/games/getInvestments 
 * GET /api/games/getDiscussed 
 * GET /api/games/getTopGames 
-* GET /api/games/getTrending 
-* GET /api/games/getGenreStats 		NO
-* GET /api/games/getOsPlatformStats 	NO
-* GET /api/games/releaseYearStats 	NO
 
 Utenti (User Controller) - Tutte le GET tranne le eccezioni:
 * GET /api/user/{userId} 		FATTO
@@ -46,7 +42,7 @@ Utenti (User Controller) - Tutte le GET tranne le eccezioni:
 Giochi (Game Controller):
 * GET /api/games/getRecommendations 
 * GET /api/games/getHiddenGems 
-* POST /api/games/addReview/{gameId} 
+* POST /api/games/addReview/{gameId} 		
 * DELETE /api/games/deleteReview/{reviewId} 
 
 Utenti - Consultazione Profilo Personale (User Controller):
@@ -74,8 +70,13 @@ Utenti - Operazioni (POST, DELETE):
 3. ACCESSIBILI A CHI E' ADMIN (hasRole("ADMIN"))
 ------------------------------------------------------------------------
 Amministrazione (Admin Controller):
-* POST /api/admin/addGame
-* PATCH /api/admin/editGame/{gameId}
-* DELETE /api/admin/deleteGame/{gameId}
-* DELETE /api/admin/deleteUser/{userId}
+* POST /api/admin/addGame				FATTO
+* PATCH /api/admin/editGame/{gameId}			FATTO
+* DELETE /api/admin/deleteGame/{gameId}			FATTO
+* DELETE /api/admin/deleteUser/{userId}			FATTO
+* GET /api/games/getTrending 				FATTO
+* GET /api/games/getGenreStats 				FATTO
+* GET /api/games/getOsPlatformStats 			FATTO
+* GET /api/games/releaseYearStats 			FATTO
+
 ========================================================================

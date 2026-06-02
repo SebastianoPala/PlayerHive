@@ -182,7 +182,9 @@ public class UserService {
         int skip = page * size;
 
         List<FriendRequestMongoDTO> friendRequestMongoDTO = userRepository.findFriendRequestsById(userId,skip,size).getFriendRequests();
-        // todo add useful comment
+
+        //embedded friend requests save the user_id field as an Object id, but we want to return it as a string
+
         List<FriendRequestDTO> friendRequests = friendRequestMongoDTO.stream()
                 .map(mongo ->
                                 new FriendRequestDTO(mongo.getUserId().toString(),
@@ -265,9 +267,6 @@ public class UserService {
 
     public void removeRequestFromUser(String targetUserId) {
         String userId = getAuthenticatedUser().getId();
-
-        //if(!userRepository.existsById(userId)) if the user does not exist, the request will simply not be present
-        // ...
 
         int result = userRepository.removeFriendRequest(userId,new ObjectId(targetUserId));
         if(result != 1)
@@ -368,13 +367,12 @@ public class UserService {
 
     // INTERESTING QUERIES ===========================================
 
-    //TODO ADD VARIABLES
-    public List<PlayerStatsDTO> getHardcoreGamers(){
-        return userRepository.findHardcoreGamers(5, 100);
+    public List<PlayerStatsDTO> getHardcoreGamers(int minGames, double minHours){
+        return userRepository.findHardcoreGamers(minGames, minHours);
     }
 
-    public List<KeyboardWarriorDTO> getKeyboardWarriors(){
-        return userRepository.getKeyboardWarriors();
+    public List<KeyboardWarriorDTO> getKeyboardWarriors(double warriorRatio){
+        return userRepository.getKeyboardWarriors(warriorRatio);
     }
 
     public List<ActiveGamerDTO> getMostActiveGamers(){

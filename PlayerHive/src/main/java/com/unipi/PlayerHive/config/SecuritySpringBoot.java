@@ -36,7 +36,7 @@ public class SecuritySpringBoot {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable) //todo these are all get requests! fix!
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // for swagger
                 .requestMatchers("/api/auth/**").permitAll()

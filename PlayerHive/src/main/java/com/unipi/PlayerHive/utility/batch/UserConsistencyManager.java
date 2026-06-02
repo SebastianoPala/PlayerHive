@@ -4,7 +4,6 @@ import com.mongodb.bulk.BulkWriteResult;
 import com.unipi.PlayerHive.DTO.users.GameOwnerDTO;
 import com.unipi.PlayerHive.model.Review;
 import com.unipi.PlayerHive.model.user.User;
-import com.unipi.PlayerHive.repository.ReviewRepository;
 import com.unipi.PlayerHive.repository.games.GameNeo4jRepository;
 import com.unipi.PlayerHive.repository.games.GameRepository;
 import com.unipi.PlayerHive.repository.users.UserRepository;
@@ -76,7 +75,6 @@ public class UserConsistencyManager {
         int skip = 0;
         boolean reviews_left = true;
 
-        long modified = 0;
         long deleted_reviews = 0;
         long updated_users = 0;
 

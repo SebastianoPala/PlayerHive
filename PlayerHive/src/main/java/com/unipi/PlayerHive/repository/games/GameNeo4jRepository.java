@@ -47,10 +47,12 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
     @Query("MATCH (u1:User)-[:FRIENDS_WITH]->(u2:User) " +
             "WHERE elementId(u1) < elementId(u2) " +
             "MATCH (u1)-[:PLAYED]->(g:Game)<-[:PLAYED]-(u2) " +
-            "RETURN g.name AS name, count(*) AS socialPlayCount " +
+            "WITH g.name AS name, count(*) AS socialPlayCount " +
+            "WHERE socialPlayCount > $minSocialCount " +
+            "RETURN name, socialPlayCount " +
             "ORDER BY socialPlayCount DESC " +
             "LIMIT $limit")
-    List<TrendingGameDTO> getTrendingGamesAmongFriends(int limit);
+    List<TrendingGameDTO> getTrendingGamesAmongFriends(int limit, int minSocialCount);
 
     // 8. The "Hidden Gem" Recommendation (Inverse Popularity)
     //todo this feels like the "game recommendation" query :( are they all the same?

@@ -59,7 +59,7 @@
         }
         .tab-btn.active { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-glow); color: var(--accent-glow); }
 
-        .search-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .search-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .search-input {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
@@ -100,17 +100,36 @@
         .os-card { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; text-align: center;}
         .os-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; text-transform: uppercase;}
         
-        /* Modifiche Istogramma */
-        .histogram { display: flex; align-items: flex-end; gap: 15px; height: 400px; padding: 20px 10px; background: rgba(0,0,0,0.2); border-radius: 12px; overflow-x: auto;}
-        .histogram-bar-wrapper { display: flex; flex-direction: column; align-items: center; min-width: 42px; height: 100%; justify-content: flex-end;}
-        .histogram-bar { width: 100%; background: var(--accent-glow); opacity: 0.75; border-radius: 4px 4px 0 0; transition: height 0.5s ease;}
+        /* Updated Histogram Styles */
+        .histogram-container-with-axes { display: flex; gap: 10px; align-items: stretch; height: 350px; margin-bottom: 30px; }
+        .y-axis { 
+            display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
+            color: var(--text-secondary); font-size: 0.75rem; padding-bottom: 25px; 
+            border-right: 1px solid var(--glass-border); padding-right: 10px; min-width: 50px; 
+        }
+        .y-axis span { line-height: 1; }
+        
+        .histogram { flex: 1; display: flex; align-items: flex-end; gap: 15px; padding: 10px; padding-bottom: 0; background: rgba(0,0,0,0.2); border-radius: 12px; overflow-x: auto;}
+        .histogram-bar-wrapper { display: flex; flex-direction: column; align-items: center; min-width: 38px; height: 100%; justify-content: flex-end;}
+        .histogram-bar { width: 100%; opacity: 0.75; border-radius: 4px 4px 0 0; transition: height 0.5s ease;}
         .histogram-bar:hover { opacity: 1; }
-        .histogram-label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;}
+        .histogram-label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; height: 20px;}
         .bar-stats { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); text-align: center; margin-bottom: 5px; line-height: 1.3; }
 
         .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;}
         .data-table th, .data-table td { padding: 10px; border-bottom: 1px solid var(--glass-border); }
         .data-table th { color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.8rem;}
+
+        /* Trending Games Styles */
+        .trending-list { display: flex; flex-direction: column; gap: 10px; }
+        .trending-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border);
+            padding: 15px 20px; border-radius: 12px; 
+        }
+        .trending-item .rank { font-size: 1.5rem; font-weight: bold; width: 40px; }
+        .trending-item .name { flex: 1; font-weight: 600; font-size: 1.1rem; }
+        .trending-item .count { color: var(--text-secondary); font-size: 0.9rem; }
 
         /* Modal Overlays */
         .modal-overlay {
@@ -181,6 +200,7 @@
                     <button class="action-btn" onclick="loadGenreStats()">Show Genre Stats</button>
                     <button class="action-btn" onclick="loadOsStats()">Show OS Stats</button>
                     <button class="action-btn" onclick="loadReleaseYearStats()">Show Release Year Stats</button>
+                    <button class="action-btn" onclick="loadTrendingGames()">Show Trending Games</button>
                 </div>
 
                 <div id="genreStatsBlock" class="analytics-block" style="display: none;">
@@ -207,7 +227,33 @@
 
                 <div id="releaseYearStatsBlock" class="analytics-block" style="display: none;">
                     <h3>Release Year Statistics</h3>
-                    <div class="histogram" id="yearHistogramContainer"></div>
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div>
+                            <h4 style="color: var(--text-secondary); margin-bottom: 10px;">Total Games Released (Y-Axis) vs Year (X-Axis)</h4>
+                            <div class="histogram-container-with-axes">
+                                <div class="y-axis">
+                                    <span id="maxGamesAxisLabel">Max</span>
+                                    <span>0</span>
+                                </div>
+                                <div class="histogram" id="yearGamesHistogramContainer"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--text-secondary); margin-bottom: 10px;">Average Score (Y-Axis) vs Year (X-Axis)</h4>
+                            <div class="histogram-container-with-axes">
+                                <div class="y-axis">
+                                    <span>10.0</span>
+                                    <span>0.0</span>
+                                </div>
+                                <div class="histogram" id="yearScoreHistogramContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="trendingStatsBlock" class="analytics-block" style="display: none;">
+                    <h3>Trending Games Among Friends</h3>
+                    <div id="trendingContainer" class="trending-list"></div>
                 </div>
             </div>
         </main>
@@ -275,7 +321,7 @@
 
         async function loadPfpList() {
             try {
-                const response = await fetch('../pfps.txt');
+                const response = await fetch('../../pfps.txt');
                 if (response.ok) {
                     const text = await response.text();
                     pfpFiles = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
@@ -484,6 +530,7 @@
             document.getElementById('genreStatsBlock').style.display = 'none';
             document.getElementById('osStatsBlock').style.display = 'none';
             document.getElementById('releaseYearStatsBlock').style.display = 'none';
+            document.getElementById('trendingStatsBlock').style.display = 'none';
         }
 
         async function loadGenreStats() {
@@ -519,14 +566,12 @@
                 const res = await fetch('http://localhost:8080/api/admin/getOsPlatformStats', { headers: getAuthHeaders() });
                 const data = await res.json();
                 
-                const labels = ['OS number:', 'OS number:', 'OS number:'];
                 let html = '';
-                
                 for(let i = 0; i < 3; i++) {
                     const item = data[i] || { osCount: 0, avgScore: 0, totalGames: 0 };
                     html += `
                         <div class="os-card">
-                            <div class="os-title">${labels[i]}</div>
+                            <div class="os-title">OS ${i + 1}</div>
                             <p style="font-size: 1.8rem; font-weight: bold; color: var(--accent-glow); margin: 10px 0;">${item.osCount.toLocaleString()}</p>
                             <p style="font-size:0.85rem; color:var(--text-secondary);">Total Games: ${item.totalGames}</p>
                             <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">Avg Rating: ★ ${item.avgScore.toFixed(1)}</p>
@@ -540,31 +585,84 @@
         async function loadReleaseYearStats() {
             hideAllAnalytics();
             const block = document.getElementById('releaseYearStatsBlock');
-            const container = document.getElementById('yearHistogramContainer');
-            container.innerHTML = '<p>Fetching historical intervals...</p>';
+            const gamesContainer = document.getElementById('yearGamesHistogramContainer');
+            const scoreContainer = document.getElementById('yearScoreHistogramContainer');
+            
+            gamesContainer.innerHTML = '<p>Fetching historical intervals...</p>';
+            scoreContainer.innerHTML = '';
             block.style.display = 'block';
 
             try {
                 const res = await fetch('http://localhost:8080/api/admin/releaseYearStats', { headers: getAuthHeaders() });
                 const data = await res.json();
                 
-                if(!data || data.length === 0) { container.innerHTML = '<p>Empty set.</p>'; return; }
+                if(!data || data.length === 0) { 
+                    gamesContainer.innerHTML = '<p>Empty set.</p>'; 
+                    return; 
+                }
 
-                const maxGames = Math.max(...data.map(d => d.totalGames));
+                const maxGames = Math.max(...data.map(d => d.totalGames), 1);
+                document.getElementById('maxGamesAxisLabel').innerText = maxGames.toLocaleString();
                 
-                container.innerHTML = data.map(item => {
+                // Histogram 1: Games count
+                gamesContainer.innerHTML = data.map(item => {
                     const percentageHeight = (item.totalGames / maxGames) * 100;
                     return `
                         <div class="histogram-bar-wrapper">
                             <div class="bar-stats">
-                                ${item.totalGames}<br>★ ${item.avgScore.toFixed(1)}
+                                ${item.totalGames}
                             </div>
-                            <div class="histogram-bar" style="height: ${percentageHeight}%; min-height: 2px;"></div>
+                            <div class="histogram-bar" style="height: ${percentageHeight}%; min-height: 2px; background: var(--accent-glow);"></div>
                             <div class="histogram-label">${item.releaseYear}</div>
                         </div>
                     `;
                 }).join('');
-            } catch(e) { container.innerHTML = '<p style="color:var(--danger-color);">Failed to render graphical chart.</p>'; }
+
+                // Histogram 2: Score (Max 10)
+                scoreContainer.innerHTML = data.map(item => {
+                    const percentageHeight = (item.avgScore / 10) * 100;
+                    return `
+                        <div class="histogram-bar-wrapper">
+                            <div class="bar-stats">
+                                ★ ${item.avgScore.toFixed(1)}
+                            </div>
+                            <div class="histogram-bar" style="height: ${percentageHeight}%; min-height: 2px; background: #f5a623;"></div>
+                            <div class="histogram-label">${item.releaseYear}</div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch(e) { gamesContainer.innerHTML = '<p style="color:var(--danger-color);">Failed to render graphical chart.</p>'; }
+        }
+
+        async function loadTrendingGames() {
+            hideAllAnalytics();
+            const block = document.getElementById('trendingStatsBlock');
+            const container = document.getElementById('trendingContainer');
+            container.innerHTML = '<p>Loading trending data...</p>';
+            block.style.display = 'block';
+
+            try {
+                const res = await fetch('http://localhost:8080/api/admin/getTrending', { headers: getAuthHeaders() });
+                const data = await res.json();
+                
+                if(!data || data.length === 0) { container.innerHTML = '<p>No trending games found.</p>'; return; }
+
+                container.innerHTML = data.map((item, index) => {
+                    let rankColor = 'var(--accent-glow)';
+                    if(index === 0) rankColor = '#ffd700'; // Gold
+                    else if(index === 1) rankColor = '#c0c0c0'; // Silver
+                    else if(index === 2) rankColor = '#cd7f32'; // Bronze
+
+                    return `
+                        <div class="trending-item">
+                            <div class="rank" style="color: ${rankColor};">#${index + 1}</div>
+                            <div class="name">${item.name}</div>
+                            <div class="count">${item.socialPlayCount.toLocaleString()} mutual plays</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) { container.innerHTML = '<p style="color:var(--danger-color);">Error fetching trending games.</p>'; }
         }
 
         document.getElementById('gameSearchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') searchGames(); });

@@ -1,6 +1,7 @@
 package com.unipi.PlayerHive.repository.users;
 
 import com.unipi.PlayerHive.DTO.games.LibraryGameDTO;
+import com.unipi.PlayerHive.DTO.games.LibraryGameLightDTO;
 import com.unipi.PlayerHive.DTO.users.GamingTwinDTO;
 
 import com.unipi.PlayerHive.DTO.users.friends.FriendDTO;
@@ -79,7 +80,7 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserNeo4j,String> {
             "WITH id, hoursPlayed " +
             "WHERE id IS NOT NULL " +
             "RETURN id, hoursPlayed")
-    List<LibraryGameDTO> deleteUserAndRetrieveLibrary(String userId);
+    List<LibraryGameLightDTO> deleteUserAndRetrieveLibrary(String userId);
 
     // INTERESTING QUERIES ===================================================
 

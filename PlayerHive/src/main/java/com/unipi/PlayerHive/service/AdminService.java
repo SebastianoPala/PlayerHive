@@ -62,15 +62,15 @@ public class AdminService {
                 .toArray(String[]::new);
     }
 
-    double roundNumber(double num){
+    private double roundNumber(double num){
         return ((double) Math.round(num * 100)) / 100;
     }
 
-    double calculateFinalPrice(double price, double discount){
+    private double calculateFinalPrice(double price, double discount){
         return price - (price * discount/100);
     }
 
-    void fixPrices(Game game){
+    private void fixPrices(Game game){
         game.setPrice(roundNumber(game.getPrice()));
 
         double finalPrice = roundNumber(calculateFinalPrice(game.getPrice(), game.getDiscount()));

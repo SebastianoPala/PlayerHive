@@ -1,7 +1,7 @@
 package com.unipi.PlayerHive.utility.batch;
 
 import com.mongodb.bulk.BulkWriteResult;
-import com.unipi.PlayerHive.DTO.games.LibraryGameDTO;
+import com.unipi.PlayerHive.DTO.games.LibraryGameLightDTO;
 import com.unipi.PlayerHive.DTO.reviews.ReviewScoreDTO;
 import com.unipi.PlayerHive.model.game.Game;
 import com.unipi.PlayerHive.repository.ReviewRepository;
@@ -84,7 +84,7 @@ public class GameConsistencyManager {
     public long adjustGameStatsAndRemoveUserNode(String userId){
         long modified = 0;
 
-        List<LibraryGameDTO> targetLibrary = userNeo4jRepository.deleteUserAndRetrieveLibrary(userId);
+        List<LibraryGameLightDTO> targetLibrary = userNeo4jRepository.deleteUserAndRetrieveLibrary(userId);
 
         if(!targetLibrary.isEmpty()){
 
@@ -93,7 +93,7 @@ public class GameConsistencyManager {
                     Game.class
             );
 
-            for (LibraryGameDTO game : targetLibrary){
+            for (LibraryGameLightDTO game : targetLibrary){
                 Query query = new Query(Criteria.where("_id").is(game.getId()));
 
                 Update update = new Update().inc("totalHoursPlayed", -game.getHoursPlayed())

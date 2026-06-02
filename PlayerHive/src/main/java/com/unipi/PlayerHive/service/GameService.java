@@ -27,7 +27,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -192,8 +191,8 @@ public class GameService {
         return gameNeo4jRepository.getGameRecommendations(getAuthenticatedUser().getId(),10);
     }
 
-    public List<TrendingGameDTO> getTrendingGames(){
-        return gameNeo4jRepository.getTrendingGamesAmongFriends(100);
+    public List<TrendingGameDTO> getTrendingGames(int limit, int minSocial){
+        return gameNeo4jRepository.getTrendingGamesAmongFriends(limit, minSocial);
     }
 
     public List<HiddenGemDTO> getHiddenGems(int nicheThreshold){

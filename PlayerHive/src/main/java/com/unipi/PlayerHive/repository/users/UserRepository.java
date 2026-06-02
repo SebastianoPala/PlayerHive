@@ -84,7 +84,7 @@ public interface UserRepository extends MongoRepository<User,String> {
 
     @Aggregation(pipeline = {
             "{ '$match': { '_id': ?0 } }",
-            "{ '$project': { 'reviews': '$reviewIds'   }"
+            "{ '$project': { 'reviews': '$reviewIds' } }"
     })
     OldUserReviewContainerDTO getAllUserReviews(String userId);
 
@@ -147,12 +147,12 @@ public interface UserRepository extends MongoRepository<User,String> {
                     "    ] } " +
                     "} }",
 
-            "{ $match: { warriorRatio: { $gt: 1 } } }",
+            "{ $match: { warriorRatio: { $gt: ?0 } } }",
 
             "{ $sort: { warriorRatio: -1, numReviews: -1 } }",
             "{ $limit: 15 }"
     })
-    List<KeyboardWarriorDTO> getKeyboardWarriors();
+    List<KeyboardWarriorDTO> getKeyboardWarriors(double warriorRatio);
 
     @Aggregation(pipeline = {
             "{ $match: { numGames: { $gt: 0 }} }",

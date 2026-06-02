@@ -9,6 +9,7 @@ import com.unipi.PlayerHive.model.user.UserPrincipal;
 import com.unipi.PlayerHive.repository.users.UserNeo4jRepository;
 import com.unipi.PlayerHive.repository.users.UserRepository;
 import jakarta.annotation.Nonnull;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,6 +38,7 @@ public class AuthService {
         this.encoder = encoder;
     }
 
+    @Transactional
     public void registerUser(@Nonnull @Valid @RequestBody UserRegistrationDTO dto){
 
         userRepository.findLightByUsernameOrEmail(dto.username(), dto.email()).ifPresent(user -> {

@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
@@ -78,8 +79,9 @@ public class AdminController {
 
     // todo unanchored query, find explanation
     @GetMapping("/getTrending")
-    public ResponseEntity<List<TrendingGameDTO>> getTrendingGames(){
-        return ResponseEntity.ok(gameService.getTrendingGames());
+    public ResponseEntity<List<TrendingGameDTO>> getTrendingGames(@RequestParam(defaultValue = "20") @Min(10) int limit,
+                                                                  @RequestParam(defaultValue = "1") @Min(1) int minSocial){
+        return ResponseEntity.ok(gameService.getTrendingGames(limit, minSocial));
     }
 
     @GetMapping("/getGenreStats")
