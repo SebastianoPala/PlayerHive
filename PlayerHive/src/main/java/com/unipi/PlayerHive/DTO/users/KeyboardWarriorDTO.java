@@ -15,8 +15,6 @@ public class KeyboardWarriorDTO {
     private String username;
     private String pfpURL;
 
-    private String role;
-
     private Integer numGames;
     private Integer numReviews;
 

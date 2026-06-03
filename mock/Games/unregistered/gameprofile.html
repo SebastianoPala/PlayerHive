@@ -55,78 +55,44 @@
         .tags-container { display: flex; flex-wrap: wrap; gap: 8px; }
         .tag-badge { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; color: var(--text-primary); border: 1px solid var(--glass-border);}
 
+        /* Carosello Correlati */
+        .category-section { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .category-title { font-size: 1.2rem; font-weight: 600; color: var(--accent-glow); letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        .carousel { display: flex; overflow-x: auto; gap: 20px; padding-bottom: 15px; scroll-behavior: smooth; scroll-snap-type: x mandatory; }
+        .carousel::-webkit-scrollbar { height: 8px; }
+        .carousel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .carousel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+        .carousel-item { scroll-snap-align: start; flex: 0 0 auto; width: 220px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.3s, border-color 0.3s; cursor: pointer; }
+        .carousel-item:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+        .game-cover { width: 100%; height: 120px; object-fit: cover; border-bottom: 1px solid var(--glass-border); }
+        .item-info { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        .item-title { font-size: 1rem; font-weight: 600; line-height: 1.2; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; color: var(--text-primary); }
+        .stat-text { font-size: 0.8rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
+        .stat-highlight { color: var(--text-primary); font-weight: bold; }
+
         aside.glass-sidebar { flex: 1.2; max-width: 550px; display: flex; flex-direction: column; gap: 20px; }
 
-        .stats-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .stat-box {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-        }
+        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-box { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; text-align: center; }
         .stat-value { font-size: 1.8rem; font-weight: bold; color: var(--accent-glow); display: block; text-shadow: 0 0 10px rgba(224, 242, 254, 0.3); }
         .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
 
-        .buy-box {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            padding: 30px;
-            border-radius: 24px;
-            backdrop-filter: blur(16px);
-        }
+        .buy-box { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 30px; border-radius: 24px; backdrop-filter: blur(16px); }
         .price-big { font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; color: #4caf50; }
-        
-        .btn-disabled { 
-            width: 100%; padding: 15px; 
-            background: #333333; color: #7a7a7a; 
-            border: 1px solid #444; border-radius: 12px; 
-            font-weight: bold; cursor: not-allowed; 
-        }
+        .btn-disabled { width: 100%; padding: 15px; background: #333333; color: #7a7a7a; border: 1px solid #444; border-radius: 12px; font-weight: bold; cursor: not-allowed; }
 
-        .reviews-section {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 25px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: hidden;
-        }
-        .reviews-list {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            padding-right: 10px;
-        }
+        .reviews-section { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; flex: 1; display: flex; flex-direction: column; overflow-y: hidden; }
+        .reviews-list { flex: 1; overflow-y: auto; margin-bottom: 15px; padding-right: 10px; }
         .review-item { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 0; }
         .review-user { color: var(--accent-glow); font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
         .review-pfp { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--glass-border); }
         
-        .pagination-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 15px;
-        }
-        .pagination-btn {
-            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border);
-            color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s;
-        }
+        .pagination-controls { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+        .pagination-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border); color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .pagination-btn:not(:disabled):hover { background: rgba(255, 255, 255, 0.2); }
-        .size-select {
-            background: rgba(0, 0, 0, 0.4); color: white; border: 1px solid var(--glass-border);
-            padding: 4px 8px; border-radius: 6px; outline: none;
-        }
+        .size-select { background: rgba(0, 0, 0, 0.4); color: white; border: 1px solid var(--glass-border); padding: 4px 8px; border-radius: 6px; outline: none; }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
@@ -156,7 +122,6 @@
         let currentReviewSize = 5;
         let pfpFiles = [];
 
-        // Caricamento della lista di immagini per i profili delle recensioni dal path specificato
         async function loadPfpList() {
             try {
                 const response = await fetch('../../pfps.txt');
@@ -189,11 +154,8 @@
                 const avgPlaytimeFormatted = (g.averagePlaytime || 0).toFixed(1);
                 const priceFormatted = (g.finalPrice || 0).toFixed(2);
                 
-                // Formattazione Array in badges
                 const genresHtml = (g.genres || []).map(genre => `<span class="tag-badge">${genre}</span>`).join('');
                 const osHtml = (g.supportedOS || []).map(os => `<span class="tag-badge">${os}</span>`).join('');
-                
-                // Formattazione Array Testuali
                 const devs = (g.developers || []).join(', ') || 'N/A';
                 const pubs = (g.publishers || []).join(', ') || 'N/A';
                 const releaseDate = g.releaseDate ? new Date(g.releaseDate).toLocaleDateString() : 'N/A';
@@ -214,7 +176,6 @@
                                 <span class="meta-label">Genres</span>
                                 <div class="tags-container">${genresHtml || 'N/A'}</div>
                             </div>
-                            
                             <div class="meta-item">
                                 <span class="meta-label">Developers</span>
                                 <span class="meta-value">${devs}</span>
@@ -231,10 +192,16 @@
                                 <span class="meta-label">Total Achievements</span>
                                 <span class="meta-value">${g.achievements || 0}</span>
                             </div>
-
                             <div class="meta-item" style="grid-column: 1 / -1; margin-top: 10px;">
                                 <span class="meta-label">Supported OS</span>
                                 <div class="tags-container">${osHtml || 'N/A'}</div>
+                            </div>
+                        </div>
+
+                        <div class="category-section">
+                            <div class="category-title">Users have played also...</div>
+                            <div id="relatedCarousel" class="carousel">
+                                <div style="color:var(--text-secondary); font-size: 0.85rem;">Loading related games...</div>
                             </div>
                         </div>
                     </div>
@@ -265,10 +232,43 @@
                 `;
 
                 loadReviews();
+                loadRelatedGames();
 
             } catch (err) {
                 console.error(err);
                 document.getElementById('mainBody').innerHTML = "<p style='padding:40px; color:#ff6b6b;'>Error loading game data.</p>";
+            }
+        }
+
+        async function loadRelatedGames() {
+            const container = document.getElementById('relatedCarousel');
+            if (!container) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/${gameId}/getRelatedGames`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div style="color:var(--text-secondary); font-size: 0.85rem;">No related games found.</div>';
+                    return;
+                }
+                
+                container.innerHTML = data.map(g => {
+                    const statsHtml = `<span class="stat-text">Shared Players: <span class="stat-highlight">${(g.sharedPlayers || 0).toLocaleString()}</span></span>`;
+                    return `
+                        <div class="carousel-item" onclick="localStorage.setItem('selectedGameId', '${g.gameId || g.id}'); window.location.reload();">
+                            <img src="${g.image || g.imageURL || 'https://via.placeholder.com/280x140?text=No+Cover'}" class="game-cover" alt="${g.name}">
+                            <div class="item-info">
+                                <div class="item-title">${g.name}</div>
+                                <div style="display:flex; flex-direction:column; gap:4px; margin-bottom: 5px;">
+                                    ${statsHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) {
+                container.innerHTML = '<div style="color:var(--danger-color); font-size: 0.85rem;">Failed to load related games.</div>';
             }
         }
 
@@ -287,8 +287,6 @@
                     listEl.innerHTML = data.reviews.map(r => {
                         const scoreFormatted = (r.score || 0).toFixed(1);
                         const dateFormatted = r.timestamp ? new Date(r.timestamp).toLocaleDateString() : '';
-                        
-                        // Generazione dinamica della foto profilo con il trick del pfps.txt
                         const pfpPath = getUserPfpPath(r.username);
                         
                         return `
@@ -344,9 +342,8 @@
             loadReviews();
         };
 
-        // Bootstrap App
         window.onload = async () => {
-            await loadPfpList(); // Carica la lista foto profilo prima di renderizzare
+            await loadPfpList(); 
             if(gameId) loadGame();
         };
     </script>

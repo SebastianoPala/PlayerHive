@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>playerHive | Discover</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #2a0845, #1a1a24, #0b0c10);
+            --glass-bg: rgba(20, 22, 28, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --accent-glow: #e0f2fe; 
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --danger-color: #ff6b6b;
+            --success-color: #4caf50;
+            --font-main: 'system-ui', -apple-system, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Overlay Login */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-gradient);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+        }
+        .login-box {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            padding: 40px; border-radius: 24px; text-align: center; width: 350px;
+            backdrop-filter: blur(16px);
+        }
+        .auth-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            color: white; padding: 12px 15px; border-radius: 12px; outline: none; margin: 20px 0;
+        }
+        .auth-btn {
+            width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border);
+            color: white; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .auth-btn:hover { background: rgba(255,255,255,0.2); }
+
+        .app-wrapper { width: 100%; max-width: 1800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+        header.glass-nav {
+            height: 80px;
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; display: flex;
+            align-items: center; justify-content: space-between; padding: 0 40px;
+            flex-shrink: 0;
+        }
+        .logo { font-size: 1.6rem; font-weight: 300; letter-spacing: 2px; display: flex; align-items: center; }
+        .logo b { font-weight: 700; }
+        .logo::after { content: ""; width: 8px; height: 8px; background: var(--accent-glow); border-radius: 50%; margin-left: 8px; box-shadow: 0 0 10px var(--accent-glow); }
+
+        .auth-actions { display: flex; align-items: center; gap: 15px; }
+        .user-pfp-small { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--glass-border); object-fit: cover; }
+        .login-btn { background: transparent; border: 1px solid var(--glass-border); color: white; padding: 8px 24px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .login-btn:hover { background: rgba(255,107,107,0.2); border-color: var(--danger-color); color: var(--danger-color); }
+
+        main.glass-content {
+            flex: 1;
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 30px;
+        }
+
+        .profile-tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary); padding: 12px 30px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1.1rem; transition: 0.3s;
+        }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .tab-btn.active { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-glow); color: var(--accent-glow); }
+
+        .category-section { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .category-title { font-size: 1.4rem; font-weight: 600; color: var(--accent-glow); letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding-bottom: 15px;
+            scroll-behavior: smooth;
+            scroll-snap-type: x mandatory;
+        }
+        .carousel::-webkit-scrollbar { height: 8px; }
+        .carousel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .carousel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        .carousel-item {
+            scroll-snap-align: start; flex: 0 0 auto; width: 280px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+            border-radius: 16px; display: flex; flex-direction: column; overflow: hidden;
+            transition: transform 0.3s, border-color 0.3s; cursor: pointer;
+        }
+        .carousel-item:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+        
+        .game-cover { width: 100%; height: 140px; object-fit: cover; border-bottom: 1px solid var(--glass-border); }
+        .item-info { padding: 15px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .item-title { font-size: 1.1rem; font-weight: 600; line-height: 1.2; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        
+        .price-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .price-group { display: flex; align-items: center; gap: 8px; }
+        .discount-badge { background: var(--success-color); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+        .old-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.85rem; }
+        .final-price { font-weight: bold; color: var(--accent-glow); font-size: 1.1rem; }
+        .free-text { color: var(--success-color); font-weight: bold; }
+        
+        .stat-text { font-size: 0.85rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
+        .stat-highlight { color: var(--text-primary); font-weight: bold; }
+
+        .user-header { display: flex; align-items: center; gap: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; }
+        .user-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); }
+        .user-name { font-size: 1.1rem; font-weight: bold; color: var(--accent-glow); }
+
+        .loading-text { text-align: center; color: var(--text-secondary); padding: 20px; font-style: italic; }
+        .error-text { text-align: center; color: var(--danger-color); padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay">
+        <div class="login-box">
+            <div class="logo" style="justify-content: center; margin-bottom: 20px;">player<b>Hive</b></div>
+            <h3>Identify Yourself</h3>
+            <p style="font-size: 0.8rem; color: var(--text-secondary);">Enter username to access the Hub</p>
+            <input type="text" id="usernameInput" class="auth-input" placeholder="Username...">
+            <button class="auth-btn" onclick="attemptAutoLogin()">Login</button>
+            <div id="loginError" style="color: var(--danger-color); margin-top: 10px; font-size: 0.85rem;"></div>
+        </div>
+    </div>
+
+    <div class="app-wrapper">
+        <header class="glass-nav">
+            <div class="logo">player<b>Hive</b></div>
+            <div class="auth-actions">
+                <img id="navPfp" src="" class="user-pfp-small" style="display:none;" alt="User">
+                <span id="navUsername" style="font-weight: bold; margin-right: 10px;"></span>
+                <button class="login-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <main class="glass-content">
+            <div class="profile-tabs">
+                <button id="btnGames" class="tab-btn active" onclick="switchTab('games')">Games Discovery</button>
+                <button id="btnUsers" class="tab-btn" onclick="switchTab('users')">Community Leaders</button>
+                <button id="btnRecs" class="tab-btn" onclick="switchTab('recs')">Your Recommendations</button>
+            </div>
+
+            <div id="gamesSection">
+                <div class="category-section">
+                    <div class="category-title">Top Rated Games</div>
+                    <div id="topGamesCarousel" class="carousel"><div class="loading-text">Loading top games...</div></div>
+                </div>
+                <div class="category-section">
+                    <div class="category-title">Best Deals (Rating to Price Ratio)</div>
+                    <div id="dealsCarousel" class="carousel"><div class="loading-text">Loading best deals...</div></div>
+                </div>
+                <div class="category-section">
+                    <div class="category-title">Best Investments (Playtime to Price Ratio)</div>
+                    <div id="investmentsCarousel" class="carousel"><div class="loading-text">Loading investments...</div></div>
+                </div>
+                <div class="category-section">
+                    <div class="category-title">Most Discussed (Recent Review Activity)</div>
+                    <div id="discussedCarousel" class="carousel"><div class="loading-text">Loading trending discussions...</div></div>
+                </div>
+            </div>
+
+            <div id="usersSection" style="display: none;">
+                <div class="category-section">
+                    <div class="category-title">Hardcore Gamers (Playtime per Game)</div>
+                    <div id="hardcoreCarousel" class="carousel"><div class="loading-text">Loading hardcore gamers...</div></div>
+                </div>
+                <div class="category-section">
+                    <div class="category-title">Keyboard Warriors (Review to Game Ratio)</div>
+                    <div id="warriorsCarousel" class="carousel"><div class="loading-text">Loading keyboard warriors...</div></div>
+                </div>
+                <div class="category-section">
+                    <div class="category-title">Most Active Gamers (Games vs Account Age)</div>
+                    <div id="activeCarousel" class="carousel"><div class="loading-text">Loading active gamers...</div></div>
+                </div>
+            </div>
+
+            <div id="recsSection" style="display: none;">
+                <div class="category-section">
+                    <div class="category-title">Recommended by Friends (Popular in your network)</div>
+                    <div id="friendRecsCarousel" class="carousel"><div class="loading-text">Loading recommendations...</div></div>
+                </div>
+                
+                <div class="category-section">
+                    <div class="category-title">Hidden Gems (Popular among friends, niche globally)</div>
+                    <div id="hiddenGemsCarousel" class="carousel"><div class="loading-text">Loading hidden gems...</div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let pfpFiles = [];
+
+        window.onload = async () => {
+            await loadPfpList();
+            if (!localStorage.getItem('accessToken')) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            } else {
+                document.getElementById('loginOverlay').style.display = 'none';
+                setupUserHeader();
+                loadAllGames();
+                loadAllUsers();
+                loadRecommendations(); // Load Recs on startup as well
+            }
+        };
+
+        // --- AUTH & PFP ---
+        function getHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+            };
+        }
+
+        async function attemptAutoLogin() {
+            const user = document.getElementById('usernameInput').value.trim();
+            if (!user) return;
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: `${user}@hotmail.com`, password: user })
+                });
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('loggedInUser', user);
+                
+                document.getElementById('loginOverlay').style.display = 'none';
+                setupUserHeader();
+                loadAllGames();
+                loadAllUsers();
+                loadRecommendations();
+            } catch (err) {
+                document.getElementById('loginError').innerText = "Authentication failed.";
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('loggedInUser');
+            window.location.reload();
+        }
+
+        async function loadPfpList() {
+            try {
+                const response = await fetch('../../pfps.txt');
+                if (response.ok) {
+                    const text = await response.text();
+                    pfpFiles = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                }
+            } catch (err) { console.warn("pfps.txt not found."); }
+        }
+
+        function getUserPfpPath(username) {
+            const basePath = '/home/sebastiano_pala/Pictures/Sfondi/';
+            if (pfpFiles.length === 0 || !username) return 'https://via.placeholder.com/150/1a1a24/e0f2fe?text=U';
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            return basePath + pfpFiles[Math.abs(hash) % pfpFiles.length];
+        }
+
+        function setupUserHeader() {
+            const user = localStorage.getItem('loggedInUser');
+            if (user) {
+                document.getElementById('navUsername').innerText = user;
+                const pfpImg = document.getElementById('navPfp');
+                pfpImg.src = getUserPfpPath(user);
+                pfpImg.style.display = 'block';
+            }
+        }
+
+        // --- NAVIGATION ---
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('gamesSection').style.display = 'none';
+            document.getElementById('usersSection').style.display = 'none';
+            document.getElementById('recsSection').style.display = 'none';
+
+            if (tab === 'games') {
+                document.getElementById('btnGames').classList.add('active');
+                document.getElementById('gamesSection').style.display = 'block';
+            } else if (tab === 'users') {
+                document.getElementById('btnUsers').classList.add('active');
+                document.getElementById('usersSection').style.display = 'block';
+            } else if (tab === 'recs') {
+                document.getElementById('btnRecs').classList.add('active');
+                document.getElementById('recsSection').style.display = 'block';
+            }
+        }
+
+        // --- FETCH GAMES ---
+        async function loadAllGames() {
+            fetchGameCategory('/api/games/getTopGames', 'topGamesCarousel', 'rating');
+            fetchGameCategory('/api/games/getDeals', 'dealsCarousel', 'rating');
+            fetchGameCategory('/api/games/getInvestments', 'investmentsCarousel', 'playtime');
+            fetchGameCategory('/api/games/getDiscussed', 'discussedCarousel', 'rating');
+        }
+
+        async function fetchGameCategory(endpoint, containerId, metricType) {
+            const container = document.getElementById(containerId);
+            try {
+                const res = await fetch(`http://localhost:8080${endpoint}`, { headers: getHeaders() });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                if (!data || data.length === 0) { container.innerHTML = '<div class="loading-text">No games found.</div>'; return; }
+                container.innerHTML = buildGameCards(data, metricType);
+            } catch(e) { container.innerHTML = '<div class="error-text">Failed to load data.</div>'; }
+        }
+
+        // --- FETCH USERS ---
+        async function loadAllUsers() {
+            fetchUserCategory('/api/user/getHardcoreGamers', 'hardcoreCarousel', 'hardcore');
+            fetchUserCategory('/api/user/getKeyboardWarriors', 'warriorsCarousel', 'warriors');
+            fetchUserCategory('/api/user/getMostActiveGamers', 'activeCarousel', 'active');
+        }
+
+        async function fetchUserCategory(endpoint, containerId, userType) {
+            const container = document.getElementById(containerId);
+            try {
+                const res = await fetch(`http://localhost:8080${endpoint}`, { headers: getHeaders() });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                if (!data || data.length === 0) { container.innerHTML = '<div class="loading-text">No users found.</div>'; return; }
+
+                container.innerHTML = data.map(u => {
+                    const pfp = getUserPfpPath(u.username);
+                    let statsHtml = '';
+
+                    if (userType === 'hardcore') {
+                        statsHtml = `
+                            <span class="stat-text">Total Hours: <span class="stat-highlight">${(u.totalHours || 0).toLocaleString(undefined, {maximumFractionDigits:1})} hrs</span></span>
+                            <span class="stat-text">Library Size: <span class="stat-highlight">${u.numGames || 0} games</span></span>
+                            <span class="stat-text">Avg per Game: <span class="stat-highlight" style="color:var(--accent-glow);">${(u.avgHoursPerGame || 0).toFixed(1)} hrs</span></span>
+                        `;
+                    } else if (userType === 'warriors') {
+                        statsHtml = `
+                            <span class="stat-text">Library Size: <span class="stat-highlight">${u.numGames || 0} games</span></span>
+                            <span class="stat-text">Total Reviews: <span class="stat-highlight">${u.numReviews || 0}</span></span>
+                            <span class="stat-text">Warrior Ratio: <span class="stat-highlight" style="color:var(--danger-color);">${(u.warriorRatio || 0).toFixed(2)}</span></span>
+                        `;
+                    } else if (userType === 'active') {
+                        const dateStr = u.registrationDate ? new Date(u.registrationDate).toLocaleDateString() : 'N/A';
+                        statsHtml = `
+                            <span class="stat-text">Library Size: <span class="stat-highlight">${u.numGames || 0} games</span></span>
+                            <span class="stat-text">Joined On: <span class="stat-highlight">${dateStr}</span></span>
+                            <span class="stat-text" style="color:var(--success-color); margin-top:5px;">High Acquisition Rate</span>
+                        `;
+                    }
+
+                    return `
+                        <div class="carousel-item" onclick="localStorage.setItem('selectedUserId', '${u.id}'); window.location.href='userprofile.html'">
+                            <div class="item-info">
+                                <div class="user-header">
+                                    <img src="${pfp}" class="user-avatar" alt="${u.username}">
+                                    <div class="user-name">${u.username}</div>
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    ${statsHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) { container.innerHTML = '<div class="error-text">Failed to load data.</div>'; }
+        }
+
+        // --- FETCH RECOMMENDATIONS ---
+        async function loadRecommendations() {
+            // Friend Recommendations
+            const recsContainer = document.getElementById('friendRecsCarousel');
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/getRecommendations`, { headers: getHeaders() });
+                const data = await res.json();
+                if (!data || data.length === 0) { recsContainer.innerHTML = '<div class="loading-text">No recommendations available.</div>'; }
+                else { recsContainer.innerHTML = buildRecCards(data, 'friendsWhoPlay'); }
+            } catch(e) { recsContainer.innerHTML = '<div class="error-text">Failed to load recommendations.</div>'; }
+
+            // Hidden Gems
+            const gemsContainer = document.getElementById('hiddenGemsCarousel');
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/getHiddenGems`, { headers: getHeaders() });
+                const data = await res.json();
+                if (!data || data.length === 0) { gemsContainer.innerHTML = '<div class="loading-text">No hidden gems found.</div>'; }
+                else { gemsContainer.innerHTML = buildRecCards(data, 'hiddenGems'); }
+            } catch(e) { gemsContainer.innerHTML = '<div class="error-text">Failed to load hidden gems.</div>'; }
+        }
+
+        // --- UI BUILDER UTILS ---
+        function buildGameCards(data, metricType) {
+            return data.map(g => {
+                let metricHtml = '';
+                if (metricType === 'rating') {
+                    metricHtml = `<span class="stat-text">Avg Rating: <span class="stat-highlight">★ ${(g.avgRating || 0).toFixed(1)}</span></span>`;
+                } else if (metricType === 'playtime') {
+                    metricHtml = `
+                        <span class="stat-text">Avg Playtime: <span class="stat-highlight">${(g.avgTimePlayed || 0).toFixed(1)} hrs</span></span>
+                        <span class="stat-text">Players: <span class="stat-highlight">${(g.numPlayers || 0).toLocaleString()}</span></span>
+                    `;
+                }
+
+                let priceHtml = '';
+                if (g.finalPrice === 0) priceHtml = `<span class="free-text">Free To Play</span>`;
+                else if (g.discount > 0) {
+                    priceHtml = `
+                        <div class="price-group">
+                            <span class="discount-badge">-${g.discount}%</span>
+                            <span class="old-price">€${(g.price || 0).toFixed(2)}</span>
+                        </div>
+                        <span class="final-price">€${(g.finalPrice || 0).toFixed(2)}</span>
+                    `;
+                } else {
+                    priceHtml = `<span class="final-price">€${(g.finalPrice || g.price || 0).toFixed(2)}</span>`;
+                }
+
+                return `
+                    <div class="carousel-item" onclick="localStorage.setItem('selectedGameId', '${g.id}'); window.location.href='gameprofile.html'">
+                        <img src="${g.imageURL || 'https://via.placeholder.com/280x140?text=No+Cover'}" class="game-cover" alt="${g.name}">
+                        <div class="item-info">
+                            <div class="item-title">${g.name}</div>
+                            <div style="display:flex; flex-direction:column; gap:4px; margin-bottom: 5px;">${metricHtml}</div>
+                            <div class="price-row">${priceHtml}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function buildRecCards(data, type) {
+            return data.map(g => {
+                let statsHtml = '';
+                if (type === 'friendsWhoPlay') {
+                    statsHtml = `<span class="stat-text">Friends playing: <span class="stat-highlight">${g.friendsWhoPlay}</span></span>`;
+                } else if (type === 'hiddenGems') {
+                    statsHtml = `
+                        <span class="stat-text">Friends playing: <span class="stat-highlight">${g.friendsPlaying}</span></span>
+                        <span class="stat-text">Global Popularity: <span class="stat-highlight">${g.globalPopularity}</span></span>
+                    `;
+                }
+
+                return `
+                    <div class="carousel-item" onclick="localStorage.setItem('selectedGameId', '${g.gameId || g.id}'); window.location.href='gameprofile.html'">
+                        <img src="${g.image || 'https://via.placeholder.com/280x140?text=No+Cover'}" class="game-cover" alt="${g.name}">
+                        <div class="item-info">
+                            <div class="item-title">${g.name}</div>
+                            <div style="display:flex; flex-direction:column; gap:4px; margin-bottom: 5px;">
+                                ${statsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

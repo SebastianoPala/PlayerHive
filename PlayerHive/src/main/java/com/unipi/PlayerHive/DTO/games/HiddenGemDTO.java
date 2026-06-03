@@ -7,7 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class HiddenGemDTO {
 
+    private String gameId;
     private String name;
+    private String image;
     private int friendsPlaying;
     private int globalPopularity;
 

@@ -42,19 +42,20 @@ Utenti (User Controller) - Tutte le GET tranne le eccezioni:
 Giochi (Game Controller):
 * GET /api/games/getRecommendations 
 * GET /api/games/getHiddenGems 
-* POST /api/games/addReview/{gameId} 		
-* DELETE /api/games/deleteReview/{reviewId} 
+* GET /api/games/getRelatedGames
+* POST /api/games/addReview/{gameId} 		FATTO
+* DELETE /api/games/deleteReview/{reviewId} 	FATTO
 
 Utenti - Consultazione Profilo Personale (User Controller):
-* GET /api/user/MyProfile 	FATTO	sistema bottone goofy e sistema embedding friend requests, nel senso: restituisci subito le prime 10?
+* GET /api/user/MyProfile 	FATTO	sistema bottone goofy
 * GET /api/user/MyLibrary 	FATTO
 * GET /api/user/MyFriends 	FATTO
 * GET /api/user/MyReviews 	FATTO
 
 Utenti - Funzionalità Social e Raccomandazioni:
 * GET /api/user/friendRequests 		FATTO
-* GET /api/user/friendRecommendations 
-* GET /api/user/gamingTwins 
+* GET /api/user/friendRecommendations 	FATTO
+* GET /api/user/gamingTwins 		FATTO
 
 Utenti - Operazioni (POST, DELETE):
 * POST /api/user/editLibrary 				FATTO

@@ -2,7 +2,7 @@ package com.unipi.PlayerHive.repository.games;
 
 import com.unipi.PlayerHive.DTO.games.HiddenGemDTO;
 import com.unipi.PlayerHive.DTO.games.PlaytimeAchievementsDTO;
-import com.unipi.PlayerHive.DTO.games.FriendMagnetDTO;
+import com.unipi.PlayerHive.DTO.games.RelatedGameDTO;
 import com.unipi.PlayerHive.DTO.games.GameRecommendationDTO;
 import com.unipi.PlayerHive.DTO.games.TrendingGameDTO;
 import com.unipi.PlayerHive.DTO.users.GameOwnerDTO;
@@ -35,7 +35,8 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
     //  2. The "Game Recommendation" (Item-Based Collaborative Filtering)
     @Query("MATCH (u:User {id: $userId})-[:FRIENDS_WITH]->(friend:User)-[:PLAYED]->(recGame:Game) " +
             "WHERE NOT (u)-[:PLAYED]->(recGame) " +
-            "RETURN recGame.name AS name, count(friend) AS friendsWhoPlay " +
+            "RETURN recGame.id as gameId, recGame.name AS name, recGame.image as image, " +
+            " count(friend) AS friendsWhoPlay " +
             "ORDER BY friendsWhoPlay DESC " +
             "LIMIT $limit")
     List<GameRecommendationDTO> getGameRecommendations(String userId, int limit);
@@ -65,17 +66,18 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
             "MATCH (game)<-[:PLAYED]-(globalPlayer) " +
             "WITH game, friendsPlaying, count(globalPlayer) AS globalPopularity " +
             "WHERE globalPopularity < $nicheThreshold " +
-            "RETURN game.name AS name, friendsPlaying AS friendsPlaying, globalPopularity AS globalPopularity " +
+            "RETURN game.id as gameId, game.name AS name, game.image as image, friendsPlaying AS friendsPlaying, globalPopularity AS globalPopularity " +
             "ORDER BY friendsPlaying DESC, globalPopularity ASC " +
-            "LIMIT 10")
+            "LIMIT 10") // todo better hardcoded or variable?
     List<HiddenGemDTO> getHiddenGems(String userId, int nicheThreshold);
 
     @Query("MATCH (g:Game {id: $gameId})<-[:PLAYED]-(u:User)-[:PLAYED]->(other:Game) " +
         "WHERE g <> other " +
-        "RETURN other.name AS name, count(DISTINCT u) AS sharedPlayers " +
+        "RETURN other.id as gameId, other.name AS name, other.image as image, count(DISTINCT u) AS sharedPlayers " +
+        "WHERE sharedPlayers >= $minShared" +
         "ORDER BY sharedPlayers DESC " +
-        "LIMIT $limit")
-    List<FriendMagnetDTO> getRelatedGames(String gameId, int limit);
+        "LIMIT $limit") // todo better hardcoded or variable?
+    List<RelatedGameDTO> getRelatedGames(String gameId, int minShared, int limit);
 
 
 }

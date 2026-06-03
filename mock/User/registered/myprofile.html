@@ -97,7 +97,6 @@
         .dynamic-window { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 20px; }
         .sub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
 
-        /* Componenti grafici interni alle finestre */
         .lib-card, .friend-item, .req-item {
             background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
             border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; position: relative;
@@ -117,12 +116,10 @@
         .mini-search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
         .mini-search-bar input { flex: 1; padding: 10px 15px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; }
 
-        /* Sidebar Destra Stats */
-        aside.glass-sidebar { flex: 1; max-width: 300px; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+        aside.glass-sidebar { flex: 1; max-width: 300px; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;}
         .stat-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; }
         .stat-value { font-size: 2rem; font-weight: 700; color: var(--accent-glow); }
 
-        /* Finestre Modali Overlay */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);
             backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000;
@@ -192,6 +189,7 @@
                     <button id="btnFriends" class="tab-btn" onclick="switchTab('friends')">My Friends</button>
                     <button id="btnRequests" class="tab-btn" onclick="switchTab('requests')">Friend Requests <span id="reqBadge" style="color:var(--danger-color)"></span></button>
                     <button id="btnReviews" class="tab-btn" onclick="switchTab('reviews')">My Reviews</button>
+                    <button id="btnRecommendations" class="tab-btn" onclick="switchTab('recommendations')">My Recommendations</button>
                 </div>
 
                 <div id="dynamicWindow" class="dynamic-window" style="display: none;">
@@ -199,7 +197,7 @@
                     <div id="windowTopArea"></div> 
                     <div id="windowContent"></div>
                     
-                    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+                    <div id="paginationArea" style="display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
                         <button id="subPrevBtn" class="action-btn" onclick="changeSubPage(-1)">Previous</button>
                         <span id="subPageDisplay" style="color: var(--text-secondary); font-size: 0.9rem; align-self: center;">Page 0</span>
                         <button id="subNextBtn" class="action-btn" onclick="changeSubPage(1)">Next</button>
@@ -212,6 +210,13 @@
                 <div class="stat-card"><span id="statGames" class="stat-value">0</span><span style="font-size: 0.8rem;">Games Owned</span></div>
                 <div class="stat-card"><span id="statHours" class="stat-value">0</span><span style="font-size: 0.8rem;">Hours Played</span></div>
                 <div class="stat-card"><span id="statFriends" class="stat-value">0</span><span style="font-size: 0.8rem;">Friends</span></div>
+                
+                <div id="sidebarPendingBlock">
+                    <div style="font-weight: bold; color: var(--text-secondary); letter-spacing: 1px; margin-top: 20px;">PENDING REQUESTS</div>
+                    <div id="sidebarRequests" style="display: flex; flex-direction: column; gap: 10px;">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">No pending requests.</span>
+                    </div>
+                </div>
             </aside>
         </div>
     </div>
@@ -261,7 +266,6 @@
             }
         };
 
-        // Caricamento asincrono iniziale dei percorsi locali da pfps.txt
         async function loadPfpList() {
             try {
                 const response = await fetch('../../pfps.txt');
@@ -272,7 +276,6 @@
             } catch (err) { console.error("pfps.txt non trovato."); }
         }
 
-        // Algoritmo di hashing deterministico globale (Uguale a prima)
         function getUserPfpPath(username) {
             const basePath = '/home/sebastiano_pala/Pictures/Sfondi/';
             if (pfpFiles.length === 0 || !username) return 'https://via.placeholder.com/150/1a1a24/e0f2fe?text=U';
@@ -312,7 +315,6 @@
             window.location.reload();
         }
 
-        // Recupero Info Profilo Personale (/api/user/MyProfile)
         async function fetchMyProfile() {
             try {
                 const res = await fetch('http://localhost:8080/api/user/MyProfile', { headers: getHeaders() });
@@ -323,20 +325,56 @@
                 document.getElementById('myRole').innerText = profile.role;
                 document.getElementById('myEmail').innerText = profile.email;
                 document.getElementById('myRegDate').innerText = `Member since ${new Date(profile.registrationDate).toLocaleDateString()}`;
-                document.getElementById('myBirthDate').innerText = `Birthday: ${new Date(profile.registrationDate).toLocaleDateString()}`;
-    
+                document.getElementById('myBirthDate').innerText = `Birthday: ${profile.birthdate ? new Date(profile.birthdate).toLocaleDateString() : '---'}`;
                 
                 document.getElementById('statGames').innerText = profile.numGames || 0;
                 document.getElementById('statHours').innerText = (profile.hoursPlayed || 0).toFixed(1);
                 document.getElementById('statFriends').innerText = profile.friends || 0;
 
-                // Gestione robusta del contatore richieste di amicizia
-                const reqNum = parseInt(profile.requestsNum) || 0;
+                document.getElementById('myAvatar').src = getUserPfpPath(profile.username);
+
+                // Effettuiamo un refresh dinamico della sidebar in fase di avvio
+                refreshSidebarRequests();
+
+            } catch (err) { console.error(err); }
+        }
+
+        async function refreshSidebarRequests() {
+            const sidebarReq = document.getElementById('sidebarRequests');
+            try {
+                const res = await fetch(`http://localhost:8080/api/user/friendRequests?page=0&size=10`, { headers: getHeaders() });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                // Aggiorniamo il counter del badge nel tasto
+                const reqNum = parseInt(data.requestsNum) || 0;
                 document.getElementById('reqBadge').innerText = reqNum > 0 ? `(${reqNum})` : '';
 
-                // Foto profilo dell'account loggato presa dal percorso locale richiesto
-                document.getElementById('myAvatar').src = getUserPfpPath(profile.username);
-            } catch (err) { console.error(err); }
+                sidebarReq.innerHTML = '';
+                const items = data.friendRequests || [];
+                
+                if (items.length > 0) {
+                    items.forEach(r => {
+                        sidebarReq.innerHTML += `
+                            <div class="req-item" style="padding: 10px;" id="sidebar-req-${r.userId}">
+                                <div class="friend-info" style="gap: 10px;">
+                                    <img src="${getUserPfpPath(r.username)}" alt="${r.username}" style="width: 35px; height: 35px;">
+                                    <div>
+                                        <div style="font-weight:bold; font-size: 0.85rem;">${r.username}</div>
+                                    </div>
+                                </div>
+                                <div class="req-actions" style="margin-top: 5px;">
+                                    <button class="action-btn success" onclick="handleRequest('${r.userId}', 'approve', 'POST')">✓</button>
+                                    <button class="action-btn danger" onclick="handleRequest('${r.userId}', 'deny', 'DELETE')">✕</button>
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    sidebarReq.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-secondary);">No pending requests.</span>';
+                }
+            } catch (err) {
+                sidebarReq.innerHTML = '<span style="font-size: 0.8rem; color: var(--danger-color);">Failed to load requests.</span>';
+            }
         }
 
         async function switchTab(tabName) {
@@ -347,7 +385,73 @@
             
             document.getElementById('dynamicWindow').style.display = 'flex';
             document.getElementById('windowTopArea').innerHTML = ''; 
-            await fetchTabContent();
+            
+            // Gestione visibilità Sidebar
+            const sidebarBlock = document.getElementById('sidebarPendingBlock');
+            if (tabName === 'requests') {
+                sidebarBlock.style.display = 'none';
+            } else {
+                sidebarBlock.style.display = 'block';
+                refreshSidebarRequests();
+            }
+
+            if(tabName === 'recommendations') {
+                renderRecommendationsTab();
+            } else {
+                document.getElementById('paginationArea').style.display = 'flex';
+                await fetchTabContent();
+            }
+        }
+
+        function renderRecommendationsTab() {
+            document.getElementById('windowTitle').innerText = "Discover Users";
+            document.getElementById('paginationArea').style.display = 'none'; 
+            
+            document.getElementById('windowTopArea').innerHTML = `
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
+                    <button class="action-btn" onclick="loadRecommendations('friendRecommendations')">Friend Recommendations</button>
+                    <button class="action-btn" onclick="loadRecommendations('gamingTwins')">Gaming Twins</button>
+                </div>
+            `;
+            document.getElementById('windowContent').innerHTML = '<p style="text-align:center; color: var(--text-secondary);">Select a recommendation type above.</p>';
+        }
+
+        async function loadRecommendations(type) {
+            const content = document.getElementById('windowContent');
+            content.innerHTML = '<p style="text-align:center;">Fetching recommendations...</p>';
+            try {
+                const res = await fetch(`http://localhost:8080/api/user/${type}`, { headers: getHeaders() });
+                if(!res.ok) throw new Error();
+                const data = await res.json();
+                
+                if(!data || data.length === 0) {
+                    content.innerHTML = '<p style="text-align:center; color: var(--text-secondary);">No recommendations found.</p>';
+                    return;
+                }
+
+                let html = '<div class="sub-grid">';
+                data.forEach(u => {
+                    let detailText = type === 'friendRecommendations' 
+                        ? `${u.mutualFriendsCount} mutual friends`
+                        : `Similarity: ${(u.jaccardSimilarity * 100).toFixed(1)}%`;
+
+                    html += `
+                        <div class="friend-item" style="flex-direction: column; align-items: stretch;">
+                            <div class="friend-info">
+                                <img src="${getUserPfpPath(u.username)}" alt="${u.username}">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span>${u.username}</span>
+                                    <span style="font-size: 0.75rem; color: var(--accent-glow);">${detailText}</span>
+                                </div>
+                            </div>
+                            <button id="sendReqBtn-${u.userId}" class="action-btn" onclick="sendFriendRequest('${u.userId}')" style="margin-top: 10px;">Send Request</button>
+                        </div>`;
+                });
+                html += '</div>';
+                content.innerHTML = html;
+            } catch(e) {
+                content.innerHTML = '<p style="color:var(--danger-color); text-align:center;">Failed to load recommendations.</p>';
+            }
         }
 
         async function fetchTabContent() {
@@ -374,7 +478,6 @@
 
         function changeSubPage(dir) { currentSubPage += dir; fetchTabContent(); }
 
-        // RENDERING DELLE FINESTRE DENTRO IL TAB CORRENTE
         function renderTabWindow(data) {
             const content = document.getElementById('windowContent');
             const topArea = document.getElementById('windowTopArea');
@@ -384,7 +487,6 @@
             document.getElementById('subPrevBtn').disabled = (currentSubPage <= 0);
             document.getElementById('subNextBtn').disabled = data.lastPage;
 
-            // 1. LIBRERIA PERSONALE CON TASTO EDIT
             if (currentTab === 'library') {
                 document.getElementById('windowTitle').innerText = "My Game Library";
                 const items = data.library || [];
@@ -404,7 +506,6 @@
                 content.appendChild(grid);
             } 
             
-            // 2. LISTA AMICI CON RIMOZIONE E BARRA DI RICERCA UTENTI INTERNA (SIZE 4)
             else if (currentTab === 'friends') {
                 document.getElementById('windowTitle').innerText = "My Hive Friends";
                 
@@ -416,7 +517,6 @@
                         </div>
                         <div id="searchResultsArea"></div>
                     `;
-                    // Listener per l'invio sulla mini-barra
                     document.getElementById('friendSearchQuery').addEventListener('keypress', (ev) => {
                         if(ev.key === 'Enter') searchUsersToFriend();
                     });
@@ -439,9 +539,13 @@
                 content.appendChild(grid);
             } 
             
-            // 3. RICHIESTE DI AMICIZIA CON TASTO ACCETTA / RIFIUTA
             else if (currentTab === 'requests') {
                 document.getElementById('windowTitle').innerText = "Incoming Friend Requests";
+                
+                // Aggiorniamo il counter del badge nel tasto dalla risposta paginata
+                const reqNum = parseInt(data.requestsNum) || 0;
+                document.getElementById('reqBadge').innerText = reqNum > 0 ? `(${reqNum})` : '';
+
                 const items = data.friendRequests || [];
                 if(items.length === 0) { content.innerHTML = '<p>No pending friend requests.</p>'; return; }
 
@@ -465,7 +569,6 @@
                 content.appendChild(list);
             }
 
-            // 4. LE MIE RECENSIONI COMPRENSIVE DI COPERTINA GIOCO E NOME (Endpoint modificato)
             else if (currentTab === 'reviews') {
                 document.getElementById('windowTitle').innerText = "My Posted Reviews";
                 const items = data.reviews || [];
@@ -491,9 +594,6 @@
             }
         }
 
-        // --- MICRO LOGICA INTERAZIONI FRONTIERA ---
-
-        // Ricerca Utenti da dentro la finestra Friends (Dimensione Paginata Ridotta a 4)
         async function searchUsersToFriend() {
             const query = document.getElementById('friendSearchQuery').value.trim();
             if(!query) return;
@@ -537,7 +637,6 @@
             } catch(e) { alert("Network Error."); }
         }
 
-        // Rimozione Amico Diretto
         async function removeFriend(friendId) {
             if(!confirm("Are you sure you want to remove this friend?")) return;
             try {
@@ -549,29 +648,24 @@
             } catch(e) { alert("An error occurred."); }
         }
 
-        // Gestione Richiesta d'Amicizia Ricevuta (Accetta/Rifiuta)
         async function handleRequest(targetId, action, method) {
             const url = `http://localhost:8080/api/user/${action}FriendRequest/${targetId}`;
             try {
                 const res = await fetch(url, { method: method, headers: getHeaders() });
                 if(res.ok) {
-                    const itemToRemove = document.getElementById(`req-${targetId}`);
-                    if (itemToRemove) itemToRemove.remove();
-                    
-                    // Attendiamo l'aggiornamento del profilo e dei badge (effettua la fetch al server)
-                    await fetchMyProfile(); 
-                    
-                    // Se siamo nella tab requests e abbiamo svuotato la pagina, forziamo il ricaricamento del contenuto visivo
-                    if (currentTab === 'requests' && document.querySelectorAll('.req-item').length === 0) {
+                    if (currentTab === 'requests') {
                         fetchTabContent();
+                    } else {
+                        refreshSidebarRequests();
                     }
+                    // Aggiorniamo le stats complessive (es: total friends) in background
+                    fetchMyProfile(); 
                 } else {
                     alert("Operation failed on server.");
                 }
             } catch(e) { alert("An error occurred."); }
         }
 
-        // Finestra Modale Modifica Gioco Libreria
         function openEditGame(gameId, hours, achievs) {
             document.getElementById('editGameId').value = gameId;
             document.getElementById('editHours').value = hours;
@@ -612,7 +706,6 @@
             } catch(e) { alert("An error occurred."); }
         }
 
-        // Modale Opzioni Account (Tasto 3 puntini)
         function openOptionsModal() { document.getElementById('optionsModal').style.display = 'flex'; }
         function fakeDeleteAccount() { alert("Account deleted successfully! (Simulation only)"); closeModals(); }
         function closeModals() {

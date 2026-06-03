@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>playerHive | Game Details</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #2a0845, #1a1a24, #0b0c10); 
+            --glass-bg: rgba(20, 22, 28, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-glow: #e0f2fe;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --danger-color: #ff6b6b;
+            --success-color: #4caf50;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: var(--bg-gradient); color: white; display: flex; height: 100vh; padding: 20px; overflow: hidden; }
+
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-gradient);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .login-box {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 40px; border-radius: 24px; text-align: center; width: 450px;
+            backdrop-filter: blur(16px); display: flex; flex-direction: column; gap: 15px;
+        }
+        .auth-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 12px 15px; border-radius: 12px; outline: none; }
+        .auth-btn { width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .auth-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .auth-btn:not(:disabled):hover { background: var(--accent-glow); color: #000; }
+        .overlay-game-item { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; text-align: left; }
+        .overlay-game-item img { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; }
+        .overlay-game-results { max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+
+        .app-wrapper { width: 100%; display: flex; flex-direction: column; gap: 20px; }
+
+        header.glass-nav {
+            height: 80px; background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
+        }
+        .logo a { color: white; text-decoration: none; font-size: 1.6rem; letter-spacing: 2px; }
+        .logo b { font-weight: 700; }
+        .login-btn { background: transparent; border: 1px solid var(--glass-border); color: white; padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: 0.2s;}
+        .login-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .login-btn.danger { border-color: rgba(255,107,107,0.3); color: var(--danger-color); }
+        .login-btn.danger:hover { background: rgba(255,107,107,0.1); }
+
+        .dashboard-layout { display: flex; gap: 20px; flex: 1; height: calc(100vh - 140px); }
+
+        main.glass-content { flex: 2.5; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; overflow-y: auto; }
+        
+        .hero { width: 100%; height: 350px; background-size: cover; background-position: center; position: relative; border-bottom: 1px solid var(--glass-border);}
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,12,16,1), transparent); display: flex; align-items: flex-end; padding: 40px; }
+
+        .content-body { padding: 40px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 30px;}
+        .description { font-size: 1.05rem; }
+
+        .game-metadata {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;
+            background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 25px; border-radius: 16px;
+        }
+        .meta-item { display: flex; flex-direction: column; gap: 5px; }
+        .meta-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-glow); }
+        .meta-value { font-size: 0.95rem; color: var(--text-primary); }
+        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag-badge { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; color: var(--text-primary); border: 1px solid var(--glass-border);}
+
+        /* Carosello Correlati */
+        .category-section { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .category-title { font-size: 1.2rem; font-weight: 600; color: var(--accent-glow); letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        .carousel { display: flex; overflow-x: auto; gap: 20px; padding-bottom: 15px; scroll-behavior: smooth; scroll-snap-type: x mandatory; }
+        .carousel::-webkit-scrollbar { height: 8px; }
+        .carousel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .carousel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+        .carousel-item { scroll-snap-align: start; flex: 0 0 auto; width: 220px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.3s, border-color 0.3s; cursor: pointer; }
+        .carousel-item:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+        .game-cover { width: 100%; height: 120px; object-fit: cover; border-bottom: 1px solid var(--glass-border); }
+        .item-info { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        .item-title { font-size: 1rem; font-weight: 600; line-height: 1.2; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; color: var(--text-primary); }
+        .stat-text { font-size: 0.8rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
+        .stat-highlight { color: var(--text-primary); font-weight: bold; }
+
+        aside.glass-sidebar { flex: 1.2; max-width: 550px; display: flex; flex-direction: column; gap: 20px; }
+
+        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-box { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; text-align: center; }
+        .stat-value { font-size: 1.8rem; font-weight: bold; color: var(--accent-glow); display: block; text-shadow: 0 0 10px rgba(224, 242, 254, 0.3); }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
+
+        .buy-box { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 30px; border-radius: 24px; backdrop-filter: blur(16px); }
+        .price-big { font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; color: #4caf50; }
+        .btn-active { width: 100%; padding: 15px; background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--glass-border); border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-active:hover { background: rgba(255,255,255,0.2); }
+
+        .reviews-section { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; flex: 1; display: flex; flex-direction: column; overflow-y: hidden; }
+        .reviews-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .add-review-btn { background: rgba(224, 242, 254, 0.1); border: 1px solid var(--accent-glow); color: var(--accent-glow); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+        .reviews-list { flex: 1; overflow-y: auto; margin-bottom: 15px; padding-right: 10px; }
+        .review-item { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 0; position: relative; }
+        .review-user { color: var(--accent-glow); font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
+        .review-pfp { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--glass-border); }
+        .review-actions { position: absolute; top: 15px; right: 0; }
+        .action-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; }
+        .action-btn.danger { background: rgba(255, 107, 107, 0.15); color: var(--danger-color); }
+
+        .pagination-controls { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+        .pagination-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border); color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .size-select { background: rgba(0, 0, 0, 0.4); color: white; border: 1px solid var(--glass-border); padding: 4px 8px; border-radius: 6px; outline: none; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #1a1a24; border: 1px solid var(--glass-border); padding: 30px; border-radius: 20px; width: 400px; display: flex; flex-direction: column; gap: 15px; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; border-radius: 8px; outline: none; font-family: inherit; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-actions button { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: bold; }
+        .btn-cancel { background: rgba(255,255,255,0.1); }
+        .btn-save { background: var(--success-color); }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay">
+        <div class="login-box">
+            <div class="logo" style="justify-content: center;">player<b>Hive</b></div>
+            <h3>Identify & Connect</h3>
+            <input type="text" id="overlayUsername" class="auth-input" placeholder="Enter Username..." oninput="checkOverlayForm()">
+            
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="overlayGameQuery" class="auth-input" style="margin:0;" placeholder="Search Game..." onkeypress="if(event.key==='Enter') searchGamesOverlay()">
+                <button class="auth-btn" style="width: auto;" onclick="searchGamesOverlay()">Search</button>
+            </div>
+            
+            <div id="overlayGameResults" class="overlay-game-results"></div>
+            
+            <button id="overlayLoginBtn" class="auth-btn" disabled onclick="performOverlayLogin()" style="margin-top: 10px;">Login & Load Profile</button>
+            <div id="loginError" style="color: var(--danger-color); font-size: 0.85rem;"></div>
+        </div>
+    </div>
+
+    <div id="libraryModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color: var(--accent-glow);">Add to Library</h3>
+            <div>
+                <label style="font-size: 0.8rem; color: var(--text-secondary);">Hours Played</label>
+                <input type="number" id="libHours" step="0.1" min="0" value="0">
+            </div>
+            <div>
+                <label style="font-size: 0.8rem; color: var(--text-secondary);">Achievements Obtained</label>
+                <input type="number" id="libAchievs" min="0" value="0">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+                <button class="btn-save" onclick="submitAddToLibrary()">Save to Library</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reviewModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color: var(--accent-glow);">Write a Review</h3>
+            <div>
+                <label style="font-size: 0.8rem; color: var(--text-secondary);">Score (0-10)</label>
+                <input type="number" id="revScore" step="0.1" min="0" max="10" value="10">
+            </div>
+            <div>
+                <label style="font-size: 0.8rem; color: var(--text-secondary);">Review Text</label>
+                <textarea id="revText" rows="4" placeholder="What do you think about this game?"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+                <button class="btn-save" onclick="submitReview()">Post Review</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-wrapper">
+        <header class="glass-nav">
+            <div class="logo"><a href="index.html">player<b>Hive</b></a></div>
+            <button class="login-btn danger" onclick="logout()">Logout</button>
+        </header>
+
+        <div class="dashboard-layout">
+            <main class="glass-content" id="mainBody">
+                <p style="padding: 40px;">Loading game data...</p>
+            </main>
+
+            <aside class="glass-sidebar" id="sideBody">
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        let gameId = null;
+        let loggedInUser = null;
+        let tempSelectedGameId = null;
+
+        let currentReviewPage = 0;
+        let currentReviewSize = 5;
+        let pfpFiles = [];
+
+        window.onload = async () => {
+            await loadPfpList();
+            
+            const token = localStorage.getItem('accessToken');
+            loggedInUser = localStorage.getItem('loggedInUser');
+            gameId = localStorage.getItem('selectedGameId');
+
+            if (!token || !loggedInUser || !gameId) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            } else {
+                document.getElementById('loginOverlay').style.display = 'none';
+                loadGame();
+            }
+        };
+
+        function checkOverlayForm() {
+            const user = document.getElementById('overlayUsername').value.trim();
+            document.getElementById('overlayLoginBtn').disabled = !(user && tempSelectedGameId);
+        }
+
+        async function searchGamesOverlay() {
+            const query = document.getElementById('overlayGameQuery').value.trim();
+            const resArea = document.getElementById('overlayGameResults');
+            if(!query) return;
+
+            resArea.innerHTML = '<span style="font-size:0.8rem; color:var(--text-secondary);">Searching...</span>';
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/search/${encodeURIComponent(query)}?page=0&size=5`);
+                const data = await res.json();
+                
+                if(!data.searchResult || data.searchResult.length === 0) {
+                    resArea.innerHTML = '<span style="font-size:0.8rem; color:var(--danger-color);">No games found.</span>';
+                    return;
+                }
+
+                resArea.innerHTML = data.searchResult.map(g => `
+                    <div class="overlay-game-item" id="overlay-game-${g.id}" onclick="selectOverlayGame('${g.id}')">
+                        <img src="${g.imageURL || 'https://via.placeholder.com/40'}" alt="cover">
+                        <span style="font-size:0.9rem;">${g.name}</span>
+                    </div>
+                `).join('');
+                tempSelectedGameId = null;
+                checkOverlayForm();
+            } catch(e) {
+                resArea.innerHTML = '<span style="font-size:0.8rem; color:var(--danger-color);">Error fetching games.</span>';
+            }
+        }
+
+        function selectOverlayGame(id) {
+            tempSelectedGameId = id;
+            document.querySelectorAll('.overlay-game-item').forEach(el => el.style.borderColor = 'var(--glass-border)');
+            document.getElementById(`overlay-game-${id}`).style.borderColor = 'var(--accent-glow)';
+            checkOverlayForm();
+        }
+
+        async function performOverlayLogin() {
+            const user = document.getElementById('overlayUsername').value.trim();
+            const btn = document.getElementById('overlayLoginBtn');
+            const errBox = document.getElementById('loginError');
+            
+            btn.disabled = true;
+            errBox.innerText = '';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: `${user}@hotmail.com`, password: user })
+                });
+
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('loggedInUser', user);
+                localStorage.setItem('selectedGameId', tempSelectedGameId);
+                
+                loggedInUser = user;
+                gameId = tempSelectedGameId;
+                
+                document.getElementById('loginOverlay').style.display = 'none';
+                loadGame();
+            } catch (err) {
+                errBox.innerText = "Login failed. Check credentials/server.";
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('loggedInUser');
+            window.location.reload();
+        }
+
+        function getHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+            };
+        }
+
+        async function loadPfpList() {
+            try {
+                const response = await fetch('../../pfps.txt');
+                if (response.ok) {
+                    const text = await response.text();
+                    pfpFiles = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                }
+            } catch (err) {}
+        }
+
+        function getUserPfpPath(username) {
+            const basePath = '/home/sebastiano_pala/Pictures/Sfondi/';
+            if (pfpFiles.length === 0 || !username) {
+                return 'https://via.placeholder.com/150/1a1a24/e0f2fe?text=U';
+            }
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) {
+                hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return basePath + pfpFiles[Math.abs(hash) % pfpFiles.length];
+        }
+
+        async function loadGame() {
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/${gameId}`);
+                if (!res.ok) throw new Error();
+                const g = await res.json();
+                
+                const userScoreFormatted = (g.userScore || 0).toFixed(1);
+                const avgPlaytimeFormatted = (g.averagePlaytime || 0).toFixed(1);
+                const priceFormatted = (g.finalPrice || 0).toFixed(2);
+                
+                const genresHtml = (g.genres || []).map(genre => `<span class="tag-badge">${genre}</span>`).join('');
+                const osHtml = (g.supportedOS || []).map(os => `<span class="tag-badge">${os}</span>`).join('');
+                const devs = (g.developers || []).join(', ') || 'N/A';
+                const pubs = (g.publishers || []).join(', ') || 'N/A';
+                const releaseDate = g.releaseDate ? new Date(g.releaseDate).toLocaleDateString() : 'N/A';
+
+                document.getElementById('mainBody').innerHTML = `
+                    <div class="hero" style="background-image: url('${g.imageURL || ''}')">
+                        <div class="hero-overlay">
+                            <h1>${g.name || 'Unknown Game'}</h1>
+                        </div>
+                    </div>
+                    <div class="content-body">
+                        <div class="description">${g.description || 'No description available for this game.'}</div>
+                        <div class="game-metadata">
+                            <div class="meta-item" style="grid-column: 1 / -1;">
+                                <span class="meta-label">Genres</span>
+                                <div class="tags-container">${genresHtml || 'N/A'}</div>
+                            </div>
+                            <div class="meta-item"><span class="meta-label">Developers</span><span class="meta-value">${devs}</span></div>
+                            <div class="meta-item"><span class="meta-label">Publishers</span><span class="meta-value">${pubs}</span></div>
+                            <div class="meta-item"><span class="meta-label">Release Date</span><span class="meta-value">${releaseDate}</span></div>
+                            <div class="meta-item"><span class="meta-label">Total Achievements</span><span class="meta-value">${g.achievements || 0}</span></div>
+                            <div class="meta-item" style="grid-column: 1 / -1; margin-top: 10px;">
+                                <span class="meta-label">Supported OS</span>
+                                <div class="tags-container">${osHtml || 'N/A'}</div>
+                            </div>
+                        </div>
+
+                        <div class="category-section">
+                            <div class="category-title">Users have played also...</div>
+                            <div id="relatedCarousel" class="carousel">
+                                <div style="color:var(--text-secondary); font-size: 0.85rem;">Loading related games...</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('sideBody').innerHTML = `
+                    <div class="stats-container">
+                        <div class="stat-box"><span class="stat-value">${userScoreFormatted}</span><span class="stat-label">User Score</span></div>
+                        <div class="stat-box"><span class="stat-value">${avgPlaytimeFormatted}h</span><span class="stat-label">Avg Playtime</span></div>
+                    </div>
+                    <div class="buy-box">
+                        <div class="price-big">€${priceFormatted}</div>
+                        <button class="btn-active" onclick="openLibraryModal()">ADD TO LIBRARY</button>
+                    </div>
+                    <div class="reviews-section" id="reviewsContainer">
+                        <div class="reviews-header-bar">
+                            <h4 style="color: var(--text-primary);">Community Reviews</h4>
+                            <button class="add-review-btn" onclick="openReviewModal()">+ Add Review</button>
+                        </div>
+                        <div id="reviewsList" class="reviews-list">
+                            <p style="font-size:0.85rem; color:var(--text-secondary);">Loading reviews...</p>
+                        </div>
+                        <div id="paginationControls" class="pagination-controls"></div>
+                    </div>
+                `;
+
+                loadReviews();
+                loadRelatedGames();
+            } catch (err) {
+                document.getElementById('mainBody').innerHTML = "<p style='padding:40px; color:#ff6b6b;'>Error loading game data.</p>";
+            }
+        }
+
+        async function loadRelatedGames() {
+            const container = document.getElementById('relatedCarousel');
+            if (!container) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/${gameId}/getRelatedGames`, { headers: getHeaders() });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div style="color:var(--text-secondary); font-size: 0.85rem;">No related games found.</div>';
+                    return;
+                }
+                
+                container.innerHTML = data.map(g => {
+                    const statsHtml = `<span class="stat-text">Shared Players: <span class="stat-highlight">${(g.sharedPlayers || 0).toLocaleString()}</span></span>`;
+                    return `
+                        <div class="carousel-item" onclick="localStorage.setItem('selectedGameId', '${g.gameId || g.id}'); window.location.reload();">
+                            <img src="${g.image || g.imageURL || 'https://via.placeholder.com/280x140?text=No+Cover'}" class="game-cover" alt="${g.name}">
+                            <div class="item-info">
+                                <div class="item-title">${g.name}</div>
+                                <div style="display:flex; flex-direction:column; gap:4px; margin-bottom: 5px;">
+                                    ${statsHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) {
+                container.innerHTML = '<div style="color:var(--danger-color); font-size: 0.85rem;">Failed to load related games.</div>';
+            }
+        }
+
+        async function loadReviews() {
+            const listEl = document.getElementById('reviewsList');
+            const pagEl = document.getElementById('paginationControls');
+            if(!listEl || !pagEl) return;
+
+            listEl.innerHTML = '<p style="font-size:0.85rem; color:var(--text-secondary);">Fetching reviews...</p>';
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/reviews/${gameId}?page=${currentReviewPage}&size=${currentReviewSize}`);
+                const data = await res.json();
+
+                if (data.reviews && data.reviews.length > 0) {
+                    listEl.innerHTML = data.reviews.map(r => {
+                        const scoreFormatted = (r.score || 0).toFixed(1);
+                        const dateFormatted = r.timestamp ? new Date(r.timestamp).toLocaleDateString() : '';
+                        const pfpPath = getUserPfpPath(r.username);
+                        
+                        const canDelete = r.username === loggedInUser || loggedInUser === 'admin';
+                        const deleteBtnHtml = canDelete 
+                            ? `<div class="review-actions"><button class="action-btn danger" onclick="deleteReview('${r.id}')">Delete</button></div>` 
+                            : '';
+
+                        return `
+                            <div class="review-item" id="review-${r.id}">
+                                ${deleteBtnHtml}
+                                <div class="review-user">
+                                    <img src="${pfpPath}" class="review-pfp" alt="${r.username}">
+                                    <span>${r.username} <span style="color:var(--text-secondary); font-weight:normal; margin-left: 5px;">• ${scoreFormatted}/10</span></span>
+                                </div>
+                                <p style="font-size:0.85rem; margin-top:10px; line-height: 1.5; color: #cbd5e1; padding-right: 50px;">${r.reviewText}</p>
+                                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:8px;">${dateFormatted}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    listEl.innerHTML = `<p style="font-size:0.85rem; color:var(--text-secondary);">No reviews found for this game yet.</p>`;
+                }
+
+                const totalPages = data.numPages || 1;
+                pagEl.innerHTML = `
+                    <div>
+                        <label>Size: </label>
+                        <select class="size-select" onchange="changeReviewSize(this.value)">
+                            <option value="5" ${currentReviewSize === 5 ? 'selected' : ''}>5</option>
+                            <option value="25" ${currentReviewSize === 25 ? 'selected' : ''}>25</option>
+                            <option value="75" ${currentReviewSize === 75 ? 'selected' : ''}>75</option>
+                            <option value="100" ${currentReviewSize === 100 ? 'selected' : ''}>100</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="pagination-btn" onclick="changeReviewPage(-1)" ${currentReviewPage === 0 ? 'disabled' : ''}>Prev</button>
+                        <span style="margin: 0 10px;">Page ${currentReviewPage + 1} / ${totalPages}</span>
+                        <button class="pagination-btn" onclick="changeReviewPage(1)" ${data.lastPage ? 'disabled' : ''}>Next</button>
+                    </div>
+                `;
+            } catch (err) {
+                listEl.innerHTML = "<p style='font-size:0.85rem; color:#ff6b6b;'>Error loading reviews.</p>";
+                pagEl.innerHTML = "";
+            }
+        }
+
+        window.changeReviewPage = function(direction) { currentReviewPage += direction; loadReviews(); };
+        window.changeReviewSize = function(newSize) { currentReviewSize = parseInt(newSize); currentReviewPage = 0; loadReviews(); };
+
+        function closeModals() {
+            document.getElementById('libraryModal').style.display = 'none';
+            document.getElementById('reviewModal').style.display = 'none';
+        }
+
+        function openLibraryModal() {
+            document.getElementById('libHours').value = '0';
+            document.getElementById('libAchievs').value = '0';
+            document.getElementById('libraryModal').style.display = 'flex';
+        }
+
+        async function submitAddToLibrary() {
+            const payload = {
+                gameId: gameId,
+                hoursPlayed: parseFloat(document.getElementById('libHours').value),
+                achievements: document.getElementById('libAchievs').value.toString()
+            };
+            try {
+                const res = await fetch('http://localhost:8080/api/user/editLibrary', {
+                    method: 'POST', headers: getHeaders(), body: JSON.stringify(payload)
+                });
+                if(res.ok) {
+                    closeModals();
+                    alert("Game added to library successfully!");
+                } else alert("Error adding game to library.");
+            } catch(e) { alert("Network Error"); }
+        }
+
+        function openReviewModal() {
+            document.getElementById('revScore').value = '10';
+            document.getElementById('revText').value = '';
+            document.getElementById('reviewModal').style.display = 'flex';
+        }
+
+        async function submitReview() {
+            const payload = {
+                reviewText: document.getElementById('revText').value.trim(),
+                score: parseFloat(document.getElementById('revScore').value)
+            };
+            if(!payload.reviewText) return alert("Review text cannot be empty.");
+            
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/addReview/${gameId}`, {
+                    method: 'POST', headers: getHeaders(), body: JSON.stringify(payload)
+                });
+                if(res.ok) {
+                    closeModals();
+                    currentReviewPage = 0;
+                    loadReviews();
+                } else alert("Error posting review. Note: You can only post one review per game.");
+            } catch(e) { alert("Network Error"); }
+        }
+
+        async function deleteReview(reviewId) {
+            if(!confirm("Delete this review permanently?")) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/deleteReview/${reviewId}`, {
+                    method: 'DELETE', headers: getHeaders()
+                });
+                if(res.ok) {
+                    loadReviews();
+                } else alert("Error deleting review.");
+            } catch(e) { alert("Network Error"); }
+        }
+    </script>
+</body>
+</html>

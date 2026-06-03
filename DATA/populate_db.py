@@ -50,7 +50,7 @@ default_user = {
     "email": "BrunoStrati@hotmail.com",
     "birthdate": datetime(1776, 12, 4), 
     "registrationDate": datetime.now() - timedelta(days=5 * 365),
-    "role": "ADMIN",
+    "role": "USER",
     "friendRequests": [],
     "requestsNum": 0,
     "friends": 0,

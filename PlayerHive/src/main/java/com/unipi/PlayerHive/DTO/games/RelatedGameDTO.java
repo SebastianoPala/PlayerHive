@@ -5,7 +5,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class FriendMagnetDTO {
+public class RelatedGameDTO {
+
+    private String gameId;
     private String name;
+    private String image;
     private Long sharedPlayers;
 }

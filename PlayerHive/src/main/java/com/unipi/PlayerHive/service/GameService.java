@@ -200,8 +200,11 @@ public class GameService {
         return gameNeo4jRepository.getHiddenGems(getAuthenticatedUser().getId(),nicheThreshold);
     }
 
-    public List<FriendMagnetDTO> getRelatedGames(String gameId, int limit) {
-        return gameNeo4jRepository.getRelatedGames(gameId, limit);
+    public List<RelatedGameDTO> getRelatedGames(String gameId,int minShared, int limit) {
+        if(!gameRepository.existsById(gameId))
+            throw new NoSuchElementException("The requested game does not exist");
+
+        return gameNeo4jRepository.getRelatedGames(gameId, minShared, limit);
     }
 
     // admin analytics

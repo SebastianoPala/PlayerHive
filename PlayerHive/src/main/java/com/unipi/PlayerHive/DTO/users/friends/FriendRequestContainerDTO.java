@@ -12,9 +12,11 @@ import java.util.List;
 @Setter
 @Getter
 public class FriendRequestContainerDTO {
-    List<FriendRequestDTO> friendRequests;
+    private List<FriendRequestDTO> friendRequests;
 
-    int numPages;
+    private int requestsNum;
 
-    boolean isLastPage;
+    private int numPages;
+
+    private boolean isLastPage;
 }

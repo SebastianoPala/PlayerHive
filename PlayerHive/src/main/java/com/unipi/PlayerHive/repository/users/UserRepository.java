@@ -117,7 +117,7 @@ public interface UserRepository extends MongoRepository<User,String> {
             "{ $project: { " +
                         "_id: 1," +
                     "    username: 1, " +
-                    "    role: 1, " +
+                    "    pfpURL: 1, " +
                     "    totalHours: '$hoursPlayed', " +
                     "    numGames: 1, " +
                     "    avgHoursPerGame: { $round: [{ $divide: ['$hoursPlayed', '$numGames'] }, 1] } " +
@@ -134,7 +134,6 @@ public interface UserRepository extends MongoRepository<User,String> {
             "{ $project: { " +
                         "_id: 1," +
                     "    username: 1, " +
-                    "    role: 1, " +
                     "    pfpURL: 1, " +
                     "    numGames: 1, " +
                     "    numReviews: { $size: '$reviewIds' }, " +
@@ -161,7 +160,6 @@ public interface UserRepository extends MongoRepository<User,String> {
                         "_id: 1," +
                     "    username: 1, " +
                     "    pfpURL: 1, " +
-                    "    role: 1, " +
                     "    numGames: 1, " +
                     "    registrationDate: 1, " +
                     "    gamesPerDay: { $divide: ['$numGames', { $divide: [ { $subtract: ['$$NOW', '$registrationDate'] } , 86400000] }] }  " +

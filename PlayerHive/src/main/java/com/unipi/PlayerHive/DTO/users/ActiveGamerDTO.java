@@ -17,8 +17,6 @@ public class ActiveGamerDTO {
     private String username;
     private String pfpURL;
 
-    private String role;
-
     private Integer numGames;
     private LocalDateTime registrationDate;
 }

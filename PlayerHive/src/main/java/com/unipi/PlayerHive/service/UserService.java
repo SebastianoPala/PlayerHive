@@ -197,8 +197,7 @@ public class UserService {
         int numPages = (friendRequestNumber / size) + ((friendRequestNumber % size > 0) ? 1 : 0);
         boolean isLastPage = (friendRequestNumber - skip <= size);
 
-
-        return new FriendRequestContainerDTO(friendRequests,numPages,isLastPage);
+        return new FriendRequestContainerDTO(friendRequests,getAuthenticatedUser().getRequestsNum(),numPages,isLastPage);
     }
 
     @Transactional

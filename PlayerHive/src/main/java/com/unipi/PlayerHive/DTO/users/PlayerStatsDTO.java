@@ -12,7 +12,7 @@ public class PlayerStatsDTO {
     @Id
     private String id;
     private String username;
-    private String role;
+    private String pfpURL;
     private float totalHours;
     private int numGames;
     private float avgHoursPerGame;

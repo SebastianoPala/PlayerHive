@@ -88,7 +88,7 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserNeo4j,String> {
     //TODO FIX RETURN VALUES
     @Query("MATCH (u:User {id: $userId})-[:FRIENDS_WITH]->(mutual:User)-[:FRIENDS_WITH]->(suggested:User) " +
             "WHERE u <> suggested AND NOT (u)-[:FRIENDS_WITH]-(suggested) " +
-            "RETURN suggested.username AS username, count(mutual) AS mutualFriendsCount " +
+            "RETURN suggested.id as userId, suggested.username AS username, suggested.pfpURL as pfpURL, count(mutual) AS mutualFriendsCount " +
             "ORDER BY mutualFriendsCount DESC " +
             "LIMIT $limit")
     List<FriendRecommendationDTO> getFriendRecommendations(String userId, int limit);
@@ -119,7 +119,8 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserNeo4j,String> {
             "WITH u2, u1Total, count(g) AS sharedGames " +
             "WITH u2, u1Total, sharedGames, COUNT { (u2)-[:PLAYED]->(:Game) } AS u2Total " +
             "WITH u2, sharedGames, (u1Total + u2Total - sharedGames) AS unionGames " +
-            "RETURN u2.username AS username, toFloat(sharedGames) / unionGames AS jaccardSimilarity " +
+            "RETURN u2.id as userId, u2.username AS username, toFloat(sharedGames) / unionGames AS jaccardSimilarity," +
+            " u2.pfpURL as pfpURL " +
             "ORDER BY jaccardSimilarity DESC " +
             "LIMIT $limit")
     List<GamingTwinDTO> getGamingTwins(String userId, int limit);
