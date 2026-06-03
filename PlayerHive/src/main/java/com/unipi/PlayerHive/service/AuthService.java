@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+/**
+ * Service class responsible for handling user registration and authentication logic.
+ */
 @Service
 public class AuthService {
 
@@ -38,6 +41,13 @@ public class AuthService {
         this.encoder = encoder;
     }
 
+    /**
+     * Registers a new user, saving data in both MongoDB and Neo4j.
+     * Validates that the username and email are unique.
+     *
+     * @param dto The registration details provided by the user.
+     * @throws IllegalArgumentException if the username or email already exists.
+     */
     @Transactional
     public void registerUser(@Nonnull @Valid @RequestBody UserRegistrationDTO dto){
 
@@ -49,37 +59,28 @@ public class AuthService {
                 throw new IllegalArgumentException("Email already exists");
             }
         });
-
+        // TODO TURN THIS INTO A CONSTRUCTOR CALL
         // the userId will be obtained by mongoDB
-        User newUser = new User();
-
-        newUser.setUsername(dto.username());
-        newUser.setPassword(encoder.encode(dto.password()));
-        newUser.setEmail(dto.email());
-        newUser.setBirthdate(dto.birthDate());
-        newUser.setPfpURL(dto.profile_picture());
-        newUser.setRegistrationDate(LocalDateTime.now());
-        newUser.setRole("USER");
-        newUser.setNumGames(0);
-        newUser.setHoursPlayed(0);
-        newUser.setFriends(0);
-        newUser.setFriendRequests(new ArrayList<>());
-        newUser.setRequestsNum(0);
-        newUser.setReviewIds(new ArrayList<>());
+        User newUser = new User(null, dto.username(), encoder.encode(dto.password()), "USER", dto.email(),
+                                dto.profile_picture(), 0, 0f, dto.birthDate(),
+                                LocalDateTime.now(), 0, new ArrayList<>(), 0, new ArrayList<>());
+                                                               // friend requests               // reviews
 
         User savedUser = userRepository.save(newUser);
 
-        UserNeo4j neo4jUser = new UserNeo4j();
-        neo4jUser.setId(savedUser.getId());
-        neo4jUser.setUsername(dto.username());
-        neo4jUser.setPfpURL(dto.profile_picture());
-
+        UserNeo4j neo4jUser = new UserNeo4j(savedUser.getId(), dto.username(), dto.profile_picture());
         userNeo4jRepository.save(neo4jUser);
     }
 
+    /**
+     * Authenticates a user based on email and password.
+     *
+     * @param dto The login credentials.
+     * @return A JWT token if authentication is successful, null otherwise.
+     */
     public String loginUser(@Nonnull @Valid @RequestBody UserLoginDTO dto){
         Authentication auth = authManager.authenticate(
-            new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
+                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
         if(auth.isAuthenticated()){
             UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
             return JwtUtils.generateToken(principal.getUser().getId());

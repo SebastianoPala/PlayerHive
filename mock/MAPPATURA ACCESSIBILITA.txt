@@ -18,10 +18,10 @@ Giochi (Game Controller) - Tutte le GET tranne le eccezioni:
 * GET /api/games/{gameId} 		FATTO
 * GET /api/games/search/{gameName} 	FATTO
 * GET /api/games/reviews/{gameId} 	FATTO
-* GET /api/games/getDeals 
-* GET /api/games/getInvestments 
-* GET /api/games/getDiscussed 
-* GET /api/games/getTopGames 
+* GET /api/games/getDeals 		FATTO
+* GET /api/games/getInvestments 	FATTO
+* GET /api/games/getDiscussed 		FATTO
+* GET /api/games/getTopGames 		FATTO
 
 Utenti (User Controller) - Tutte le GET tranne le eccezioni:
 * GET /api/user/{userId} 		FATTO
@@ -29,11 +29,9 @@ Utenti (User Controller) - Tutte le GET tranne le eccezioni:
 * GET /api/user/library/{userId} 	FATTO
 * GET /api/user/friends/{userId} 	FATTO
 * GET /api/user/reviews/{userId} 	FATTO
-* GET /api/user/getHardcoreGamers 
-* GET /api/user/getKeyboardWarriors 
-* GET /api/user/getMostActiveGamers 
-
-** NOTA BENE: Sebbene i commenti Swagger di /getGenreStats, /getOsPlatformStats e /releaseYearStats indichino "Admin only", la regola `requestMatchers(HttpMethod.GET, "/api/games/**").permitAll()` in SecuritySpringBoot.java li rende attualmente accessibili a tutti.
+* GET /api/user/getHardcoreGamers 	FATTO
+* GET /api/user/getKeyboardWarriors 	FATTO
+* GET /api/user/getMostActiveGamers 	FATTO
 
 
 ------------------------------------------------------------------------

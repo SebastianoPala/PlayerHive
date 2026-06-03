@@ -30,6 +30,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Service class handling game retrieval, search, reviews, and analytical game queries.
+ */
 @Service
 public class GameService {
 
@@ -51,6 +54,11 @@ public class GameService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Retrieves the currently authenticated user from the Spring Security context.
+     *
+     * @return The authenticated User entity.
+     */
     // JwtFilter already put the authenticated user in the security context earlier in the request, this just reads it back out
     private User getAuthenticatedUser() {
         return ((UserPrincipal) SecurityContextHolder.getContext()
@@ -58,6 +66,13 @@ public class GameService {
                 .getUser();
     }
 
+    /**
+     * Retrieves detailed information about a specific game, computing its average score and playtime.
+     *
+     * @param gameId The ID of the game.
+     * @return A GameInfoDTO containing the game data.
+     * @throws NoSuchElementException if the game does not exist.
+     */
     public GameInfoDTO getGameById(String gameId) {
         Game game = gameRepository.findByIdLight(gameId).orElseThrow(() -> new NoSuchElementException("Game not found"));
 
@@ -72,6 +87,14 @@ public class GameService {
         return gameInfo;
     }
 
+    /**
+     * Searches for games by name utilizing a case-insensitive match.
+     *
+     * @param gameName The query string to search for.
+     * @param page The pagination page number.
+     * @param size The number of results per page.
+     * @return A container with the paginated game results.
+     */
     public GameSearchContainerDTO searchGameByName(String gameName, int page, int size) {
         Pageable pageable = PageRequest.of(page,size);
 
@@ -80,6 +103,15 @@ public class GameService {
         return new GameSearchContainerDTO(result.getContent(),result.isLast());
     }
 
+    /**
+     * Retrieves the paginated reviews for a specific game.
+     *
+     * @param gameId The ID of the game.
+     * @param page The pagination page number.
+     * @param size The number of results per page.
+     * @return A container with the game's reviews.
+     * @throws NoSuchElementException if the game does not exist.
+     */
     // todo TEST
     public GameReviewContainerDTO getGameReviews(String gameId, int page, int size) {
 
@@ -104,6 +136,15 @@ public class GameService {
         return new GameReviewContainerDTO(reviews,numPages,isLastPage);
     }
 
+    /**
+     * Adds a review for a game, updating the game statistics and the user's review history.
+     *
+     * @param gameId The ID of the game to review.
+     * @param addReviewDTO The text and score of the review.
+     * @throws ResourceAlreadyExistsException if the user has already reviewed the game.
+     * @throws NoSuchElementException if the game does not exist.
+     * @throws RuntimeException if the database update fails.
+     */
     @Transactional
     public void addReview(String gameId, AddReviewDTO addReviewDTO) {
 
@@ -121,7 +162,7 @@ public class GameService {
                 .orElseThrow(() -> new NoSuchElementException("the specified game does not exist"));
 
         Review review = new Review(null,new ObjectId(gameId),userIdObj,user.getUsername(),user.getPfpURL(),gameNameImage.getGameName(),
-                                            gameNameImage.getGameImage(), addReviewDTO.getReviewText(), addReviewDTO.getScore(), LocalDateTime.now());
+                gameNameImage.getGameImage(), addReviewDTO.getReviewText(), addReviewDTO.getScore(), LocalDateTime.now());
 
         // the review is saved in the Review collection ...
         Review savedReview = reviewRepository.save(review);
@@ -139,6 +180,15 @@ public class GameService {
         userRepository.addReviewToUser(userId, userReview);
     }
 
+    /**
+     * Deletes a review from the system. Reverses statistical changes in the game document
+     * and removes the entry from the author's history.
+     *
+     * @param reviewId The ID of the review to delete.
+     * @throws IllegalArgumentException if a standard user tries to delete another user's review.
+     * @throws NoSuchElementException if the review is not found.
+     * @throws RuntimeException if database consistency checks fail.
+     */
     @Transactional
     public void deleteReview(String reviewId) {
 
@@ -171,35 +221,91 @@ public class GameService {
 
     // INTERESTING QUERIES ====================
 
+    /**
+     * Retrieves games offering high quality ratings relative to their price.
+     *
+     * @param minReviews Minimum reviews necessary.
+     * @param minPrice Minimum price threshold.
+     * @param maxPrice Maximum price threshold.
+     * @param minRating Minimum rating necessary.
+     * @return List of matching GameStatsDTOs.
+     */
     public List<GameStatsDTO> getDeals(int minReviews, double minPrice, double maxPrice, double minRating){
         return gameRepository.getQualityToPriceGames(minReviews, minPrice, maxPrice, minRating);
     }
 
+    /**
+     * Retrieves games offering significant average playtime relative to their price.
+     *
+     * @param minPlayers Minimum players necessary.
+     * @param minPrice Minimum price threshold.
+     * @param maxPrice Maximum price threshold.
+     * @param minAvgTime Minimum average playtime needed.
+     * @return List of matching GameInvestmentDTOs.
+     */
     public List<GameInvestmentDTO> getInvestments(int minPlayers, double minPrice, double maxPrice, double minAvgTime){
         return gameRepository.getTimeToPriceGames(minPlayers, minPrice, maxPrice, minAvgTime);
     }
 
+    /**
+     * Retrieves the most discussed games based on review density and timing.
+     *
+     * @return List of GameStatsDTOs.
+     */
     public List<GameStatsDTO> getDiscussed(){
         return gameRepository.findMostDiscussedGames();
     }
 
+    /**
+     * Retrieves the overall top-rated games that meet the review threshold.
+     *
+     * @param minReviews Minimum reviews necessary.
+     * @return List of top GameStatsDTOs.
+     */
     public List<GameStatsDTO> getTopGames(int minReviews){
         return gameRepository.getTopRatedGames(minReviews);
     }
 
+    /**
+     * Generates item-based game recommendations for the authenticated user.
+     *
+     * @return List of recommended games based on friend activity.
+     */
     public List<GameRecommendationDTO> getRecommendations(){
         return gameNeo4jRepository.getGameRecommendations(getAuthenticatedUser().getId(),10);
     }
 
+    /**
+     * Retrieves games currently trending heavily among friend networks.
+     *
+     * @param limit Max items to return.
+     * @param minSocial Minimum social count needed.
+     * @return List of TrendingGameDTOs.
+     */
     public List<TrendingGameDTO> getTrendingGames(int limit, int minSocial){
         return gameNeo4jRepository.getTrendingGamesAmongFriends(limit, minSocial);
     }
 
+    /**
+     * Finds hidden gems (games popular with friends but niche globally) for the authenticated user.
+     *
+     * @param nicheThreshold Global popularity threshold limits.
+     * @return List of HiddenGemDTOs.
+     */
     public List<HiddenGemDTO> getHiddenGems(int nicheThreshold){
 
         return gameNeo4jRepository.getHiddenGems(getAuthenticatedUser().getId(),nicheThreshold);
     }
 
+    /**
+     * Retrieves related games based on overlapping player bases.
+     *
+     * @param gameId The source game ID.
+     * @param minShared Minimum shared players to form a link.
+     * @param limit Max items to return.
+     * @return List of RelatedGameDTOs.
+     * @throws NoSuchElementException if the source game does not exist.
+     */
     public List<RelatedGameDTO> getRelatedGames(String gameId,int minShared, int limit) {
         if(!gameRepository.existsById(gameId))
             throw new NoSuchElementException("The requested game does not exist");
@@ -209,14 +315,29 @@ public class GameService {
 
     // admin analytics
 
+    /**
+     * Administrative query to fetch average stats grouped by game genre.
+     *
+     * @return List of GenreStatsDTOs.
+     */
     public List<GenreStatsDTO> getGenreStats(){
         return gameRepository.getGenreStats();
     }
 
+    /**
+     * Administrative query to fetch average stats grouped by the number of supported OS platforms.
+     *
+     * @return List of OsPlatformStatsDTOs.
+     */
     public List<OsPlatformStatsDTO> getOsPlatformStats(){
         return gameRepository.getOsPlatformStats();
     }
 
+    /**
+     * Administrative query to fetch average game scores grouped by release year.
+     *
+     * @return List of ReleaseYearStatsDTOs.
+     */
     public List<ReleaseYearStatsDTO> getReleaseYearStats(){
         return gameRepository.getReleaseYearStats();
     }

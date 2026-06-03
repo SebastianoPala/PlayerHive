@@ -22,9 +22,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST Controller for Administrator operations.
+ * Allows adding, modifying, and deleting games, force-deleting users, and viewing platform-wide analytics.
+ */
 @RestController
 @RequestMapping("/api/admin")
-
 @Tag(name = "1. Admin", description = "Admin operations (Game and User management)")
 public class AdminController {
     private final AdminService adminService;
@@ -37,6 +40,12 @@ public class AdminController {
         this.gameService = gameService;
     }
 
+    /**
+     * Adds a new game to the platform databases.
+     *
+     * @param newGame The DTO containing the details of the game to add.
+     * @return ResponseEntity with a success message.
+     */
     @PostMapping("/addGame")
     @Operation(summary = "Add a new game", description = "Inserts a new game into the database (MongoDB and Neo4j).")
     @ApiResponse(responseCode = "200", description = "The game has been added successfully")
@@ -46,7 +55,13 @@ public class AdminController {
         return ResponseEntity.ok("The game has been added successfully");
     }
 
-
+    /**
+     * Updates an existing game's metadata.
+     *
+     * @param gameId   The ID of the game to edit.
+     * @param editGame The DTO containing the updated game fields.
+     * @return ResponseEntity with a success message.
+     */
     @PatchMapping("/editGame/{gameId}")
     @Operation(summary = "Edit a game", description = "Updates the details of an existing game by its ID.")
     @ApiResponse(responseCode = "200", description = "The game info has been edited successfully")
@@ -56,6 +71,12 @@ public class AdminController {
         return ResponseEntity.ok("The game info has been edited successfully");
     }
 
+    /**
+     * Deletes a game and cleans up all related statistics and reviews.
+     *
+     * @param gameId The ID of the game to delete.
+     * @return ResponseEntity with a success message.
+     */
     @DeleteMapping("/deleteGame/{gameId}")
     @Operation(summary = "Delete a game", description = "Permanently removes a game, its reviews, and updates user statistics.")
     @ApiResponse(responseCode = "200", description = "The game has been deleted successfully")
@@ -65,6 +86,12 @@ public class AdminController {
         return ResponseEntity.ok("The game has been deleted successfully");
     }
 
+    /**
+     * Forcefully deletes a user account and all associated data.
+     *
+     * @param userId The ID of the user to delete.
+     * @return ResponseEntity with a success message.
+     */
     @DeleteMapping("/deleteUser/{userId}")
     @Operation(summary = "Force delete a user", description = "Allows an admin to remove a user and all related data.")
     @ApiResponse(responseCode = "200", description = "The user has been deleted successfully")
@@ -74,16 +101,28 @@ public class AdminController {
         return  ResponseEntity.ok("The user has been deleted successfully");
     }
 
-
     // analytics
 
-    // todo unanchored query, find explanation
+    /**
+     * Retrieves games that are currently trending across social clusters.
+     *
+     * @param limit     The maximum number of games to return.
+     * @param minSocial Minimum social interactions required to be trending.
+     * @return ResponseEntity containing a list of trending games.
+     */
     @GetMapping("/getTrending")
+    @Operation(summary = "Get trending games", description = "Retrieves a list of games currently trending among social friend groups.")
+    @ApiResponse(responseCode = "200", description = "Trending games retrieved successfully")
     public ResponseEntity<List<TrendingGameDTO>> getTrendingGames(@RequestParam(defaultValue = "20") @Min(10) int limit,
                                                                   @RequestParam(defaultValue = "1") @Min(1) int minSocial){
         return ResponseEntity.ok(gameService.getTrendingGames(limit, minSocial));
     }
 
+    /**
+     * Retrieves analytical statistics detailing platform-wide averages grouped by game genre.
+     *
+     * @return ResponseEntity containing genre statistics.
+     */
     @GetMapping("/getGenreStats")
     @Operation(
             summary = "Genre analytics",
@@ -94,6 +133,11 @@ public class AdminController {
         return ResponseEntity.ok(gameService.getGenreStats());
     }
 
+    /**
+     * Retrieves analytical statistics grouped by OS compatibility quantity.
+     *
+     * @return ResponseEntity containing OS platform statistics.
+     */
     @GetMapping("/getOsPlatformStats")
     @Operation(
             summary = "OS platform analytics",
@@ -104,6 +148,11 @@ public class AdminController {
         return ResponseEntity.ok(gameService.getOsPlatformStats());
     }
 
+    /**
+     * Retrieves analytical statistics indicating platform-wide averages grouped by release year.
+     *
+     * @return ResponseEntity containing release year statistics.
+     */
     @GetMapping("/releaseYearStats")
     @Operation(
             summary = "Release year analytics",

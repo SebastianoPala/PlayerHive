@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
+/**
+ * Service class handling administrative logic such as adding, editing, and deleting games.
+ */
 @Service
 public class AdminService {
     private final GameRepository gameRepository;
@@ -49,11 +52,23 @@ public class AdminService {
         this.userConsistencyManager = userConsistencyManager;
     }
 
+    /**
+     * Copies non-null properties from a source object to a target object.
+     *
+     * @param source The object containing new field values.
+     * @param target The entity object to be updated.
+     */
     // This function copies all the non-null fields from source to target, and only matches fields with the same name
     public static void copyNonNullProperties(Object source, Object target) {
         BeanUtils.copyProperties(source, target, getNullPropertyNames(source));
     }
 
+    /**
+     * Identifies fields within the source object that are currently null.
+     *
+     * @param source The object to inspect.
+     * @return Array of property names that hold null values.
+     */
     private static String[] getNullPropertyNames (Object source) {
         final BeanWrapper src = new BeanWrapperImpl(source);
         return Stream.of(src.getPropertyDescriptors())
@@ -62,14 +77,32 @@ public class AdminService {
                 .toArray(String[]::new);
     }
 
+    /**
+     * Utility method to round doubles to 2 decimal places.
+     *
+     * @param num The double to round.
+     * @return The rounded double.
+     */
     private double roundNumber(double num){
         return ((double) Math.round(num * 100)) / 100;
     }
 
+    /**
+     * Calculates the final price of a game based on the discount percentage.
+     *
+     * @param price Original price.
+     * @param discount Discount percentage.
+     * @return The calculated final price.
+     */
     private double calculateFinalPrice(double price, double discount){
         return price - (price * discount/100);
     }
 
+    /**
+     * Re-calculates and rounds the prices attached to a Game entity.
+     *
+     * @param game The game to calculate prices for.
+     */
     private void fixPrices(Game game){
         game.setPrice(roundNumber(game.getPrice()));
 
@@ -78,11 +111,18 @@ public class AdminService {
         game.setFinalPrice(finalPrice);
     }
 
+    /**
+     * Adds a newly registered game into MongoDB and its corresponding node into Neo4j.
+     * Initializes default statistics.
+     *
+     * @param newGame The AddGameDTO containing game creation fields.
+     * @throws ResourceAlreadyExistsException if a game with the same name already exists.
+     */
     @Transactional
     public void addGame(@Nonnull @Valid @RequestBody AddGameDTO newGame) {
 
         if(gameRepository.existsByName(newGame.getName()))
-                throw new ResourceAlreadyExistsException("Game "+ newGame.getName() +" already exists");
+            throw new ResourceAlreadyExistsException("Game "+ newGame.getName() +" already exists");
 
         Game game = gameMapper.editGameDTOtoGame(newGame);
 
@@ -103,6 +143,15 @@ public class AdminService {
         gameNeo4jRepository.save(gameN4j);
     }
 
+    /**
+     * Updates an existing game with new information. Will trigger bulk updates
+     * on reviews if the game's name or image URL changes.
+     *
+     * @param gameId The ID of the game to edit.
+     * @param editGame The fields intended for updating.
+     * @throws ResourceAlreadyExistsException if editing results in a duplicate name conflict.
+     * @throws NoSuchElementException if the game is missing.
+     */
     @Transactional
     public void editGame(String gameId, @Nonnull @Valid @RequestBody EditGameDTO editGame) {
 
@@ -122,7 +171,7 @@ public class AdminService {
         }
 
         if(gameImg != null && !gameImg.equals(editGame.getImageURL()) ||
-                        gameImg == null && editGame.getImageURL() != null){
+                gameImg == null && editGame.getImageURL() != null){
 
             updateReviewInfo = true;
             gameImg = editGame.getImageURL();
@@ -146,6 +195,13 @@ public class AdminService {
         gameNeo4jRepository.save(gameNeo);
     }
 
+    /**
+     * Permanently deletes a game and handles the heavy cleanup tasks for adjusting users'
+     * total played stats and cascade-deleting all relevant reviews.
+     *
+     * @param gameId The ID of the game to be deleted.
+     * @throws NoSuchElementException if the game does not exist.
+     */
     @Transactional
     public void deleteGame(String gameId) {
 

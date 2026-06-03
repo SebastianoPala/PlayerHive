@@ -29,11 +29,13 @@ import org.springframework.data.domain.Slice;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.*;
 
-
+/**
+ * Service class handling user-related operations, including profile management,
+ * library tracking, social features (friends), and complex analytical queries.
+ */
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -46,7 +48,6 @@ public class UserService {
 
     private final ReviewRepository reviewRepository;
 
-
     public UserService(UserRepository userRepository, UserNeo4jRepository userNeo4jRepository, GameRepository gameRepository, UserMapper userMapper, GameNeo4jRepository gameNeo4jRepository, GameConsistencyManager gameConsistencyManager, ReviewRepository reviewRepository) {
         this.userRepository = userRepository;
         this.userNeo4jRepository = userNeo4jRepository;
@@ -57,6 +58,11 @@ public class UserService {
         this.reviewRepository = reviewRepository;
     }
 
+    /**
+     * Retrieves the currently authenticated user from the Spring Security context.
+     *
+     * @return The authenticated User entity.
+     */
     // JwtFilter already put the authenticated user in the security context earlier in the request, this just reads it back out :)
     private User getAuthenticatedUser() {
         return ((UserPrincipal) SecurityContextHolder.getContext()
@@ -64,11 +70,23 @@ public class UserService {
                 .getUser();
     }
 
+    /**
+     * Retrieves the public profile information of a specific user.
+     *
+     * @param userId The ID of the requested user.
+     * @return A ProfileDTO containing the public user data.
+     * @throws NoSuchElementException if the user does not exist.
+     */
     public ProfileDTO getProfileById(String userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found"));
         return userMapper.userToProfileDTO(user);
     }
 
+    /**
+     * Retrieves the complete profile information for the currently authenticated user.
+     *
+     * @return An OwnProfileDTO containing detailed user data including pending friend requests.
+     */
     public OwnProfileDTO getOwnProfileById() {
 
         // more information is provided if the user requests his own profile
@@ -78,23 +96,42 @@ public class UserService {
 
         ownProfileDTO.setFriendRequests(ownProfileMongo.getFriendRequestsMongo()
                 .stream().map(mongo ->
-                new FriendRequestDTO(mongo.getUserId().toString(),
-                        mongo.getUsername(),
-                        mongo.getPfpURL(),
-                        mongo.getTimestamp())
+                        new FriendRequestDTO(mongo.getUserId().toString(),
+                                mongo.getUsername(),
+                                mongo.getPfpURL(),
+                                mongo.getTimestamp())
                 ).toList());
 
         return ownProfileDTO;
     }
 
+    /**
+     * Searches for users by username using a case-insensitive partial match.
+     *
+     * @param username The partial username to search for.
+     * @param page The pagination page number.
+     * @param size The number of results per page.
+     * @return A container holding the paginated search results.
+     */
     // edit regexp
     public UserSearchContainerDTO searchUser(String username, int page, int size) {
+
         Pageable pageable = PageRequest.of(page,size);
 
         Slice<UserSearchDTO> result = userRepository.searchByUsernameContaining(username, pageable);
+
         return new UserSearchContainerDTO(result.getContent(),result.isLast());
     }
 
+    /**
+     * Retrieves the game library for a specific user.
+     *
+     * @param userId The ID of the user.
+     * @param page The pagination page number.
+     * @param size The number of results per page.
+     * @return A container holding the paginated library items.
+     * @throws NoSuchElementException if the user does not exist.
+     */
     public LibraryContainerDTO getLibraryById(String userId, int page, int size) {
 
         if(!userRepository.existsById(userId))
@@ -106,6 +143,15 @@ public class UserService {
         return new LibraryContainerDTO(library.getContent(), library.getTotalPages(), library.isLast());
     }
 
+    /**
+     * Adds a game to the authenticated user's library or updates existing playtime/achievements.
+     * Modifies aggregate statistics on both the user and the game documents.
+     *
+     * @param addGame The DTO containing the game ID, playtime, and achievements.
+     * @throws IllegalArgumentException if the ID format is invalid or achievements exceed the game's max.
+     * @throws NoSuchElementException if the game does not exist.
+     * @throws RuntimeException if database updates fail.
+     */
     @Transactional
     public void editLibrary(@Valid AddGameToLibraryDTO addGame) {
 
@@ -149,6 +195,13 @@ public class UserService {
 
     }
 
+    /**
+     * Removes a game from the authenticated user's library and adjusts total statistics.
+     *
+     * @param gameId The ID of the game to remove.
+     * @throws NoSuchElementException if the game is not in the user's library.
+     * @throws RuntimeException if database updates fail.
+     */
     @Transactional
     public void removeGameFromLibrary(String gameId) {
         String userId = getAuthenticatedUser().getId();
@@ -165,6 +218,15 @@ public class UserService {
             throw new RuntimeException("The server was unable to decrease the game's stats");
     }
 
+    /**
+     * Retrieves the paginated friend list for a specific user.
+     *
+     * @param userId The ID of the user.
+     * @param page The pagination page number.
+     * @param size The number of results per page.
+     * @return A container holding the paginated friend list.
+     * @throws NoSuchElementException if the user does not exist.
+     */
     public FriendContainerDTO getFriendListById(String userId, int page, int size) {
         if(!userRepository.existsById(userId))
             throw new NoSuchElementException("The requested user does not exist");
@@ -174,9 +236,15 @@ public class UserService {
         return new FriendContainerDTO(friends.getContent(), friends.getTotalPages(), friends.isLast());
     }
 
+    /**
+     * Retrieves the paginated incoming friend requests for the authenticated user.
+     *
+     * @param page The pagination page number.
+     * @param size The number of results per page.
+     * @return A container holding the paginated friend requests.
+     */
     public FriendRequestContainerDTO getFriendRequests(int page, int size) {
         String userId = getAuthenticatedUser().getId();
-
         int friendRequestNumber = getAuthenticatedUser().getRequestsNum();
 
         int skip = page * size;
@@ -187,12 +255,11 @@ public class UserService {
 
         List<FriendRequestDTO> friendRequests = friendRequestMongoDTO.stream()
                 .map(mongo ->
-                                new FriendRequestDTO(mongo.getUserId().toString(),
-                                        mongo.getUsername(),
-                                        mongo.getPfpURL(),
-                                        mongo.getTimestamp())
-                                ).toList();
-
+                        new FriendRequestDTO(mongo.getUserId().toString(),
+                                mongo.getUsername(),
+                                mongo.getPfpURL(),
+                                mongo.getTimestamp())
+                ).toList();
 
         int numPages = (friendRequestNumber / size) + ((friendRequestNumber % size > 0) ? 1 : 0);
         boolean isLastPage = (friendRequestNumber - skip <= size);
@@ -200,6 +267,16 @@ public class UserService {
         return new FriendRequestContainerDTO(friendRequests,getAuthenticatedUser().getRequestsNum(),numPages,isLastPage);
     }
 
+    /**
+     * Sends a friend request to a target user. If the target user has already sent a request
+     * to the authenticated user, it automatically approves the friendship instead.
+     *
+     * @param targetUserId The ID of the target user.
+     * @return A success message indicating the action taken.
+     * @throws IllegalArgumentException if the user targets themselves.
+     * @throws NoSuchElementException if the target user does not exist.
+     * @throws ResourceAlreadyExistsException if they are already friends or the request exists.
+     */
     @Transactional
     public String sendRequestToUser(String targetUserId) {
 
@@ -214,7 +291,6 @@ public class UserService {
 
         if(userNeo4jRepository.checkFriendshipExistence(userId,targetUserId))
             throw new ResourceAlreadyExistsException("The users are already friends");
-
 
         try { // we first check if we already have a request from targetUser
             this.approveRequestFromUser(targetUserId);
@@ -231,6 +307,15 @@ public class UserService {
         return "Friend request sent successfully";
     }
 
+    /**
+     * Approves a pending friend request from a target user and establishes the friendship connection.
+     *
+     * @param targetUserId The ID of the user who sent the request.
+     * @return A success message.
+     * @throws IllegalArgumentException if the ID format is invalid.
+     * @throws NoSuchElementException if the request or the target user does not exist.
+     * @throws RuntimeException if database updates fail.
+     */
     @Transactional
     public String approveRequestFromUser(String targetUserId) {
         String userId = getAuthenticatedUser().getId();
@@ -264,6 +349,12 @@ public class UserService {
         return "The friend request has been approved successfully";
     }
 
+    /**
+     * Rejects/removes an incoming friend request without establishing a friendship.
+     *
+     * @param targetUserId The ID of the user who sent the request.
+     * @throws NoSuchElementException if the request does not exist.
+     */
     public void removeRequestFromUser(String targetUserId) {
         String userId = getAuthenticatedUser().getId();
 
@@ -272,6 +363,14 @@ public class UserService {
             throw new NoSuchElementException("Friend request was not present!");
     }
 
+    /**
+     * Removes an established friend connection between the authenticated user and a target friend.
+     *
+     * @param friendId The ID of the friend to remove.
+     * @throws IllegalArgumentException if the user attempts to remove themselves.
+     * @throws NoSuchElementException if the friendship does not exist.
+     * @throws RuntimeException if the counter update fails.
+     */
     @Transactional
     public void removeFriend(String friendId) {
         String userId = getAuthenticatedUser().getId();
@@ -286,9 +385,17 @@ public class UserService {
         int result = userRepository.decrementFriendCounterForUsers(List.of(userId, friendId));
         if (result != 2)
             throw new RuntimeException("The server was unable to decrease the friend counters");
-
     }
 
+    /**
+     * Retrieves the paginated list of reviews authored by a specific user.
+     *
+     * @param userId The ID of the user.
+     * @param page The pagination page number.
+     * @param size The number of results per page.
+     * @return A container holding the user's reviews.
+     * @throws NoSuchElementException if the user does not exist.
+     */
     public UserReviewContainerDTO getUserReviews(String userId, int page, int size) {
         if(!userRepository.existsById(userId))
             throw new NoSuchElementException("The user does not exist");
@@ -311,7 +418,15 @@ public class UserService {
         return new UserReviewContainerDTO(reviews,numPages,isLastPage);
     }
 
-
+    /**
+     * Deletes a user profile and propagates the deletion to clean up social connections,
+     * authored reviews, and associated game statistics.
+     * Requires the requester to be the target user or an ADMIN.
+     *
+     * @param userId The ID of the user to delete.
+     * @throws IllegalArgumentException if a standard user tries to delete another account.
+     * @throws NoSuchElementException if the user does not exist.
+     */
     @Transactional
     public void deleteUser(String userId){
 
@@ -325,7 +440,7 @@ public class UserService {
                 throw new IllegalArgumentException("You can't delete another user's profile");
 
         } else if (!userRepository.existsById(userId))
-                throw new NoSuchElementException("The user requested for deletion does not exist");
+            throw new NoSuchElementException("The user requested for deletion does not exist");
 
         System.out.println("A user with Id: " + userId + " has been scheduled for deletion");
 
@@ -356,7 +471,6 @@ public class UserService {
 
         System.out.println(modified + " reviews were deleted from the Review Collection");
 
-
         modified = gameConsistencyManager.adjustGameStatsAndRemoveUserNode(userId);
 
         System.out.println(modified + " games had their stats updated");
@@ -366,23 +480,51 @@ public class UserService {
 
     // INTERESTING QUERIES ===========================================
 
+    /**
+     * Retrieves a list of hardcore gamers based on minimum played games and playtime thresholds.
+     *
+     * @param minGames Minimum games in library.
+     * @param minHours Minimum total hours played.
+     * @return List of matching PlayerStatsDTOs.
+     */
     public List<PlayerStatsDTO> getHardcoreGamers(int minGames, double minHours){
         return userRepository.findHardcoreGamers(minGames, minHours);
     }
 
+    /**
+     * Retrieves a list of users with high review-to-game ratios ("Keyboard Warriors").
+     *
+     * @param warriorRatio Minimum threshold ratio.
+     * @return List of matching KeyboardWarriorDTOs.
+     */
     public List<KeyboardWarriorDTO> getKeyboardWarriors(double warriorRatio){
         return userRepository.getKeyboardWarriors(warriorRatio);
     }
 
+    /**
+     * Retrieves the most active gamers based on the number of games played per day since registration.
+     *
+     * @return List of matching ActiveGamerDTOs.
+     */
     public List<ActiveGamerDTO> getMostActiveGamers(){
         return userRepository.getMostActiveGamers();
     }
 
+    /**
+     * Generates friend recommendations for the authenticated user based on mutual connections.
+     *
+     * @return List of recommended users.
+     */
     public List<FriendRecommendationDTO> getFriendRecommendations(){
         String userId = getAuthenticatedUser().getId();
         return userNeo4jRepository.getFriendRecommendations(userId,10);
     }
 
+    /**
+     * Generates "Gaming Twin" matches for the authenticated user based on shared game libraries.
+     *
+     * @return List of gaming twins ranked by similarity.
+     */
     public List<GamingTwinDTO> getGamingTwins(){
         String userId = getAuthenticatedUser().getId();
         return userNeo4jRepository.getGamingTwins(userId, 10);

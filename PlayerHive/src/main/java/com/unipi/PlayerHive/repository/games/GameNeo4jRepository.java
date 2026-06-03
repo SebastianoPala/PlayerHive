@@ -13,9 +13,18 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing Game entities and their relationships in Neo4j.
+ */
 @Repository
 public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
 
+    /**
+     * Deletes PLAYED relationships targeting a specific game in batches to avoid overwhelming the database.
+     * @param gameId The ID of the game.
+     * @param batchSize The limit of items to process in one batch.
+     * @return A list of removed relationships mapping users to their lost playtime.
+     */
     @Query("MATCH (u:User)-[r:PLAYED]->(g:Game {id: $gameId}) " +
             "WITH u, r LIMIT $batchSize " +
             "WITH u.id AS id, r.hoursPlayed AS hoursPlayed, r " +
@@ -24,6 +33,12 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
     List<GameOwnerDTO> deletePlayedEdgesInBatch(String gameId, int batchSize);
 
     // gets the USER's playtime (if present) and the GAME'S (NOT the user's) achievements
+    /**
+     * Retrieves a user's playtime for a game along with the game's total possible achievements.
+     * @param userId The ID of the user.
+     * @param gameId The ID of the game.
+     * @return A DTO containing the playtime and game achievements.
+     */
     @Query("MATCH (g:Game {id: $gameId}) " +
             "OPTIONAL MATCH (u:User {id: $userId})-[r:PLAYED]->(g) " +
             "RETURN r.hoursPlayed as hoursPlayed, g.achievements as achievements")
@@ -33,6 +48,12 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
 
     // todo fix return values
     //  2. The "Game Recommendation" (Item-Based Collaborative Filtering)
+    /**
+     * Recommends games frequently played by the user's friends but not by the user yet.
+     * @param userId The ID of the user.
+     * @param limit Maximum number of game recommendations to return.
+     * @return A list of GameRecommendationDTO.
+     */
     @Query("MATCH (u:User {id: $userId})-[:FRIENDS_WITH]->(friend:User)-[:PLAYED]->(recGame:Game) " +
             "WHERE NOT (u)-[:PLAYED]->(recGame) " +
             "RETURN recGame.id as gameId, recGame.name AS name, recGame.image as image, " +
@@ -45,6 +66,12 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
     // todo fix return values
     // todo maybe move to analytics
     // really heavy query
+    /**
+     * Retrieves games that are currently trending among interconnected friend groups.
+     * @param limit Maximum number of games to return.
+     * @param minSocialCount Minimum popularity threshold within friend groups.
+     * @return A list of TrendingGameDTO.
+     */
     @Query("MATCH (u1:User)-[:FRIENDS_WITH]->(u2:User) " +
             "WHERE elementId(u1) < elementId(u2) " +
             "MATCH (u1)-[:PLAYED]->(g:Game)<-[:PLAYED]-(u2) " +
@@ -57,6 +84,12 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
 
     // 8. The "Hidden Gem" Recommendation (Inverse Popularity)
     //todo this feels like the "game recommendation" query :( are they all the same?
+    /**
+     * Finds "Hidden Gems" that are played by friends but have a low global popularity.
+     * @param userId The ID of the user.
+     * @param nicheThreshold Maximum threshold for global popularity to be considered a niche game.
+     * @return A list of HiddenGemDTO.
+     */
     @Query("MATCH (u:User {id: $userId})-[:FRIENDS_WITH]-(friend)-[:PLAYED]->(game:Game) " +
             "WHERE NOT (u)-[:PLAYED]->(game) " +
             "WITH game, count(DISTINCT friend) AS friendsPlaying " +
@@ -71,12 +104,19 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
             "LIMIT 10") // todo better hardcoded or variable?
     List<HiddenGemDTO> getHiddenGems(String userId, int nicheThreshold);
 
+    /**
+     * Recommends games commonly played by users who also play the specified game.
+     * @param gameId The source game ID.
+     * @param minShared Minimum number of shared players required to form a relation.
+     * @param limit Maximum number of related games to return.
+     * @return A list of RelatedGameDTO.
+     */
     @Query("MATCH (g:Game {id: $gameId})<-[:PLAYED]-(u:User)-[:PLAYED]->(other:Game) " +
-        "WHERE g <> other " +
-        "RETURN other.id as gameId, other.name AS name, other.image as image, count(DISTINCT u) AS sharedPlayers " +
-        "WHERE sharedPlayers >= $minShared" +
-        "ORDER BY sharedPlayers DESC " +
-        "LIMIT $limit") // todo better hardcoded or variable?
+            "WHERE g <> other " +
+            "RETURN other.id as gameId, other.name AS name, other.image as image, count(DISTINCT u) AS sharedPlayers " +
+            "WHERE sharedPlayers >= $minShared" +
+            "ORDER BY sharedPlayers DESC " +
+            "LIMIT $limit") // todo better hardcoded or variable?
     List<RelatedGameDTO> getRelatedGames(String gameId, int minShared, int limit);
 
 

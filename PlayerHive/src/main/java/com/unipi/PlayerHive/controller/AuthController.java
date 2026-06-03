@@ -14,9 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST Controller providing public endpoints for user registration and authentication.
+ */
 @RestController
 @RequestMapping("/api/auth")
-
 @Tag(name = "2. Authentication", description = "Public endpoints for Registration and Login")
 public class AuthController {
 
@@ -27,6 +29,12 @@ public class AuthController {
         this.authService = authService;
     }
 
+    /**
+     * Registers a new user account into the system.
+     *
+     * @param dto The DTO containing registration credentials (username, email, password, etc.).
+     * @return ResponseEntity indicating a successful registration.
+     */
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = "Creates a new account. Checks that username and email are not already in use.")
     @ApiResponse(responseCode = "200", description = "User registered successfully")
@@ -36,6 +44,12 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Authenticates a user's login credentials and generates a JWT token for authorization.
+     *
+     * @param dto The DTO containing login credentials (email, password).
+     * @return ResponseEntity containing the generated JWT token or an error message on failure.
+     */
     @PostMapping("/login")
     @Operation(summary = "User login", description = "Authenticates the user and returns a JWT Bearer token for subsequent requests.")
     @ApiResponse(responseCode = "200", description = "Login successful, Token returned")
