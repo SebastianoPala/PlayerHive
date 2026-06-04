@@ -113,11 +113,11 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
      */
     @Query("MATCH (g:Game {id: $gameId})<-[:PLAYED]-(u:User)-[:PLAYED]->(other:Game) " +
             "WHERE g <> other " +
-            "RETURN other.id as gameId, other.name AS name, other.image as image, count(DISTINCT u) AS sharedPlayers " +
-            "WHERE sharedPlayers >= $minShared" +
+            "WITH other, count(DISTINCT u) AS sharedPlayers " +
+            "WHERE sharedPlayers >= $minShared " +
+            "RETURN other.id AS gameId, other.name AS name, other.image AS image, sharedPlayers " +
             "ORDER BY sharedPlayers DESC " +
-            "LIMIT $limit") // todo better hardcoded or variable?
+            "LIMIT $limit")
     List<RelatedGameDTO> getRelatedGames(String gameId, int minShared, int limit);
-
 
 }

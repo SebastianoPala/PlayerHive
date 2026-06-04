@@ -31,12 +31,29 @@
             overflow: hidden;
         }
 
-        .app-wrapper { width: 100%; max-width: 1800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .app-wrapper { width: 100%; max-width: 1800px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+
+
+        .welcome-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+        .welcome-title b {
+            font-weight: 800;
+            color: var(--accent-glow);
+            text-shadow: 0 0 15px rgba(224, 242, 254, 0.6);
+        }
+
 
         header.glass-nav {
-            height: 80px;
+            height: 70px;
             background: var(--glass-bg); backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border); border-radius: 24px; display: flex;
+            border: 1px solid var(--glass-border); border-radius: 20px; display: flex;
             align-items: center; justify-content: space-between; padding: 0 40px;
             flex-shrink: 0;
         }
@@ -52,28 +69,34 @@
         main.glass-content {
             flex: 1;
             background: var(--glass-bg); backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px;
-            overflow-y: auto; display: flex; flex-direction: column; gap: 30px;
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px 40px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
         }
 
-        .profile-tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+        .profile-tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 5px; }
         .tab-btn {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--glass-border);
-            color: var(--text-primary); padding: 12px 30px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1.1rem; transition: 0.3s;
+            color: var(--text-primary); padding: 10px 25px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.3s;
         }
         .tab-btn:hover { background: rgba(255, 255, 255, 0.1); }
         .tab-btn.active { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-glow); color: var(--accent-glow); }
 
-        /* Carousel Styles */
-        .category-section { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-        .category-title { font-size: 1.4rem; font-weight: 600; color: var(--accent-glow); letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        .category-section { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+        .category-title { font-size: 1.3rem; font-weight: 600; color: var(--accent-glow); letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px; }
         
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            padding-bottom: 10px;
+        }
+
         .carousel {
             display: flex;
             overflow-x: auto;
-            gap: 20px;
-            padding-bottom: 15px;
+            gap: 15px;
+            padding-bottom: 10px;
             scroll-behavior: smooth;
             scroll-snap-type: x mandatory;
         }
@@ -82,7 +105,6 @@
         .carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
         .carousel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
-        /* Cards */
         .carousel-item {
             scroll-snap-align: start;
             flex: 0 0 auto;
@@ -97,28 +119,113 @@
         }
         .carousel-item:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
         
-        /* Game specific */
-        .game-cover { width: 100%; height: 140px; object-fit: cover; border-bottom: 1px solid var(--glass-border); }
-        .item-info { padding: 15px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        /* Community Leaders: wider cards with less vertical space */
+        #usersSection .carousel-item {
+            width: 340px;
+            padding: 10px 12px;
+        }
+        #usersSection .item-info {
+            padding: 6px 8px;
+            gap: 4px;
+        }
+        #usersSection .user-header {
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+            gap: 10px;
+        }
+        #usersSection .user-avatar {
+            width: 44px;
+            height: 44px;
+        }
+        #usersSection .user-name {
+            font-size: 1.2rem;
+        }
+        #usersSection .user-stat-text {
+            font-size: 1.1rem;
+            padding: 3px 0;
+            line-height: 1.3;
+        }
+        #usersSection .user-stat-highlight {
+            font-size: 1.2rem;
+        }
+        
+        .grid-container .carousel-item {
+            width: 100%;
+            flex: none;
+            scroll-snap-align: none;
+        }
+        
+        .game-cover { width: 100%; height: 110px; object-fit: cover; border-bottom: 1px solid var(--glass-border); }
+        .item-info { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .item-title { font-size: 1.1rem; font-weight: 600; line-height: 1.2; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
         
-        .price-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .price-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
         .price-group { display: flex; align-items: center; gap: 8px; }
-        .discount-badge { background: var(--success-color); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
-        .old-price { text-decoration: line-through; color: var(--text-secondary); font-size: 0.85rem; }
-        .final-price { font-weight: bold; color: var(--accent-glow); font-size: 1.1rem; }
+        .discount-badge { background: var(--success-color); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 1.0rem; }
+        .old-price { text-decoration: line-through; color: var(--text-secondary); font-size: 1.1rem; }
+        .final-price { font-weight: bold; color: var(--accent-glow); font-size: 1.5rem; }
         .free-text { color: var(--success-color); font-weight: bold; }
         
         .stat-text { font-size: 0.85rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
         .stat-highlight { color: var(--text-primary); font-weight: bold; }
 
-        /* User specific */
-        .user-header { display: flex; align-items: center; gap: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; }
-        .user-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); }
+        /* Stili per Playtime (Best Investments) */
+        .playtime-text { 
+            font-size: 1.15rem; 
+            color: var(--text-primary); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-weight: 600; 
+            padding-bottom: 4px; 
+        }
+        .playtime-score { 
+            color: #ffd700; 
+            font-size: 1.4rem; 
+            font-weight: 800; 
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); 
+        }
+
+        .rating-text { 
+            font-size: 1.15rem; 
+            color: var(--text-primary); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-weight: 600; 
+            padding-bottom: 4px; 
+        }
+        .rating-score { 
+            color: #ffd700; 
+            font-size: 1.4rem; 
+            font-weight: 800; 
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); 
+        }
+
+        .user-stat-text { 
+            font-size: 1rem; 
+            color: #e2e8f0; 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 4px 0; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08); 
+            line-height: 1.4; 
+        }
+        .user-stat-text:last-child { 
+            border-bottom: none; 
+        }
+        .user-stat-highlight { 
+            color: #ffffff; 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+        }
+
+        .user-header { display: flex; align-items: center; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); }
         .user-name { font-size: 1.1rem; font-weight: bold; color: var(--accent-glow); }
 
-        .loading-text { text-align: center; color: var(--text-secondary); padding: 20px; font-style: italic; }
-        .error-text { text-align: center; color: var(--danger-color); padding: 20px; }
+        .loading-text { text-align: center; color: var(--text-secondary); padding: 15px; font-style: italic; }
+        .error-text { text-align: center; color: var(--danger-color); padding: 15px; }
     </style>
 </head>
 <body>
@@ -132,17 +239,22 @@
         </header>
 
         <main class="glass-content">
+            <h1 class="welcome-title">Welcome to the <b>Hive</b></h1>
             <div class="profile-tabs">
-                <button id="btnGames" class="tab-btn active" onclick="switchTab('games')">Games Discovery</button>
-                <button id="btnUsers" class="tab-btn" onclick="switchTab('users')">Community Leaders</button>
+                <button id="btnBrowse" class="tab-btn" onclick="window.location.href='../../Games/unregistered/gamesearch.html'">Browse Games</button>
+                <button id="btnGames" class="tab-btn" onclick="toggleTab('games')">Games Discovery</button>
+                <button id="btnBrowse" class="tab-btn" onclick="window.location.href='../../User/unregistered/usersearch.html'">Browse Users</button>
+                <button id="btnUsers" class="tab-btn" onclick="toggleTab('users')">Community Leaders</button>
             </div>
 
-            <div id="gamesSection">
+            <div id="defaultSection">
                 <div class="category-section">
                     <div class="category-title">Top Rated Games</div>
-                    <div id="topGamesCarousel" class="carousel"><div class="loading-text">Loading top games...</div></div>
+                    <div id="topGamesGrid" class="grid-container"><div class="loading-text">Loading top games...</div></div>
                 </div>
+            </div>
 
+            <div id="gamesSection" style="display: none;">
                 <div class="category-section">
                     <div class="category-title">Best Deals (Rating to Price Ratio)</div>
                     <div id="dealsCarousel" class="carousel"><div class="loading-text">Loading best deals...</div></div>
@@ -180,6 +292,7 @@
 
     <script>
         let pfpFiles = [];
+        let currentActiveTab = 'default';
 
         window.onload = async () => {
             await loadPfpList();
@@ -205,24 +318,32 @@
             return basePath + pfpFiles[Math.abs(hash) % pfpFiles.length];
         }
 
-        function switchTab(tab) {
+        function toggleTab(tab) {
             document.getElementById('btnGames').classList.remove('active');
             document.getElementById('btnUsers').classList.remove('active');
+            
+            document.getElementById('defaultSection').style.display = 'none';
             document.getElementById('gamesSection').style.display = 'none';
             document.getElementById('usersSection').style.display = 'none';
 
-            if (tab === 'games') {
-                document.getElementById('btnGames').classList.add('active');
-                document.getElementById('gamesSection').style.display = 'block';
+            if (currentActiveTab === tab) {
+                currentActiveTab = 'default';
+                document.getElementById('defaultSection').style.display = 'block';
             } else {
-                document.getElementById('btnUsers').classList.add('active');
-                document.getElementById('usersSection').style.display = 'block';
+                currentActiveTab = tab;
+                if (tab === 'games') {
+                    document.getElementById('btnGames').classList.add('active');
+                    document.getElementById('gamesSection').style.display = 'block';
+                } else if (tab === 'users') {
+                    document.getElementById('btnUsers').classList.add('active');
+                    document.getElementById('usersSection').style.display = 'block';
+                }
             }
         }
 
         // --- FETCH GAMES ---
         async function loadAllGames() {
-            fetchGameCategory('/api/games/getTopGames', 'topGamesCarousel', 'rating');
+            fetchGameCategory('/api/games/getTopGames', 'topGamesGrid', 'rating'); 
             fetchGameCategory('/api/games/getDeals', 'dealsCarousel', 'rating');
             fetchGameCategory('/api/games/getInvestments', 'investmentsCarousel', 'playtime');
             fetchGameCategory('/api/games/getDiscussed', 'discussedCarousel', 'rating');
@@ -243,11 +364,11 @@
                 container.innerHTML = data.map(g => {
                     let metricHtml = '';
                     if (metricType === 'rating') {
-                        metricHtml = `<span class="stat-text">Avg Rating: <span class="stat-highlight">★ ${(g.avgRating || 0).toFixed(1)}</span></span>`;
+                        metricHtml = `<span class="rating-text">Avg Rating: <span class="rating-score">★ ${(g.avgRating || 0).toFixed(1)}</span></span>`;
                     } else if (metricType === 'playtime') {
                         metricHtml = `
-                            <span class="stat-text">Avg Playtime: <span class="stat-highlight">${(g.avgTimePlayed || 0).toFixed(1)} hrs</span></span>
-                            <span class="stat-text">Players: <span class="stat-highlight">${(g.numPlayers || 0).toLocaleString()}</span></span>
+                            <span class="playtime-text">Avg Playtime: <span class="playtime-score">${(g.avgTimePlayed || 0).toFixed(1)} hrs</span></span>
+                            <span class="playtime-text">Players: <span class="playtime-score">${(g.numPlayers || 0).toLocaleString()}</span></span>
                         `;
                     }
 
@@ -312,22 +433,21 @@
 
                     if (userType === 'hardcore') {
                         statsHtml = `
-                            <span class="stat-text">Total Hours: <span class="stat-highlight">${(u.totalHours || 0).toLocaleString(undefined, {maximumFractionDigits:1})} hrs</span></span>
-                            <span class="stat-text">Library Size: <span class="stat-highlight">${u.numGames || 0} games</span></span>
-                            <span class="stat-text">Avg per Game: <span class="stat-highlight" style="color:var(--accent-glow);">${(u.avgHoursPerGame || 0).toFixed(1)} hrs</span></span>
+                            <span class="user-stat-text">Total Hours: <span class="user-stat-highlight">${(u.totalHours || 0).toLocaleString(undefined, {maximumFractionDigits:1})} hrs</span></span>
+                            <span class="user-stat-text">Library Size: <span class="user-stat-highlight">${u.numGames || 0} games</span></span>
+                            <span class="user-stat-text">Avg per Game: <span class="user-stat-highlight" style="color:var(--accent-glow);">${(u.avgHoursPerGame || 0).toFixed(1)} hrs</span></span>
                         `;
                     } else if (userType === 'warriors') {
                         statsHtml = `
-                            <span class="stat-text">Library Size: <span class="stat-highlight">${u.numGames || 0} games</span></span>
-                            <span class="stat-text">Total Reviews: <span class="stat-highlight">${u.numReviews || 0}</span></span>
-                            <span class="stat-text">Warrior Ratio: <span class="stat-highlight" style="color:var(--danger-color);">${(u.warriorRatio || 0).toFixed(2)}</span></span>
+                            <span class="user-stat-text">Library Size: <span class="user-stat-highlight">${u.numGames || 0} games</span></span>
+                            <span class="user-stat-text">Total Reviews: <span class="user-stat-highlight">${u.numReviews || 0}</span></span>
+                            <span class="user-stat-text">Warrior Ratio: <span class="user-stat-highlight" style="color:var(--danger-color);">${(u.warriorRatio || 0).toFixed(2)}</span></span>
                         `;
                     } else if (userType === 'active') {
                         const dateStr = u.registrationDate ? new Date(u.registrationDate).toLocaleDateString() : 'N/A';
                         statsHtml = `
-                            <span class="stat-text">Library Size: <span class="stat-highlight">${u.numGames || 0} games</span></span>
-                            <span class="stat-text">Joined On: <span class="stat-highlight">${dateStr}</span></span>
-                            <span class="stat-text" style="color:var(--success-color); margin-top:5px;">High Acquisition Rate</span>
+                            <span class="user-stat-text">Library Size: <span class="user-stat-highlight">${u.numGames || 0} games</span></span>
+                            <span class="user-stat-text">Joined On: <span class="user-stat-highlight">${dateStr}</span></span>
                         `;
                     }
 
@@ -338,7 +458,7 @@
                                     <img src="${pfp}" class="user-avatar" alt="${u.username}">
                                     <div class="user-name">${u.username}</div>
                                 </div>
-                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                <div style="display:flex; flex-direction:column; gap:4px;">
                                     ${statsHtml}
                                 </div>
                             </div>

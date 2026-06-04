@@ -36,29 +36,30 @@
         .hero { width: 100%; height: 350px; background-size: cover; background-position: center; position: relative; border-bottom: 1px solid var(--glass-border);}
         .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,12,16,1), transparent); display: flex; align-items: flex-end; padding: 40px; }
 
-        .content-body { padding: 40px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 30px;}
+        .content-body { padding: 40px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 20px;}
         .description { font-size: 1.05rem; }
 
-        /* Griglia Metadati Gioco */
+        /* Griglia Metadati Gioco - COMPATTATA */
         .game-metadata {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
             background: rgba(255,255,255,0.02);
             border: 1px solid var(--glass-border);
-            padding: 25px;
-            border-radius: 16px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            align-items: flex-start;
         }
-        .meta-item { display: flex; flex-direction: column; gap: 5px; }
+        .meta-item { display: flex; flex-direction: column; gap: 4px; min-width: 140px; flex: 1 1 auto; }
         .meta-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-glow); }
         .meta-value { font-size: 0.95rem; color: var(--text-primary); }
-        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; }
-        .tag-badge { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; color: var(--text-primary); border: 1px solid var(--glass-border);}
+        .tags-container { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag-badge { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; color: var(--text-primary); border: 1px solid var(--glass-border);}
 
         /* Carosello Correlati */
-        .category-section { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        .category-title { font-size: 1.2rem; font-weight: 600; color: var(--accent-glow); letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
-        .carousel { display: flex; overflow-x: auto; gap: 20px; padding-bottom: 15px; scroll-behavior: smooth; scroll-snap-type: x mandatory; }
+        .category-section { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .category-title { font-size: 1.2rem; font-weight: 600; color: var(--accent-glow); letter-spacing: 1px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px; }
+        .carousel { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; scroll-behavior: smooth; scroll-snap-type: x mandatory; }
         .carousel::-webkit-scrollbar { height: 8px; }
         .carousel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
         .carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
@@ -71,7 +72,7 @@
         .stat-text { font-size: 0.8rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
         .stat-highlight { color: var(--text-primary); font-weight: bold; }
 
-        aside.glass-sidebar { flex: 1.2; max-width: 550px; display: flex; flex-direction: column; gap: 20px; }
+        aside.glass-sidebar { flex: 1.2; max-width: 500px; display: flex; flex-direction: column; gap: 20px; }
 
         .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .stat-box { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; text-align: center; }
@@ -172,9 +173,13 @@
                         </div>
                         
                         <div class="game-metadata">
-                            <div class="meta-item" style="grid-column: 1 / -1;">
+                            <div class="meta-item">
                                 <span class="meta-label">Genres</span>
                                 <div class="tags-container">${genresHtml || 'N/A'}</div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Supported OS</span>
+                                <div class="tags-container">${osHtml || 'N/A'}</div>
                             </div>
                             <div class="meta-item">
                                 <span class="meta-label">Developers</span>
@@ -191,10 +196,6 @@
                             <div class="meta-item">
                                 <span class="meta-label">Total Achievements</span>
                                 <span class="meta-value">${g.achievements || 0}</span>
-                            </div>
-                            <div class="meta-item" style="grid-column: 1 / -1; margin-top: 10px;">
-                                <span class="meta-label">Supported OS</span>
-                                <div class="tags-container">${osHtml || 'N/A'}</div>
                             </div>
                         </div>
 
@@ -295,7 +296,7 @@
                                     <img src="${pfpPath}" class="review-pfp" alt="${r.username}">
                                     <span>${r.username} <span style="color:var(--text-secondary); font-weight:normal; margin-left: 5px;">• ${scoreFormatted}/10</span></span>
                                 </div>
-                                <p style="font-size:0.85rem; margin-top:10px; line-height: 1.5; color: #cbd5e1;">${r.reviewText}</p>
+                                <p style="font-size:1.05rem; margin-top:10px; line-height: 1.5; color: #cbd5e1;">${r.reviewText}</p>
                                 <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:8px;">${dateFormatted}</div>
                             </div>
                         `;

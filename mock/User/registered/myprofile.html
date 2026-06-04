@@ -17,6 +17,7 @@
             --text-primary: #ffffff;
             --text-secondary: #94a3b8;
             --danger-color: #ff6b6b;
+            --danger-glow: rgba(255, 107, 107, 0.3);
             --success-color: #4caf50;
             --font-main: 'system-ui', -apple-system, sans-serif;
         }
@@ -102,6 +103,32 @@
             border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; position: relative;
         }
         .lib-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; }
+        
+        /* MIGLIORATA LEGGIBILITÀ LIBRERIA */
+        .lib-card .lib-game-name { 
+            font-size: 1.05rem; 
+            font-weight: 600; 
+            color: #ffffff; 
+            margin-top: 5px;
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+        }
+        .lib-card .played-text { 
+            font-size: 0.95rem; 
+            color: #d1d5db; 
+            font-weight: 500;
+        }
+        .lib-card .played-hours {
+            color: #f0f0f0;
+            font-weight: 700;
+        }
+        .lib-card .achievements-text { 
+            font-size: 0.85rem; 
+            color: #cbd5e1; 
+            font-weight: 500;
+        }
+        
         .action-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-top: 5px; }
         .action-btn.danger { background: rgba(255, 107, 107, 0.15); color: var(--danger-color); }
         .action-btn.success { background: rgba(76, 175, 80, 0.15); color: var(--success-color); }
@@ -116,7 +143,38 @@
         .mini-search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
         .mini-search-bar input { flex: 1; padding: 10px 15px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; }
 
-        aside.glass-sidebar { flex: 1; max-width: 300px; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;}
+        /* Stile per il selettore della dimensione della pagina */
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .page-size-selector label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .page-size-selector input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+            transition: 0.2s;
+            width: 5em;
+        }
+        .page-size-selector select:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .page-size-selector select option {
+            background: #1a1a24;
+            color: var(--text-primary);
+        }
+
+        aside.glass-sidebar { flex: 1; max-width: 400px; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;}
         .stat-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; }
         .stat-value { font-size: 2rem; font-weight: 700; color: var(--accent-glow); }
 
@@ -131,9 +189,90 @@
         .modal-content input { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; border-radius: 8px; }
         .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
         .modal-actions button { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: bold; }
-        .btn-cancel { background: rgba(255,255,255,0.1); }
+        .btn-cancel { 
+            align-self: center;
+            width: 40%;
+            padding: 10px 10px;
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: white;
+            background: rgba(28, 21, 21, 0.08);
+            border: 1px solid white;
+            border-radius: 14px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 0 0 0 var(--danger-glow);
+        }
         .btn-save { background: var(--success-color); }
         .btn-delete { background: var(--danger-color); }
+
+        /* NUOVO STILE PER IL PULSANTE DELETE ACCOUNT */
+        .delete-account-btn {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--danger-color);
+            background: rgba(255, 107, 107, 0.08);
+            border: 1px solid var(--danger-color);
+            border-radius: 14px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 0 0 0 var(--danger-glow);
+        }
+
+        .delete-account-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 107, 107, 0.15),
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
+        .delete-account-btn:hover {
+            background: rgba(255, 107, 107, 0.15);
+            border-color: rgba(255, 107, 107, 0.8);
+            color: #ff8585;
+            box-shadow: 0 0 20px var(--danger-glow),
+                        0 0 40px rgba(255, 107, 107, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .delete-account-btn:hover::before {
+            left: 100%;
+        }
+
+        .delete-account-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 0 10px var(--danger-glow);
+            transition: all 0.1s ease;
+        }
+
+        .delete-account-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3),
+                        0 0 20px var(--danger-glow);
+        }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
@@ -197,10 +336,15 @@
                     <div id="windowTopArea"></div> 
                     <div id="windowContent"></div>
                     
-                    <div id="paginationArea" style="display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+                    <div id="paginationArea" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; flex-wrap: wrap;">
                         <button id="subPrevBtn" class="action-btn" onclick="changeSubPage(-1)">Previous</button>
                         <span id="subPageDisplay" style="color: var(--text-secondary); font-size: 0.9rem; align-self: center;">Page 0</span>
                         <button id="subNextBtn" class="action-btn" onclick="changeSubPage(1)">Next</button>
+                        
+                        <div class="page-size-selector">
+                            <label for="pageSizeSelect">Size:</label>
+                            <input id="pageSizeSelect" onchange="changePageSize()" type="number" value ="10">
+                        </div>
                     </div>
                 </div>
             </main>
@@ -245,7 +389,9 @@
         <div class="modal-content" style="text-align: center;">
             <h3>Account Options</h3>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">Warning: This action is completely irreversible.</p>
-            <button class="btn-delete" style="padding: 15px; font-size: 1.1rem;" onclick="fakeDeleteAccount()">DELETE ACCOUNT</button>
+            <button class="delete-account-btn" onclick="fakeDeleteAccount()">
+                <span style="position: relative; z-index: 1;">⚠ Delete Account</span>
+            </button>
             <button class="btn-cancel" style="margin-top: 10px;" onclick="closeModals()">Cancel</button>
         </div>
     </div>
@@ -254,7 +400,6 @@
         let pfpFiles = [];
         let currentTab = '';
         let currentSubPage = 0;
-        const pageSize = 8; 
 
         window.onload = async () => {
             await loadPfpList();
@@ -289,6 +434,11 @@
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
             };
+        }
+
+        function getCurrentPageSize() {
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            return pageSizeSelect ? parseInt(pageSizeSelect.value) : 8;
         }
 
         async function attemptAutoLogin() {
@@ -333,7 +483,6 @@
 
                 document.getElementById('myAvatar').src = getUserPfpPath(profile.username);
 
-                // Effettuiamo un refresh dinamico della sidebar in fase di avvio
                 refreshSidebarRequests();
 
             } catch (err) { console.error(err); }
@@ -346,7 +495,6 @@
                 if (!res.ok) throw new Error();
                 const data = await res.json();
                 
-                // Aggiorniamo il counter del badge nel tasto
                 const reqNum = parseInt(data.requestsNum) || 0;
                 document.getElementById('reqBadge').innerText = reqNum > 0 ? `(${reqNum})` : '';
 
@@ -386,7 +534,6 @@
             document.getElementById('dynamicWindow').style.display = 'flex';
             document.getElementById('windowTopArea').innerHTML = ''; 
             
-            // Gestione visibilità Sidebar
             const sidebarBlock = document.getElementById('sidebarPendingBlock');
             if (tabName === 'requests') {
                 sidebarBlock.style.display = 'none';
@@ -464,7 +611,8 @@
             else if (currentTab === 'reviews') endpoint = 'MyReviews';
             else if (currentTab === 'requests') endpoint = 'friendRequests';
 
-            let url = `http://localhost:8080/api/user/${endpoint}?page=${currentSubPage}&size=${pageSize}`;
+            const currentPageSize = getCurrentPageSize();
+            let url = `http://localhost:8080/api/user/${endpoint}?page=${currentSubPage}&size=${currentPageSize}`;
             
             try {
                 const res = await fetch(url, { headers: getHeaders() });
@@ -476,7 +624,15 @@
             }
         }
 
-        function changeSubPage(dir) { currentSubPage += dir; fetchTabContent(); }
+        function changeSubPage(dir) { 
+            currentSubPage += dir; 
+            fetchTabContent(); 
+        }
+
+        function changePageSize() {
+            currentSubPage = 0;
+            fetchTabContent();
+        }
 
         function renderTabWindow(data) {
             const content = document.getElementById('windowContent');
@@ -497,9 +653,9 @@
                     grid.innerHTML += `
                         <div class="lib-card" id="game-${g.id}">
                             <img src="${g.image || 'https://via.placeholder.com/200x100?text=No+Cover'}" alt="${g.name}">
-                            <h4 style="margin-top:5px;">${g.name}</h4>
-                            <p style="font-size:0.8rem; color:var(--text-secondary);">Played: ${g.hoursPlayed.toFixed(1)} hrs</p>
-                            <p style="font-size:0.75rem; color:var(--accent-glow);">Achievements: ${g.achievementsObtained}/${g.achievements}</p>
+                            <h4 class="lib-game-name">${g.name}</h4>
+                            <p class="played-text">Played: <span class="played-hours">${g.hoursPlayed.toFixed(1)} hrs</span></p>
+                            <p class="achievements-text">Achievements: ${g.achievementsObtained}/${g.achievements}</p>
                             <button class="action-btn" onclick="openEditGame('${g.id}', ${g.hoursPlayed}, ${g.achievementsObtained})">Edit Status</button>
                         </div>`;
                 });
@@ -542,7 +698,6 @@
             else if (currentTab === 'requests') {
                 document.getElementById('windowTitle').innerText = "Incoming Friend Requests";
                 
-                // Aggiorniamo il counter del badge nel tasto dalla risposta paginata
                 const reqNum = parseInt(data.requestsNum) || 0;
                 document.getElementById('reqBadge').innerText = reqNum > 0 ? `(${reqNum})` : '';
 
@@ -661,7 +816,6 @@
                     } else {
                         refreshSidebarRequests();
                     }
-                    // Aggiorniamo le stats complessive (es: total friends) in background
                     fetchMyProfile(); 
                 } else {
                     alert("Operation failed on server.");

@@ -237,7 +237,7 @@ public class GameController {
     @ApiResponse(responseCode = "200", description = "List returned")
     public ResponseEntity<List<RelatedGameDTO>> getRelatedGames(
             @PathVariable String gameId,
-            @RequestParam(defaultValue = "2") @Min(1) int minShared,
+            @RequestParam(defaultValue = "1") @Min(1) int minShared,
             @RequestParam(defaultValue = "10") @Min(10) @Max(25) int limit) {
 
         return ResponseEntity.ok(gameService.getRelatedGames(gameId, minShared, limit));
