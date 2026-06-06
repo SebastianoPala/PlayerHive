@@ -196,6 +196,23 @@ public class GameController {
     }
 
     /**
+     * Retrieves the most recently released games, shown on the home page.
+     * Lightweight index-backed query used instead of the heavier top-rated
+     * aggregation so the landing page stays fast under load.
+     *
+     * @return ResponseEntity containing the newest released games.
+     */
+    @GetMapping("/getNewReleases")
+    @Operation(
+            summary = "Get newly released games",
+            description = "Returns the 15 most recently released games. Backed by a descending index on release_date for fast home-page loading."
+    )
+    @ApiResponse(responseCode = "200", description = "Games retrieved successfully")
+    public ResponseEntity<List<GameStatsDTO>> getNewReleases(){
+        return ResponseEntity.ok(gameService.getNewReleases());
+    }
+
+    /**
      * Generates a personalized list of game recommendations based on the activity
      * of the authenticated user's friends.
      *

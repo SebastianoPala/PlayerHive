@@ -157,6 +157,10 @@ def create_mongo_indexes(db):
     # Game catalogue search (GameRepository.searchByNameContaining)
     db.games.create_index("name", unique=True ,name="name_1")
 
+    # Home-page "newly released games" query (GameRepository.getNewReleases)
+    # Descending so the newest games are at the front of the index
+    db.games.create_index([("release_date", -1)], name="release_date_-1")
+
     # Cascade delete on account deletion (ReviewRepository.removeByUserId)
     # db.reviews.create_index("user_id", name="user_id_1")
 

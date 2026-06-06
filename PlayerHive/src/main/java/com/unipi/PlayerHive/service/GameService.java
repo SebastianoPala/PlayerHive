@@ -267,6 +267,17 @@ public class GameService {
     }
 
     /**
+     * Retrieves the newest released games for the home page.
+     * Lightweight: backed by a descending index on release_date, so it avoids
+     * the full-catalogue scan and sort performed by getTopGames.
+     *
+     * @return List of the 15 most recently released games.
+     */
+    public List<GameStatsDTO> getNewReleases(){
+        return gameRepository.getNewReleases(PageRequest.of(0, 15));
+    }
+
+    /**
      * Generates item-based game recommendations for the authenticated user.
      *
      * @return List of recommended games based on friend activity.

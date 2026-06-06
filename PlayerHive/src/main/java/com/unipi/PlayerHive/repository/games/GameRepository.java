@@ -220,6 +220,18 @@ public interface GameRepository extends MongoRepository<Game, String> {
     })
     List<GameStatsDTO> getTopRatedGames(int minReviews);
 
+    /**
+     * Retrieves the most recently released games for the home page.
+     * Lightweight alternative to {@link #getTopRatedGames(int)}: it relies on a
+     * descending index on {@code release_date}, so it touches only the newest
+     * documents instead of scanning and sorting the whole catalogue on every load.
+     * @return A list of the 15 newest games projected into GameStatsDTO.
+     */
+    @Query(value = "{ 'release_date': { $ne: null } }",
+            fields = "{ '_id': 1, 'name': 1, 'price': 1, 'discount': 1, 'finalPrice': 1, 'image': 1, 'genres': 1 }",
+            sort = "{ 'release_date': -1 }")
+    List<GameStatsDTO> getNewReleases(Pageable pageable);
+
     //admin analytics
 
     /**
