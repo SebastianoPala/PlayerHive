@@ -273,7 +273,7 @@ public class GameService {
      *
      * @return List of the 15 most recently released games.
      */
-    public List<GameStatsDTO> getNewReleases(){
+    public List<NewGameInfoDTO> getNewReleases(){
         return gameRepository.getNewReleases(PageRequest.of(0, 15));
     }
 

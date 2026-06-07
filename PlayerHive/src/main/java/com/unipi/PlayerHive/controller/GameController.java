@@ -208,7 +208,7 @@ public class GameController {
             description = "Returns the 15 most recently released games. Backed by a descending index on release_date for fast home-page loading."
     )
     @ApiResponse(responseCode = "200", description = "Games retrieved successfully")
-    public ResponseEntity<List<GameStatsDTO>> getNewReleases(){
+    public ResponseEntity<List<NewGameInfoDTO>> getNewReleases(){
         return ResponseEntity.ok(gameService.getNewReleases());
     }
 

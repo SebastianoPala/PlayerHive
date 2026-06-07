@@ -230,7 +230,7 @@ public interface GameRepository extends MongoRepository<Game, String> {
     @Query(value = "{ 'release_date': { $ne: null } }",
             fields = "{ '_id': 1, 'name': 1, 'price': 1, 'discount': 1, 'finalPrice': 1, 'image': 1, 'genres': 1 }",
             sort = "{ 'release_date': -1 }")
-    List<GameStatsDTO> getNewReleases(Pageable pageable);
+    List<NewGameInfoDTO> getNewReleases(Pageable pageable);
 
     //admin analytics
 
