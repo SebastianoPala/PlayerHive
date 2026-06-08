@@ -141,8 +141,6 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserNeo4j,String> {
 
     // INTERESTING QUERIES ===================================================
 
-    // 1. The "Friend Recommendation" (Collaborative Filtering / Triadic Closure)
-    //TODO FIX RETURN VALUES
     /**
      * Recommends friends based on mutual connections.
      * @param userId The ID of the user.
@@ -155,35 +153,6 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserNeo4j,String> {
             "ORDER BY mutualFriendsCount DESC " +
             "LIMIT $limit")
     List<FriendRecommendationDTO> getFriendRecommendations(String userId, int limit);
-
-    // 3. The "Player Matchmaker" (Common Interests)
-    // todo seems identical to the others
-    /**
-     * Finds users with shared games in their libraries.
-     * @param userId The ID of the user.
-     * @param limit Maximum number of matches.
-     * @return A list of matching players and their shared games.
-     */
-    @Query("MATCH (u:User {id: $userId})-[:PLAYED]->(g:Game)<-[:PLAYED]-(other:User) " +
-            "WHERE u <> other AND NOT (u)-[:FRIENDS_WITH]-(other) " +
-            "RETURN other.username AS username, count(g) AS sharedGamesCount, collect(g.name) [0..10] AS sharedGames " +
-            "ORDER BY sharedGamesCount DESC " +
-            "LIMIT $limit")
-    List<Object> getPlayerMatchmaker(String userId, int limit);
-
-    // 4. The "Game's Core Community" (Degree Centrality)
-    // todo what even is this query brah
-    /**
-     * Finds the most socially active players of a specific game.
-     * @param gameId The ID of the game.
-     * @param limit Maximum number of community members to return.
-     * @return A list of core community members for the game.
-     */
-    @Query("MATCH (g:Game {id: $gameId})<-[:PLAYED]-(player:User) " +
-            "RETURN player.username AS username, count { (player)-[:FRIENDS_WITH]-() } AS totalFriends " +
-            "ORDER BY totalFriends DESC " +
-            "LIMIT $limit")
-    List<Object> getGameCoreCommunity(String gameId, int limit);
 
     /**
      * Finds "Gaming Twins" by calculating Jaccard similarity based on shared game libraries.

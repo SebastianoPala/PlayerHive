@@ -59,7 +59,7 @@ public class AuthService {
                 throw new IllegalArgumentException("Email already exists");
             }
         });
-        // TODO TURN THIS INTO A CONSTRUCTOR CALL
+
         // the userId will be obtained by mongoDB
         User newUser = new User(null, dto.username(), encoder.encode(dto.password()), "USER", dto.email(),
                                 dto.profile_picture(), 0, 0f, dto.birthDate(),

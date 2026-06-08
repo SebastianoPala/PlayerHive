@@ -32,9 +32,8 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
             "RETURN id, hoursPlayed")
     List<GameOwnerDTO> deletePlayedEdgesInBatch(String gameId, int batchSize);
 
-    // gets the USER's playtime (if present) and the GAME'S (NOT the user's) achievements
     /**
-     * Retrieves a user's playtime for a game along with the game's total possible achievements.
+     * Retrieves a user's playtime for a game along with the game's (NOT the user's) total possible achievements.
      * @param userId The ID of the user.
      * @param gameId The ID of the game.
      * @return A DTO containing the playtime and game achievements.
@@ -46,8 +45,6 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
 
     // INTERESTING QUERIES ========================================
 
-    // todo fix return values
-    //  2. The "Game Recommendation" (Item-Based Collaborative Filtering)
     /**
      * Recommends games frequently played by the user's friends but not by the user yet.
      * @param userId The ID of the user.
@@ -62,10 +59,6 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
             "LIMIT $limit")
     List<GameRecommendationDTO> getGameRecommendations(String userId, int limit);
 
-    // 5. Efficient Global Query: "Trending Games Among Friend Groups"
-    // todo fix return values
-    // todo maybe move to analytics
-    // really heavy query
     /**
      * Retrieves games that are currently trending among interconnected friend groups.
      * @param limit Maximum number of games to return.
@@ -82,8 +75,6 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
             "LIMIT $limit")
     List<TrendingGameDTO> getTrendingGamesAmongFriends(int limit, int minSocialCount);
 
-    // 8. The "Hidden Gem" Recommendation (Inverse Popularity)
-    //todo this feels like the "game recommendation" query :( are they all the same?
     /**
      * Finds "Hidden Gems" that are played by friends but have a low global popularity.
      * @param userId The ID of the user.
@@ -101,7 +92,7 @@ public interface GameNeo4jRepository extends Neo4jRepository<GameNeo4j,String>{
             "WHERE globalPopularity < $nicheThreshold " +
             "RETURN game.id as gameId, game.name AS name, game.image as image, friendsPlaying AS friendsPlaying, globalPopularity AS globalPopularity " +
             "ORDER BY friendsPlaying DESC, globalPopularity ASC " +
-            "LIMIT 10") // todo better hardcoded or variable?
+            "LIMIT 10")
     List<HiddenGemDTO> getHiddenGems(String userId, int nicheThreshold);
 
     /**

@@ -204,15 +204,6 @@ public interface UserRepository extends MongoRepository<User,String> {
     boolean hasUserAlreadyReviewed(String userId, ObjectId  gameId);
 
     /**
-     * Removes all reviews related to a specific game from all user profiles.
-     * @param gameId The ObjectId of the game.
-     * @return The number of documents updated.
-     */
-    @Query("{ 'reviewIds.game_id': ?0 }")
-    @Update("{ '$pull': { 'reviewIds': { 'game_id': ?0 } } }")
-    long removeAllGameReviewsFromUsers(ObjectId gameId);
-
-    /**
      * Removes a specific game's review from a targeted list of users.
      * @param userIds List of user IDs.
      * @param gameId The ObjectId of the game.
@@ -225,7 +216,7 @@ public interface UserRepository extends MongoRepository<User,String> {
     // INTERESTING QUERIES ============================================
 
     /**
-     * Aggregation query to find hardcore gamers matching minimum game counts and playtimes, sorted by average playtime.
+     * Aggregation query to find hardcore gamers matching minimum game counts and playtime, sorted by average playtime.
      * @param minGames Minimum number of games owned.
      * @param minHours Minimum number of total hours played.
      * @return A list of PlayerStatsDTO representing hardcore gamers.

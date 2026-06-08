@@ -8,7 +8,6 @@ import com.unipi.PlayerHive.model.game.GameNeo4j;
 import com.unipi.PlayerHive.repository.ReviewRepository;
 import com.unipi.PlayerHive.repository.games.GameNeo4jRepository;
 import com.unipi.PlayerHive.repository.games.GameRepository;
-import com.unipi.PlayerHive.repository.users.UserRepository;
 import com.unipi.PlayerHive.utility.batch.UserConsistencyManager;
 import com.unipi.PlayerHive.utility.map.GameMapper;
 import jakarta.annotation.Nonnull;
@@ -36,18 +35,15 @@ public class AdminService {
     private final GameNeo4jRepository gameNeo4jRepository;
     private final GameMapper gameMapper;
 
-    private final UserRepository userRepository;
-
     private final ReviewRepository reviewRepository;
 
     private final UserConsistencyManager userConsistencyManager;
 
-    public AdminService(GameRepository gameRepository, GameNeo4jRepository gameNeo4jRepository, GameMapper gameMapper, UserRepository userRepository, ReviewRepository reviewRepository,
+    public AdminService(GameRepository gameRepository, GameNeo4jRepository gameNeo4jRepository, GameMapper gameMapper, ReviewRepository reviewRepository,
                         UserConsistencyManager userConsistencyManager) {
         this.gameRepository = gameRepository;
         this.gameNeo4jRepository = gameNeo4jRepository;
         this.gameMapper = gameMapper;
-        this.userRepository = userRepository;
         this.reviewRepository = reviewRepository;
         this.userConsistencyManager = userConsistencyManager;
     }
@@ -210,33 +206,10 @@ public class AdminService {
 
         System.out.println("A game with Id: " + gameId + " has been scheduled for deletion");
 
-        //todo: this operation is super heavy, but games are basically never deleted, especially popular ones
-        //todo: if we do not perform the user update here, it makes the user related queries heavier
         //all users "hoursPlayed" and "numGames" are decreased accordingly
         long modified = userConsistencyManager.adjustUserStatsAfterRemovalOf(gameId);
         System.out.println(modified + " users had their stats updated");
 
-        ObjectId gameIdObj = new ObjectId(gameId);
-
-        //all reviews are now deleted
-
-        // first version
-        // long deleted = reviewRepository.removeByGameId(gameIdObj);
-
-        // second version
-        /*
-        List<String> reviewIds = gameRepository.getAllGameReviews(gameId).getReviews().stream().map(ObjectId::toString).toList();
-        long deleted = reviewRepository.removeByIdIn(reviewIds);
-
-        System.out.println(deleted + " reviews were deleted from the Review Collection");
-
-        // all reviews of the game are removed from the reviews array present in every user document
-        deleted = userRepository.removeAllGameReviewsFromUsers(gameIdObj); // todo bruh
-
-        System.out.println(deleted + " users had their reviews updated");
-        */
-
-        // third version
         userConsistencyManager.removeAllGameReviews(gameId);
 
         //the game node in neo4j is removed

@@ -14,5 +14,5 @@ public class GameNeo4j {
     private String name;
 
     private Integer achievements;
-    private String imageURL; // change
+    private String image;
 }

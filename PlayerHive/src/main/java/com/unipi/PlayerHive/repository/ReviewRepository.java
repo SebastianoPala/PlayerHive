@@ -42,20 +42,6 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
     List<UserReviewDTO> findUserReviewsByIdIn(List<String> reviewIds);
 
     /**
-     * Removes all reviews associated with a specific game ID.
-     * @param gameId The ObjectId of the game.
-     * @return The number of reviews removed.
-     */
-    long removeByGameId(ObjectId gameId);
-
-    /**
-     * Removes all reviews created by a specific user.
-     * @param userId The ObjectId of the user.
-     * @return The number of reviews removed.
-     */
-    long removeByUserId(ObjectId userId);
-
-    /**
      * Removes multiple reviews matching the provided list of IDs.
      * @param reviewIds List of review IDs to remove.
      * @return The number of reviews removed.

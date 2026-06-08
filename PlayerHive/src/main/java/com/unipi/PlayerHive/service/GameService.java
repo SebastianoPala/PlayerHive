@@ -112,7 +112,6 @@ public class GameService {
      * @return A container with the game's reviews.
      * @throws NoSuchElementException if the game does not exist.
      */
-    // todo TEST
     public GameReviewContainerDTO getGameReviews(String gameId, int page, int size) {
 
         if(!gameRepository.existsById(gameId))

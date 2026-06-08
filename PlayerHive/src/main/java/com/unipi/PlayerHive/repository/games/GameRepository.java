@@ -116,17 +116,6 @@ public interface GameRepository extends MongoRepository<Game, String> {
     ReviewIdContainerDTO getGameReviews(String gameId, int skip, int limit);
 
     /**
-     * Retrieves all review IDs associated with a game.
-     * @param gameId The ID of the game.
-     * @return A container with all review IDs.
-     */
-    @Aggregation(pipeline = {
-            "{ '$match': { '_id': ?0 } }",
-            "{ '$project': { '_id': 0, 'reviews': '$allReviews' } }"
-    })
-    ReviewIdContainerDTO getAllGameReviews(String gameId);
-
-    /**
      * Retrieves just the name and image URL of a game by its ID.
      * @param gameId The ID of the game.
      * @return An Optional GameNameImageDTO.
@@ -222,8 +211,7 @@ public interface GameRepository extends MongoRepository<Game, String> {
 
     /**
      * Retrieves the most recently released games for the home page.
-     * Lightweight alternative to {@link #getTopRatedGames(int)}: it relies on a
-     * descending index on {@code release_date}, so it touches only the newest
+     * it relies on a descending index on {@code release_date}, so it touches only the newest
      * documents instead of scanning and sorting the whole catalogue on every load.
      * @return A list of the 15 newest games projected into GameStatsDTO.
      */

@@ -63,7 +63,7 @@ public class UserService {
      *
      * @return The authenticated User entity.
      */
-    // JwtFilter already put the authenticated user in the security context earlier in the request, this just reads it back out :)
+    // JwtFilter already put the authenticated user in the security context earlier in the request, this just reads it back out
     private User getAuthenticatedUser() {
         return ((UserPrincipal) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal())
@@ -113,7 +113,6 @@ public class UserService {
      * @param size The number of results per page.
      * @return A container holding the paginated search results.
      */
-    // edit regexp
     public UserSearchContainerDTO searchUser(String username, int page, int size) {
 
         Pageable pageable = PageRequest.of(page,size);
