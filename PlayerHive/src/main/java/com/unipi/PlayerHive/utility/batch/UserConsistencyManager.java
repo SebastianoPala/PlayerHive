@@ -80,6 +80,9 @@ public class UserConsistencyManager {
      */
     private long batchDecreaseUserGameStats(List<GameOwnerDTO> batch) {
         BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, User.class);
+
+        // the operation we have to perform on every user is the same, but we have different values
+        // for each
         for (GameOwnerDTO dto : batch) {
             Query query = new Query(Criteria.where("_id").is(dto.getId()));
             Update update = new Update()

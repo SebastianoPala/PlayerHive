@@ -59,6 +59,7 @@ public class GameConsistencyManager {
 
         long modified = 0;
         while(reviews_left){
+            // user reviews are retrieved and the review id is extracted from each
             List<String> userReviews = userRepository.getUserReviews(userId,step,page_size).getReviews().stream()
                     .map(userReviewDTO -> userReviewDTO.getReviewId().toString()).toList();
             step += page_size;
@@ -78,6 +79,8 @@ public class GameConsistencyManager {
                     Game.class
             );
 
+            // every game has to be updated, the operation is the same for all games, but
+            // with different values for each
             for (ReviewScoreDTO review : reviews) {
                 Query query = new Query(Criteria.where("_id").is(review.getGameId()));
                 Update update = new Update()
@@ -114,6 +117,8 @@ public class GameConsistencyManager {
                     Game.class
             );
 
+            // we have to perform the same operation to every game present in the user library,
+            // but with different values for each
             for (LibraryGameLightDTO game : targetLibrary){
                 Query query = new Query(Criteria.where("_id").is(game.getId()));
                 Update update = new Update().inc("totalHoursPlayed", -game.getHoursPlayed())

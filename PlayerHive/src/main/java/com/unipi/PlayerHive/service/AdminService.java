@@ -153,7 +153,7 @@ public class AdminService {
 
         Game game = gameRepository.findById(gameId).orElseThrow(() -> new NoSuchElementException("The Game with id:\"" + gameId + "\" does not exist"));
 
-        boolean updateReviewInfo = false;
+        boolean updateReviewInfo = false; // all reviews contain the game name and game image, hence we have to keep them consistent
         String gameName = game.getName();
         String gameImg = game.getImageURL();
 

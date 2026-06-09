@@ -94,6 +94,7 @@ public class UserService {
 
         OwnProfileDTO ownProfileDTO = userMapper.OwnProfileMongoToOwnProfileDTO(ownProfileMongo);
 
+        // embedded userIds are converted from ObjectId to String
         ownProfileDTO.setFriendRequests(ownProfileMongo.getFriendRequestsMongo()
                 .stream().map(mongo ->
                         new FriendRequestDTO(mongo.getUserId().toString(),
@@ -456,7 +457,7 @@ public class UserService {
             friendList.clear();
         }
 
-        // we do not delete friend requests, they will be deleted eventually
+        // we do not delete friend requests, they will be deleted eventually, when the receiver interacts with them
 
         // we remove the user's reviews from every single game
         long modified = gameConsistencyManager.removeUserReviewsFromGames(userId);
@@ -464,7 +465,6 @@ public class UserService {
         System.out.println(modified + " games had their reviews updated");
 
         // deletes all user's reviews
-        //modified = reviewRepository.removeByUserId(new ObjectId(userId));
         List<String> reviewIds = userRepository.getAllUserReviews(userId).getReviews().stream().map(review -> review.getReviewId().toString()).toList();
         modified = reviewRepository.removeByIdIn(reviewIds);
 

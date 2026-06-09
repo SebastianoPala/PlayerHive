@@ -199,7 +199,8 @@ public class GameService {
 
         if(isAdmin)
             deletedReview = reviewRepository.removeById(reviewId);
-        else
+
+        else // ownership check
             deletedReview = reviewRepository.removeByIdAndUserId(reviewId,new ObjectId(requestingUser.getId()));
 
         if (deletedReview == null) {
