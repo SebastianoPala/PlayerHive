@@ -52,7 +52,7 @@ public class SecuritySpringBoot {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable) //todo these are all get requests! fix!
+                .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // for swagger
                         .requestMatchers("/api/auth/**").permitAll()
@@ -60,7 +60,7 @@ public class SecuritySpringBoot {
                         .requestMatchers(HttpMethod.GET, "/api/games/getHiddenGems").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/games/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user/My*").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/user/friendRequests").authenticated() //TODO MAKE THIS GENERIC? maybe add "My" to all
+                        .requestMatchers(HttpMethod.GET, "/api/user/friendRequests").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/user/friendRecommendations").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/user/gamingTwins").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/user/**").permitAll()
