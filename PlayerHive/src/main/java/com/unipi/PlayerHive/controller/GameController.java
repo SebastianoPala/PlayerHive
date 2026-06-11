@@ -133,7 +133,7 @@ public class GameController {
             @RequestParam(defaultValue = "5") @Min(1) int minReviews,
             @RequestParam(defaultValue = "1") @Min(0) double minPrice,
             @RequestParam(defaultValue = "100") @Min(1) @Max(1000) double maxPrice,
-            @RequestParam(defaultValue = "0") @Min(0) @Max(10) double minRating
+            @RequestParam(defaultValue = "1") @Min(1) @Max(10) double minRating
     ){
         return ResponseEntity.ok(gameService.getDeals(minReviews, minPrice, maxPrice, minRating));
     }

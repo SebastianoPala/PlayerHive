@@ -1,4 +1,0 @@
-{
-	"pfp" : "user.png",
-	"username" : "Bruno Strati"
-}

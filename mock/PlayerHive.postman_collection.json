@@ -1,0 +1,1597 @@
+{
+	"info": {
+		"_postman_id": "919e2ac3-75a1-45e3-a17f-11287a48735d",
+		"name": "PlayerHive",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "52789638",
+		"_collection_link": "https://sebastiano-pala-unipi-6520235.postman.co/workspace/Seba's-Workspace~2550ad26-59c4-413b-8766-f6b4fd37559f/collection/52789638-919e2ac3-75a1-45e3-a17f-11287a48735d?action=share&source=collection_link&creator=52789638"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\" : \"TheDeep\",\n    \"password\" : \"TheDeep\",\n    \"profile_picture\" : \"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2plITd2H-pPLCZ-CxuK7oKFkCIUAOz-lE-7VXoYrOM-b-fg0H3afwtQiN6UYsk0BC1NARu9H7_c0tyca2Xpbq01XATMXHUy-IGzWmtA&s=10\",\n    \"email\" : \"TheDeep@hotmail.com\",\n    \"birthDate\": \"2002-08-29\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"TheDeep@hotmail.com\",\n    \"password\": \"TheDeep\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"admin@hotmail.com\",\n    \"password\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "General Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"BrunoStrati@hotmail.com\",\n    \"password\": \"BrunoStrati\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Registered",
+					"item": [
+						{
+							"name": "My Profile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/MyProfile",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"MyProfile"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "My Library",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/MyLibrary?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"MyLibrary"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit Library",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"gameId\" : \"896b12688fd04671873d14e3\",\n    \"achievements\" : \"10\",\n    \"hoursPlayed\" : 1000\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/user/editLibrary",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"editLibrary"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove From Library",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/removeFromLibrary/:game_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"removeFromLibrary",
+										":game_id"
+									],
+									"variable": [
+										{
+											"key": "game_id",
+											"value": "3fb912861ddd4360ba6bbdfe"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "My Friends",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/MyFriends?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"MyFriends"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Friend Requests",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/friendRequests?page=0&size=3",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"friendRequests"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Send Friend Request",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/sendFriendRequest/:target_user_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"sendFriendRequest",
+										":target_user_id"
+									],
+									"variable": [
+										{
+											"key": "target_user_id",
+											"value": "26a226645299433cb5b80c23"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Approve Friend Request",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/approveFriendRequest/:target_user_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"approveFriendRequest",
+										":target_user_id"
+									],
+									"variable": [
+										{
+											"key": "target_user_id",
+											"value": "26a226645299433cb5b80c23"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deny Friend Request",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/denyFriendRequest/:target_user_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"denyFriendRequest",
+										":target_user_id"
+									],
+									"variable": [
+										{
+											"key": "target_user_id",
+											"value": "26a226645299433cb5b80c23"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove Friend",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/removeFriend/:target_user_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"removeFriend",
+										":target_user_id"
+									],
+									"variable": [
+										{
+											"key": "target_user_id",
+											"value": "26a226645299433cb5b80c23"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "My Reviews",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/MyReviews?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"MyReviews"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Account",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/deleteAccount",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"deleteAccount"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Friend Recommendations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/friendRecommendations",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"friendRecommendations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Gaming Twin",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/gamingTwins",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"gamingTwins"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwYzI1ZTEyMjQ4MmU0NzQxYjcwZjdkNTEiLCJpYXQiOjE3ODExNjk2MDIsImV4cCI6MTc4MTE3NjgwMn0.Wzp2JsLp24_Lt-a1TOEKLgByN6xia9ZyfOoTEUEcGw4",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Unregistered",
+					"item": [
+						{
+							"name": "User Info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/:user_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										":user_id"
+									],
+									"variable": [
+										{
+											"key": "user_id",
+											"value": "84106ae9147b4ef4a1f64a87"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User Search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/search/:user_name?page=0&size=20",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"search",
+										":user_name"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										}
+									],
+									"variable": [
+										{
+											"key": "user_name",
+											"value": "to"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User Library",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/library/:user_id?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"library",
+										":user_id"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									],
+									"variable": [
+										{
+											"key": "user_id",
+											"value": "84106ae9147b4ef4a1f64a87"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User Friends",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/friends/:user_id?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"friends",
+										":user_id"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									],
+									"variable": [
+										{
+											"key": "user_id",
+											"value": "84106ae9147b4ef4a1f64a87"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User Reviews",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/reviews/:user_id?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"reviews",
+										":user_id"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									],
+									"variable": [
+										{
+											"key": "user_id",
+											"value": "84106ae9147b4ef4a1f64a87"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Hardcore Gamers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/getHardcoreGamers?minGames=7&minHours=2500.5",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"getHardcoreGamers"
+									],
+									"query": [
+										{
+											"key": "minGames",
+											"value": "7"
+										},
+										{
+											"key": "minHours",
+											"value": "2500.5"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Keyboard Warriors",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/getKeyboardWarriors?warriorRatio=3950",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"getKeyboardWarriors"
+									],
+									"query": [
+										{
+											"key": "warriorRatio",
+											"value": "3950"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Most Active",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/getMostActiveGamers",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"getMostActiveGamers"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Games",
+			"item": [
+				{
+					"name": "Registered",
+					"item": [
+						{
+							"name": "Add Review",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"reviewText\" : \"this game is average\",\n    \"score\" : 5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/games/addReview/:game_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"addReview",
+										":game_id"
+									],
+									"variable": [
+										{
+											"key": "game_id",
+											"value": "68228bd872ad4bafb500b6e3"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Review",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"reviewText\" : \"oh brother this game STINKS!\",\n    \"score\" : 1\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/games/deleteReview/:review_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"deleteReview",
+										":review_id"
+									],
+									"variable": [
+										{
+											"key": "review_id",
+											"value": "3d23f63389414070872e85dc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Recommendations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/getRecommendations",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"getRecommendations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Hidden Gems",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/getHiddenGems?nicheThreshold=3",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"getHiddenGems"
+									],
+									"query": [
+										{
+											"key": "nicheThreshold",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwYzI1ZTEyMjQ4MmU0NzQxYjcwZjdkNTEiLCJpYXQiOjE3ODExNjc3NDEsImV4cCI6MTc4MTE3NDk0MX0.6LJc_Zmit9ijwRcW_t_q36FwrW0fUwUmfQ86i4QHAe8",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Unregistered",
+					"item": [
+						{
+							"name": "Game Info",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/:game_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										":game_id"
+									],
+									"variable": [
+										{
+											"key": "game_id",
+											"value": "3fb912861ddd4360ba6bbdfe"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/search/:game_name?page=0&size=100",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"search",
+										":game_name"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "100"
+										}
+									],
+									"variable": [
+										{
+											"key": "game_name",
+											"value": "under"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Reviews",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/reviews/:game_id?page=0&size=2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"reviews",
+										":game_id"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "2"
+										}
+									],
+									"variable": [
+										{
+											"key": "game_id",
+											"value": "3fb912861ddd4360ba6bbdfe"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Deals",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/getDeals?minReviews=10&minPrice=1&maxPrice=1000&minRating=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"getDeals"
+									],
+									"query": [
+										{
+											"key": "minReviews",
+											"value": "10"
+										},
+										{
+											"key": "minPrice",
+											"value": "1"
+										},
+										{
+											"key": "maxPrice",
+											"value": "1000"
+										},
+										{
+											"key": "minRating",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Investments",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/getInvestments?minPlayers=1&minPrice=0&maxPrice=1000&minAvgTime=300",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"getInvestments"
+									],
+									"query": [
+										{
+											"key": "minPlayers",
+											"value": "1"
+										},
+										{
+											"key": "minPrice",
+											"value": "0"
+										},
+										{
+											"key": "maxPrice",
+											"value": "1000"
+										},
+										{
+											"key": "minAvgTime",
+											"value": "300"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Discussed",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/getDiscussed",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"getDiscussed"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Top",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/getTopGames?minReviews=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"getTopGames"
+									],
+									"query": [
+										{
+											"key": "minReviews",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Related",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/:game_id/getRelatedGames?minShared=1&limit=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										":game_id",
+										"getRelatedGames"
+									],
+									"query": [
+										{
+											"key": "minShared",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									],
+									"variable": [
+										{
+											"key": "game_id",
+											"value": "dfc76835a0d54b06bdecf28e"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Game Recent",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/games/getNewReleases",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"games",
+										"getNewReleases"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Add Game",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"Labubu Ultimate Battle\",\n    \"releaseDate\" : \"2002-08-29\",\n    \"price\" : 100,\n    \"discount\" : 30,\n    \"description\" : \"this game is very good\",\n    \"imageURL\" : \"https://newcop.com/cdn/shop/files/labubu-brown_02.png?height=1500&v=1745246472\",\n    \"supportedOS\" : [\"windows\", \"linux\"],\n    \"achievements\" : 10,\n    \"developers\" : [\"Gordon\", \"Freeman\"],\n    \"publishers\" : [\"Valve\"],\n    \"genres\" : [\"FPS\", \"Horror\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/admin/addGame",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"addGame"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Game",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"releaseDate\": \"2004-11-01\",\n    \"description\" : \"Fast multiplayer action set in the Half-Life 2 universe! HL2's physics adds a new dimension to deathmatch play. Play straight deathmatch or try Combine vs. Resistance teamplay. Toss a toilet at your friend today!\",\n    \"genres\" : [\"FPS\", \"Multiplayer\", \"First-Person\", \"Sci-fi\", \"Physics\", \"Funny\", \"Co-op\", \"Old School\", \"PvP\", \"Arena Shooter\", \"Moddable\", \"Adventure\", \"Action\", \"Shooter\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/admin/editGame/:target_game_id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"editGame",
+								":target_game_id"
+							],
+							"variable": [
+								{
+									"key": "target_game_id",
+									"value": "26a226645299433cb5b80c23"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Game",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/deleteGame/:target_game_id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"deleteGame",
+								":target_game_id"
+							],
+							"variable": [
+								{
+									"key": "target_game_id",
+									"value": "26a226645299433cb5b80c23"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/deleteUser/:target_user_id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"deleteUser",
+								":target_user_id"
+							],
+							"variable": [
+								{
+									"key": "target_user_id",
+									"value": "26a226645299433cb5b80c23"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Genre Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/getGenreStats",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"getGenreStats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OS Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/getOsPlatformStats",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"getOsPlatformStats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Year Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/releaseYearStats",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"releaseYearStats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Trending Games",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/getTrending?limit=20&minSocial=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"getTrending"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "minSocial",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2ZjMxODJmN2FkMzg0ODJmYTY5MGFjMWMiLCJpYXQiOjE3ODA5MDM5ODIsImV4cCI6MTc4MDkxMTE4Mn0.7994x_Va7KQSb2iiPyiUr5TqXKPwYAhBCN3PpZXVid0",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}
