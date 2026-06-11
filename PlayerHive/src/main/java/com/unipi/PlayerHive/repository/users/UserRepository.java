@@ -45,8 +45,8 @@ public interface UserRepository extends MongoRepository<User,String> {
      * @param pageable Pagination details.
      * @return A slice of UserSearchDTOs matching the criteria.
      */
-    @Query("{ 'username': { $regex: ?0, $options: 'i' } }" +
-            "{ '$project': { 'id': '$_id', 'username': 1, 'role': 1, 'pfpURL':1 } }")
+    @Query("{ 'username': { $regex: '^?0' } }" +
+            "{ '$project': { 'id': '$_id', 'username': 1, 'pfpURL':1 } }")
     Slice<UserSearchDTO> searchByUsernameContaining(String username, Pageable pageable);
 
     /**

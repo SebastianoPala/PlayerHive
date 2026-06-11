@@ -505,7 +505,6 @@
                         <div class="card-item" id="user-${u.id}" style="align-items: center; text-align: center;">
                             <img src="${pfpPath}" style="width:80px; height:80px; border-radius:50%; object-fit: cover;" alt="${u.username}" onerror="this.onerror=null; this.src='${fallbackPfp}';">
                             <h4>${u.username}</h4>
-                            <span style="font-size:0.7rem; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:6px;">${u.role || 'USER'}</span>
                             <div class="card-actions" style="width: 100%;">
                                 <button class="action-btn danger" style="flex:1;" onclick="deleteUser('${u.id}')">Delete User</button>
                             </div>

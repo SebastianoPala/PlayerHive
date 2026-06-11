@@ -31,7 +31,7 @@ public interface GameRepository extends MongoRepository<Game, String> {
      * @param pageable Pagination settings.
      * @return A slice containing GameSearchDTO elements.
      */
-    @Query("{ 'name': { $regex: ?0, $options: 'i' } }" +
+    @Query("{ 'name': { $regex: '^?0}' }" +
             "{ '$project': { 'id': '$_id', 'name': 1, 'price': 1, 'discount':1, 'finalPrice': 1,'imageURL':1 } }")
     Slice<GameSearchDTO> searchByNameContaining(String gameName, Pageable pageable);
 

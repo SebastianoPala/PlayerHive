@@ -29,7 +29,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/user")
-@Tag(name = "4. Users & Social", description = "Profile management, friends, personal libraries, and user rankings")
+@Tag(name = "Users & Social", description = "Profile management, friends, personal libraries, and user rankings")
 public class UserController {
     private final UserService userService;
 

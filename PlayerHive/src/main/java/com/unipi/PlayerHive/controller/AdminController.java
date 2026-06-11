@@ -28,7 +28,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/admin")
-@Tag(name = "1. Admin", description = "Admin operations (Game and User management)")
+@Tag(name = "Admin", description = "Admin operations (Game and User management)")
 public class AdminController {
     private final AdminService adminService;
     private final UserService userService;

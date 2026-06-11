@@ -22,8 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/games")
-// TODO FIX RANGES OF REQUESTS
-@Tag(name = "3. Games", description = "Game search, reviews, and advanced queries")
+@Tag(name = "Games", description = "Game search, reviews, and advanced queries")
 public class GameController {
     private final GameService gameService;
 
