@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>playerHive | Admin Dashboard</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at top right, #2a0845, #1a1a24, #0b0c10);
+            --glass-bg: rgba(20, 22, 28, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --accent-glow: #e0f2fe; 
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --danger-color: #ff6b6b;
+            --success-color: #4caf50;
+            --font-main: 'system-ui', -apple-system, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .app-wrapper { width: 100%; max-width: 1800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+        header.glass-nav {
+            height: 80px;
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; display: flex;
+            align-items: center; justify-content: space-between; padding: 0 40px;
+            flex-shrink: 0;
+        }
+        .logo { font-size: 1.6rem; font-weight: 300; letter-spacing: 2px; display: flex; align-items: center; }
+        .logo b { font-weight: 700; }
+        .logo::after { content: ""; width: 8px; height: 8px; background: var(--accent-glow); border-radius: 50%; margin-left: 8px; box-shadow: 0 0 10px var(--accent-glow); }
+
+        main.glass-content {
+            flex: 1;
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 30px;
+        }
+
+        .profile-tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary); padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600;
+        }
+        .tab-btn.active { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-glow); color: var(--accent-glow); }
+
+        .search-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary); padding: 10px 20px; border-radius: 20px; outline: none; width: 300px;
+        }
+        .num-input {
+            width: 60px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
+            color: white; padding: 5px; border-radius: 8px; outline: none;
+        }
+
+        .action-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s;}
+        .action-btn.active{ background: rgba(255, 255, 255, 0.15); border-color: var(--accent-glow); color: var(--accent-glow); }
+        
+        .action-btn:hover { background: rgba(255,255,255,0.2); }
+        .action-btn.danger { background: rgba(255, 107, 107, 0.15); color: var(--danger-color); border-color: rgba(255, 107, 107, 0.3);}
+
+        .sub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+
+        .card-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .card-item img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+        .card-actions { display: flex; gap: 10px; margin-top: auto; }
+
+        /* Dashboard Layout Structure */
+        #analyticsSection {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .analytics-lower-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .analytics-tables-side {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .analytics-block {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .analytics-block h3 { margin-bottom: 15px; color: var(--accent-glow); border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;}
+        
+        .scrollable-container { max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        
+        /* OS Platform Vertical List Styles */
+        .os-vertical-grid { display: flex; flex-direction: column; gap: 20px; }
+        .os-card { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; text-align: center;}
+        .os-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; text-transform: uppercase;}
+        
+        /* Original Histogram Styles Restored */
+        .histogram-container-with-axes { display: flex; gap: 10px; align-items: stretch; height: 350px; margin-bottom: 30px; }
+        .y-axis { 
+            display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
+            color: var(--text-secondary); font-size: 0.75rem; padding-bottom: 25px; 
+            border-right: 1px solid var(--glass-border); padding-right: 10px; min-width: 50px; 
+        }
+        .y-axis span { line-height: 1; }
+        
+        .histogram { flex: 1; display: flex; align-items: flex-end; gap: 15px; padding: 10px; padding-bottom: 0; background: rgba(0,0,0,0.2); border-radius: 12px; overflow-x: auto;}
+        .histogram-bar-wrapper { display: flex; flex-direction: column; align-items: center; min-width: 38px; height: 100%; justify-content: flex-end;}
+        .histogram-bar { width: 100%; opacity: 0.75; border-radius: 4px 4px 0 0; transition: height 0.5s ease;}
+        .histogram-bar:hover { opacity: 1; }
+        .histogram-label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; height: 20px;}
+        .bar-stats { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); text-align: center; margin-bottom: 5px; line-height: 1.3; }
+
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;}
+        .data-table th, .data-table td { padding: 10px; border-bottom: 1px solid var(--glass-border); }
+        .data-table th { color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.8rem;}
+
+        .trending-list { display: flex; flex-direction: column; gap: 10px; }
+        .trending-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border);
+            padding: 15px 20px; border-radius: 12px; 
+        }
+        .trending-item .rank { font-size: 1.5rem; font-weight: bold; width: 40px; }
+        .trending-item .name { flex: 1; font-weight: 600; font-size: 1.1rem; }
+        .trending-item .count { color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* Modal Overlays */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background: #1a1a24; border: 1px solid var(--glass-border); padding: 30px;
+            border-radius: 20px; width: 500px; display: flex; flex-direction: column; gap: 15px; max-height: 90vh; overflow-y: auto;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.8rem; color: var(--text-secondary); }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 10px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border); color: white; border-radius: 8px; outline: none; font-family: inherit;
+        }
+        .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-actions button { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: bold; }
+        .btn-cancel { background: rgba(255,255,255,0.1); }
+        .btn-save { background: var(--success-color); }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <header class="glass-nav">
+            <div class="logo">player<b>Hive</b> Admin</div>
+            <div id="statusBadge" style="font-size: 0.9rem; color: var(--text-secondary);">Initializing Session...</div>
+        </header>
+
+        <main class="glass-content">
+            <div class="profile-tabs">
+                <button id="btnGames" class="tab-btn active" onclick="switchTab('games')">Game Management</button>
+                <button id="btnUsers" class="tab-btn" onclick="switchTab('users')">User Management</button>
+                <button id="btnAnalytics" class="tab-btn" onclick="switchTab('analytics')">Analytics</button>
+            </div>
+
+            <div id="gamesSection">
+                <div class="search-controls">
+                    <button class="action-btn" style="background: rgba(224, 242, 254, 0.1); border-color: var(--accent-glow);" onclick="openGameModal()">+ Add Game</button>
+                    <input type="text" id="gameSearchInput" class="search-input" placeholder="Search games...">
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Page:</label>
+                    <input type="number" id="gamePage" class="num-input" value="0" min="0">
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Size:</label>
+                    <input type="number" id="gameSize" class="num-input" value="15" min="1">
+                    <button class="action-btn" onclick="searchGames()">Search</button>
+                </div>
+                <div id="gamesGrid" class="sub-grid"></div>
+            </div>
+
+            <div id="usersSection" style="display: none;">
+                <div class="search-controls">
+                    <input type="text" id="userSearchInput" class="search-input" placeholder="Search users by name...">
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Page:</label>
+                    <input type="number" id="userPage" class="num-input" value="0" min="0">
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Size:</label>
+                    <input type="number" id="userSize" class="num-input" value="15" min="1">
+                    <button class="action-btn" onclick="searchUsers()">Search</button>
+                </div>
+                <div id="usersGrid" class="sub-grid"></div>
+            </div>
+
+            <div id="analyticsSection" style="display: none;">
+                <div id="releaseYearStatsBlock" class="analytics-block" style="margin-bottom: 20px;">
+                    <h3>Release Year Statistics</h3>
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div>
+                            <h4 style="color: var(--text-secondary); margin-bottom: 10px;">Total Games Released (Y-Axis) vs Year (X-Axis)</h4>
+                            <div class="histogram-container-with-axes">
+                                <div class="y-axis">
+                                    <span id="maxGamesAxisLabel">Max</span>
+                                    <span>0</span>
+                                </div>
+                                <div class="histogram" id="yearGamesHistogramContainer"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--text-secondary); margin-bottom: 10px;">Average Score (Y-Axis) vs Year (X-Axis)</h4>
+                            <div class="histogram-container-with-axes">
+                                <div class="y-axis">
+                                    <span>10.0</span>
+                                    <span>0.0</span>
+                                </div>
+                                <div class="histogram" id="yearScoreHistogramContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-lower-row">
+                    <div class="analytics-tables-side">
+                        <div id="genreStatsBlock" class="analytics-block">
+                            <h3>Genre Statistics</h3>
+                            <div class="scrollable-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Genre</th>
+                                            <th>Avg Score</th>
+                                            <th>Avg Hours/Player</th>
+                                            <th>Total Games</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="genreStatsTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="trendingStatsBlock" class="analytics-block">
+                            <h3>Trending Games Among Friends</h3>
+                            <div id="trendingContainer" class="trending-list"></div>
+                        </div>
+                    </div>
+
+                    <div id="osStatsBlock" class="analytics-block">
+                        <h3>OS Platform Statistics</h3>
+                        <div class="os-vertical-grid" id="osGridContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="gameModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="color: var(--accent-glow);">Add New Game</h3>
+            <input type="hidden" id="editGameId">
+            
+            <div class="form-group">
+                <label>Name</label><input type="text" id="gName" placeholder="Fortnite">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Release Date</label><input type="date" id="gDate">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Base Price (€)</label><input type="number" id="gPrice" step="0.01">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Discount (%)</label><input type="number" id="gDiscount" min="0" max="100">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Image URL</label><input type="text" id="gImg" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Description</label><textarea id="gDesc" rows="3"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Achievements Count</label><input type="number" id="gAchv">
+                </div>
+                <div class="form-group" style="flex:2;">
+                    <label>Supported OS (comma separated)</label><input type="text" id="gOS" placeholder="Windows, Linux, macOS">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Developers (comma separated)</label><input type="text" id="gDevs">
+            </div>
+            <div class="form-group">
+                <label>Publishers (comma separated)</label><input type="text" id="gPubs">
+            </div>
+            <div class="form-group">
+                <label>Genres (comma separated)</label><input type="text" id="gGenres">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveGame()">Save Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pfpFiles = [];
+        const fallbackPfp = '/home/sebastiano_pala/Documents/Github/Group_15_Project/mock/default.jpg';
+
+        window.onload = async () => {
+            localStorage.removeItem('accessToken');
+            await loadPfpList();
+            await fetchAdminToken();
+        };
+
+        async function loadPfpList() {
+            try {
+                const response = await fetch('../pfps.txt');
+                if (response.ok) {
+                    const text = await response.text();
+                    pfpFiles = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                }
+            } catch (err) { console.error("pfps.txt non trovato."); }
+        }
+
+        function getUserPfpPath(username) {
+            const basePath = '/home/sebastiano_pala/Pictures/Sfondi/';
+            if (pfpFiles.length === 0 || !username) {
+                return fallbackPfp;
+            }
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) {
+                hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return basePath + pfpFiles[Math.abs(hash) % pfpFiles.length];
+        }
+
+        async function fetchAdminToken() {
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@hotmail.com', password: 'admin' })
+                });
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                localStorage.setItem('accessToken', data.accessToken);
+                document.getElementById('statusBadge').innerText = "Session Active";
+                document.getElementById('statusBadge').style.color = "var(--success-color)";
+                searchGames();
+            } catch (err) {
+                document.getElementById('statusBadge').innerText = "Admin Login Failed";
+                document.getElementById('statusBadge').style.color = "var(--danger-color)";
+            }
+        }
+
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+            };
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('gamesSection').style.display = 'none';
+            document.getElementById('usersSection').style.display = 'none';
+            document.getElementById('analyticsSection').style.display = 'none';
+
+            if(tab === 'games') {
+                document.getElementById('btnGames').classList.add('active');
+                document.getElementById('gamesSection').style.display = 'block';
+            } else if(tab === 'users') {
+                document.getElementById('btnUsers').classList.add('active');
+                document.getElementById('usersSection').style.display = 'block';
+            } else if(tab === 'analytics') {
+                document.getElementById('btnAnalytics').classList.add('active');
+                document.getElementById('analyticsSection').style.display = 'flex';
+                
+                loadGenreStats();
+                loadOsStats();
+                loadReleaseYearStats();
+                loadTrendingGames();
+            }
+        }
+
+        async function searchGames() {
+            const query = document.getElementById('gameSearchInput').value.trim() || "";
+            const page = document.getElementById('gamePage').value;
+            const size = document.getElementById('gameSize').value;
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '<p>Loading games...</p>';
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/games/search/${encodeURIComponent(query)}?page=${page}&size=${size}`);
+                const data = await res.json();
+                const games = data.searchResult || [];
+                
+                if (games.length === 0) { grid.innerHTML = '<p>No games found.</p>'; return; }
+
+                grid.innerHTML = games.map(g => `
+                    <div class="card-item" id="game-${g.id}">
+                        <img src="${g.imageURL || 'https://via.placeholder.com/200x120?text=No+Img'}" alt="${g.name}">
+                        <h4>${g.name}</h4>
+                        <p style="font-size:0.8rem; color:var(--text-secondary);">€${g.finalPrice} | ${g.discount}% Off</p>
+                        <div class="card-actions">
+                            <button class="action-btn" style="flex:1;" onclick='openGameModal(${JSON.stringify(g).replace(/'/g, "&#39;")})'>Edit</button>
+                            <button class="action-btn danger" style="flex:1;" onclick="deleteGame('${g.id}')">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) { grid.innerHTML = '<p style="color:var(--danger-color);">Search failed.</p>'; }
+        }
+
+        async function deleteGame(id) {
+            if(!confirm("Delete this game permanently?")) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/admin/deleteGame/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+                if(res.ok) document.getElementById(`game-${id}`).remove();
+                else alert("Failed to delete game");
+            } catch (err) { alert("Network error"); }
+        }
+
+        function openGameModal(game = null) {
+            document.getElementById('gameModal').style.display = 'flex';
+            if (game) {
+                document.getElementById('modalTitle').innerText = "Edit Game";
+                document.getElementById('editGameId').value = game.id;
+                document.getElementById('gName').value = game.name || '';
+                document.getElementById('gDate').value = game.releaseDate ? new Date(game.releaseDate).toISOString().split('T')[0] : '';
+                document.getElementById('gPrice').value = game.price || 0;
+                document.getElementById('gDiscount').value = game.discount || 0;
+                document.getElementById('gImg').value = game.imageURL || '';
+                document.getElementById('gDesc').value = game.description || '';
+                document.getElementById('gAchv').value = game.achievements || 0;
+                document.getElementById('gOS').value = (game.supportedOS || []).join(', ');
+                document.getElementById('gDevs').value = (game.developers || []).join(', ');
+                document.getElementById('gPubs').value = (game.publishers || []).join(', ');
+                document.getElementById('gGenres').value = (game.genres || []).join(', ');
+            } else {
+                document.getElementById('modalTitle').innerText = "Add New Game";
+                document.getElementById('editGameId').value = '';
+                document.querySelectorAll('.modal-content input, .modal-content textarea').forEach(el => el.value = '');
+            }
+        }
+
+        function closeModal() { document.getElementById('gameModal').style.display = 'none'; }
+
+        async function saveGame() {
+            const id = document.getElementById('editGameId').value;
+            const isEdit = !!id;
+            
+            const payload = {
+                name: document.getElementById('gName').value,
+                releaseDate: document.getElementById('gDate').value,
+                price: parseFloat(document.getElementById('gPrice').value) || 0,
+                discount: parseFloat(document.getElementById('gDiscount').value) || 0,
+                description: document.getElementById('gDesc').value,
+                imageURL: document.getElementById('gImg').value,
+                achievements: parseInt(document.getElementById('gAchv').value) || 0,
+                supportedOS: document.getElementById('gOS').value.split(',').map(s=>s.trim()).filter(Boolean),
+                developers: document.getElementById('gDevs').value.split(',').map(s=>s.trim()).filter(Boolean),
+                publishers: document.getElementById('gPubs').value.split(',').map(s=>s.trim()).filter(Boolean),
+                genres: document.getElementById('gGenres').value.split(',').map(s=>s.trim()).filter(Boolean)
+            };
+
+            const url = isEdit ? `http://localhost:8080/api/admin/editGame/${id}` : `http://localhost:8080/api/admin/addGame`;
+            const method = isEdit ? 'PATCH' : 'POST';
+
+            try {
+                const res = await fetch(url, { method: method, headers: getAuthHeaders(), body: JSON.stringify(payload) });
+                if (res.ok) {
+                    closeModal();
+                    searchGames(); 
+                } else alert("Failed to save game");
+            } catch (err) { alert("Network error"); }
+        }
+
+        async function searchUsers() {
+            const query = document.getElementById('userSearchInput').value.trim() || "";
+            const page = document.getElementById('userPage').value;
+            const size = document.getElementById('userSize').value;
+            const grid = document.getElementById('usersGrid');
+            grid.innerHTML = '<p>Loading users...</p>';
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/user/search/${encodeURIComponent(query)}?page=${page}&size=${size}`);
+                const data = await res.json();
+                const users = data.searchResult || [];
+
+                if (users.length === 0) { grid.innerHTML = '<p>No users found.</p>'; return; }
+
+                grid.innerHTML = users.map(u => {
+                    const pfpPath = getUserPfpPath(u.username);
+                    return `
+                        <div class="card-item" id="user-${u.id}" style="align-items: center; text-align: center;">
+                            <img src="${pfpPath}" style="width:80px; height:80px; border-radius:50%; object-fit: cover;" alt="${u.username}" onerror="this.onerror=null; this.src='${fallbackPfp}';">
+                            <h4>${u.username}</h4>
+                            <div class="card-actions" style="width: 100%;">
+                                <button class="action-btn danger" style="flex:1;" onclick="deleteUser('${u.id}')">Delete User</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) { grid.innerHTML = '<p style="color:var(--danger-color);">Search failed.</p>'; }
+        }
+
+        async function deleteUser(id) {
+            if(!confirm("Delete this user permanently?")) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/admin/deleteUser/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+                if(res.ok) document.getElementById(`user-${id}`).remove();
+                else alert("Failed to delete user");
+            } catch (err) { alert("Network error"); }
+        }
+
+        async function loadGenreStats() {
+            const tbody = document.getElementById('genreStatsTableBody');
+            tbody.innerHTML = '<tr><td colspan="4">Fetching data rows...</td></tr>';
+
+            try {
+                const res = await fetch('http://localhost:8080/api/admin/getGenreStats', { headers: getAuthHeaders() });
+                const data = await res.json();
+                
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td style="font-weight: 600;">${item.genre}</td>
+                        <td>★ ${item.avgScore.toFixed(1)}</td>
+                        <td>${item.avgHoursPerPlayer.toFixed(1)} hrs</td>
+                        <td>${item.totalGames.toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--danger-color);">Failed to parse data.</td></tr>'; }
+        }
+
+        async function loadOsStats() {
+            const container = document.getElementById('osGridContainer');
+            container.innerHTML = '<p>Fetching platform data...</p>';
+
+            try {
+                const res = await fetch('http://localhost:8080/api/admin/getOsPlatformStats', { headers: getAuthHeaders() });
+                const data = await res.json();
+                
+                let html = '';
+                for(let i = 0; i < 3; i++) {
+                    const item = data[i] || { osCount: 0, avgScore: 0, totalGames: 0 };
+                    html += `
+                        <div class="os-card">
+                            <div class="os-title">OS ${i + 1}</div>
+                            <p style="font-size: 1.8rem; font-weight: bold; color: var(--accent-glow); margin: 10px 0;">${item.osCount.toLocaleString()}</p>
+                            <p style="font-size:0.85rem; color:var(--text-secondary);">Total Games: ${item.totalGames}</p>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">Avg Rating: ★ ${item.avgScore.toFixed(1)}</p>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            } catch(e) { container.innerHTML = '<p style="color:var(--danger-color);">Failed to map platform objects.</p>'; }
+        }
+
+        async function loadReleaseYearStats() {
+            const gamesContainer = document.getElementById('yearGamesHistogramContainer');
+            const scoreContainer = document.getElementById('yearScoreHistogramContainer');
+            
+            gamesContainer.innerHTML = '<p>Fetching historical intervals...</p>';
+            scoreContainer.innerHTML = '';
+
+            try {
+                const res = await fetch('http://localhost:8080/api/admin/releaseYearStats', { headers: getAuthHeaders() });
+                const data = await res.json();
+                
+                if(!data || data.length === 0) { 
+                    gamesContainer.innerHTML = '<p>Empty set.</p>'; 
+                    return; 
+                }
+
+                const maxGames = Math.max(...data.map(d => d.totalGames), 1);
+                document.getElementById('maxGamesAxisLabel').innerText = maxGames.toLocaleString();
+                
+                gamesContainer.innerHTML = data.map(item => {
+                    const percentageHeight = (item.totalGames / maxGames) * 100;
+                    return `
+                        <div class="histogram-bar-wrapper">
+                            <div class="bar-stats">${item.totalGames}</div>
+                            <div class="histogram-bar" style="height: ${percentageHeight}%; min-height: 2px; background: var(--accent-glow);"></div>
+                            <div class="histogram-label">${item.releaseYear}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                scoreContainer.innerHTML = data.map(item => {
+                    const percentageHeight = (item.avgScore / 10) * 100;
+                    return `
+                        <div class="histogram-bar-wrapper">
+                            <div class="bar-stats">★ ${item.avgScore.toFixed(1)}</div>
+                            <div class="histogram-bar" style="height: ${percentageHeight}%; min-height: 2px; background: #f5a623;"></div>
+                            <div class="histogram-label">${item.releaseYear}</div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch(e) { gamesContainer.innerHTML = '<p style="color:var(--danger-color);">Failed to render graphical chart.</p>'; }
+        }
+
+        async function loadTrendingGames() {
+            const container = document.getElementById('trendingContainer');
+            container.innerHTML = '<p>Loading trending data...</p>';
+
+            try {
+                const res = await fetch('http://localhost:8080/api/admin/getTrending', { headers: getAuthHeaders() });
+                const data = await res.json();
+                
+                if(!data || data.length === 0) { container.innerHTML = '<p>No trending games found.</p>'; return; }
+
+                container.innerHTML = data.map((item, index) => {
+                    let rankColor = 'var(--accent-glow)';
+                    if(index === 0) rankColor = '#ffd700'; 
+                    else if(index === 1) rankColor = '#c0c0c0'; 
+                    else if(index === 2) rankColor = '#cd7f32'; 
+
+                    return `
+                        <div class="trending-item">
+                            <div class="rank" style="color: ${rankColor};">#${index + 1}</div>
+                            <div class="name">${item.name}</div>
+                            <div class="count">${item.socialPlayCount.toLocaleString()} mutual plays</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) { container.innerHTML = '<p style="color:var(--danger-color);">Error fetching trending games.</p>'; }
+        }
+
+        document.getElementById('gameSearchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') searchGames(); });
+        document.getElementById('userSearchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') searchUsers(); });
+    </script>
+</body>
+</html>

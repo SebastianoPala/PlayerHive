@@ -164,17 +164,6 @@ public interface UserRepository extends MongoRepository<User,String> {
     OldUserReviewContainerDTO getUserReviews(String userId, int skip, int limit);
 
     /**
-     * Retrieves all reviews created by a specific user.
-     * @param userId The ID of the user.
-     * @return A container of all the user's review DTOs.
-     */
-    @Aggregation(pipeline = {
-            "{ '$match': { '_id': ?0 } }",
-            "{ '$project': { 'reviews': '$reviewIds' } }"
-    })
-    OldUserReviewContainerDTO getAllUserReviews(String userId);
-
-    /**
      * Pushes a new {reviewId, gameId} pair into the user's reviewIds array when they write a review.
      * @param userId The ID of the user.
      * @param review The review reference object to add.

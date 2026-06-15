@@ -58,6 +58,7 @@ public class GameConsistencyManager {
         int step = 0;
 
         long modified = 0;
+        long deleted = 0;
         while(reviews_left){
             // user reviews are retrieved and the review id is extracted from each
             List<String> userReviews = userRepository.getUserReviews(userId,step,page_size).getReviews().stream()
@@ -94,7 +95,11 @@ public class GameConsistencyManager {
 
             BulkWriteResult result = bulkOps.execute();
             modified += result.getModifiedCount();
+
+            deleted = reviewRepository.removeByIdIn(userReviews);
+
         }
+        System.out.println(deleted + " reviews were deleted from the Review Collection");
 
         return modified;
     }
