@@ -91,8 +91,8 @@ public class SecuritySpringBoot {
      */
     @Bean
     public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder(4);
-    } //TODO lowered from 12 to 4 for speeding up db population
+        return new BCryptPasswordEncoder(12);
+    }
 
     /**
      * Configures the CORS settings for the application.

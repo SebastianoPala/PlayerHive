@@ -132,7 +132,7 @@ public class AdminService {
         game.setSumScore((float) 0);
         game.setCountScore(0);
 
-        Game addedGame = gameRepository.save(game); // I need the game ID from MongoDb for Neo4j
+        Game addedGame = gameRepository.save(game); //the game ID for Neo4j is obtained from MongoDB
 
         GameNeo4j gameN4j= new GameNeo4j(addedGame.getId(), game.getName(),game.getAchievements(),game.getImageURL());
 
@@ -157,8 +157,8 @@ public class AdminService {
         String gameName = game.getName();
         String gameImg = game.getImageURL();
 
-        if(!gameName.equals(editGame.getName())){
-            if (gameRepository.existsByName(editGame.getName())) { // avoids throwing an exception if I modify the game name to itself
+        if(!gameName.equals(editGame.getName())){ // avoids throwing an exception if I modify the game name to itself
+            if (gameRepository.existsByName(editGame.getName())) {
                 throw new ResourceAlreadyExistsException("Game "+ editGame.getName() +" already exists");
             }else{
                 updateReviewInfo = true;

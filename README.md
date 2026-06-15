@@ -2,7 +2,7 @@
 
 > **"For gamers, by gamers"** — a social gaming platform for discovering games, tracking your library, reviewing titles, and connecting with other players.
 
-Built with Spring Boot 3.5 and a polyglot persistence architecture combining MongoDB, Neo4j, and Redis.
+Built with Spring Boot 3.5 and a polyglot persistence architecture combining MongoDB, and Neo4j.
 
 ---
 

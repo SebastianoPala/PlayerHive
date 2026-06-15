@@ -14,12 +14,12 @@ from bson import ObjectId
 # --- CONFIGURATION ---
 NEO4J_URI = "bolt://localhost:7687"
 NEO4J_USER = "neo4j"
-NEO4J_PASSWORD = "00000000"  # Updated password
+NEO4J_PASSWORD = "00000000" 
 MONGO_URI = "mongodb://localhost:27017/"
 MONGO_DB_NAME = "PlayerHive"
 
 NUM_USERS = 15000            # Number of users to generate
-NUM_ROUNDS = 4
+NUM_ROUNDS = 12
 MAX_USER_REVIEWS = 40
 MAX_GAMES = 40
 MAX_FRIENDS = 20
@@ -45,9 +45,9 @@ admin_user = {
 
 default_user = {
     "_id": {"$oid": uuid.uuid4().hex[:24]},
-    "username": "BrunoStrati",
-    "password": bcrypt.hashpw("BrunoStrati".encode('utf-8'), bcrypt.gensalt(rounds=NUM_ROUNDS)).decode('utf-8'),
-    "email": "BrunoStrati@hotmail.com",
+    "username": "aleach",
+    "password": bcrypt.hashpw("aleach".encode('utf-8'), bcrypt.gensalt(rounds=NUM_ROUNDS)).decode('utf-8'),
+    "email": "aleach@hotmail.com",
     "birthdate": datetime(1776, 12, 4), 
     "registrationDate": datetime.now() - timedelta(days=5 * 365),
     "role": "USER",
@@ -60,7 +60,7 @@ default_user = {
     "reviewIds": []
 }
 
-# Remove CSV field size limits to prevent errors with large text blocks
+# remove CSV field size limits to prevent errors with large text blocks
 maxInt = sys.maxsize
 while True:
     try:
@@ -101,7 +101,7 @@ def format_to_datetime(date_raw):
     if not date_raw:
         return None
     date_str = str(date_raw).strip()
-    # Common formats found in game datasets
+
     formats = [
         "%Y-%m-%d", "%b %d, %Y", "%d %b, %Y", "%B %d, %Y", "%d %B, %Y", 
         "%Y/%m/%d", "%m/%d/%Y", "%d/%m/%Y"
@@ -111,7 +111,7 @@ def format_to_datetime(date_raw):
             return datetime.strptime(date_str, fmt)
         except ValueError:
             continue
-    # If it's just a year
+
     if len(date_str) == 4 and date_str.isdigit():
         return datetime(int(date_str), 1, 1)
     return None 
@@ -149,23 +149,12 @@ def create_mongo_indexes(db):
     Built once, after all bulk inserts, so we don't pay index-maintenance cost per insert."""
     print("   -> Creating MongoDB indexes...")
 
-    # Login + registration lookup (UserRepository.findByEmail, findLightByUsernameOrEmail)
-    # Unique to also enforce email uniqueness at the DB level
     db.users.create_index("email", unique=True, name="email_1")
     db.users.create_index("username", unique=True, name="username_1")
 
-    # Game catalogue search (GameRepository.searchByNameContaining)
     db.games.create_index("name", unique=True ,name="name_1")
 
-    # Home-page "newly released games" query (GameRepository.getNewReleases)
-    # Descending so the newest games are at the front of the index
     db.games.create_index([("release_date", -1)], name="release_date_-1")
-
-    # Cascade delete on account deletion (ReviewRepository.removeByUserId)
-    # db.reviews.create_index("user_id", name="user_id_1")
-
-    # Cascade delete on game deletion (ReviewRepository.removeByGameId)
-    # db.reviews.create_index("game_id", name="game_id_1")
 
     print("   -> MongoDB indexes created!")
 
@@ -191,7 +180,6 @@ def upload_to_mongodb(games_data, users_data, all_reviews_data):
             for r_id in g_copy.get("allReviews", [])
         ]
         
-        # Format user_ids inside recentReviews array
         for rr in g_copy.get("recentReviews", []):
             rr["_id"] = ObjectId(rr["_id"]["$oid"])
             rr["user_id"] = ObjectId(rr["user_id"])
@@ -202,11 +190,9 @@ def upload_to_mongodb(games_data, users_data, all_reviews_data):
         u_copy = u.copy()
         u_copy["_id"] = ObjectId(u["_id"]["$oid"])
         
-        # Converte l'user_id delle richieste di amicizia in ObjectId
         for req in u_copy.get("friendRequests", []):
             req["user_id"] = ObjectId(req["user_id"])
-            
-        # Converte i campi di reviewIds in ObjectId
+
         for rev in u_copy.get("reviewIds", []):
             rev["review_id"] = ObjectId(rev["review_id"])
             rev["game_id"] = ObjectId(rev["game_id"])
@@ -240,10 +226,8 @@ def upload_to_mongodb(games_data, users_data, all_reviews_data):
 def main():
     print("=== STARTING MASTER PIPELINE ===\n")
     
-    # 0. CHECK CONNECTIONS
     check_neo4j_connection()
     
-    # 1. CLEAN GAMES
     print("1. Loading and cleaning Games data (from games.json)...")
     try:
         with open('games.json', 'r', encoding='utf-8') as f:
@@ -299,7 +283,6 @@ def main():
         })
     print(f"   -> Successfully loaded and cleaned {len(games_list)} games.")
 
-    # 2. GENERATE USERS
     print(f"\n2. Generating {NUM_USERS} mock Users in memory...")
     users_list = []
     for i in range(NUM_USERS):
@@ -332,7 +315,6 @@ def main():
     users_list.append(default_user)
     print()
 
-    # 3. ASSIGN REVIEWS
     print("\n3. Extracting texts from 'reviews.csv' and generating user reviews...")
     review_texts = []
     try:
@@ -397,7 +379,6 @@ def main():
             for r in game["raw_reviews"]
         ]
         
-        # Rimosso [::-1] poiché l'array è già ordinato dal più recente
         recent_25 = game["raw_reviews"][:25]
         
         embedded_recent = []
@@ -413,7 +394,6 @@ def main():
             print(f"   -> Processed structural reviews for {i + 1}/{len(games_list)} games...", end='\r')
     print()
 
-    # 4. GAME PLAY HISTORY
     print("\n4. Generating play history metrics and [:PLAYED] relationships...")
     played_relationships = []
     game_playtime_stats = {g["_id"]["$oid"]: {"total_hours": 0.0, "user_count": 0} for g in games_list}
@@ -460,7 +440,6 @@ def main():
             print(f"   -> Processed playtime stats for {i + 1}/{len(games_list)} games...", end='\r')
     print()
 
-    # 5. SOCIAL GRAPH (FRIENDS)
     print("\n5. Generating Social Graph (Friend Requests & Mutual Friendships)...")
     user_map = {u["_id"]["$oid"]: u for u in users_list}
     all_user_ids = list(user_map.keys())
@@ -490,7 +469,7 @@ def main():
                 "pfpURL": user["pfpURL"], "timestamp": generate_recent_timestamp()
             })
             pending_requests.add((u_id, t_id))
-            user_map[t_id]["requestsNum"] += 1 # Incremento del nuovo campo
+            user_map[t_id]["requestsNum"] += 1 
 
         for t_id in friend_targets:
             established_friendships.add(frozenset([u_id, t_id]))
@@ -508,7 +487,6 @@ def main():
         if user["friendRequests"]:
             user["friendRequests"].sort(key=lambda x: x["timestamp"], reverse=True)
 
-    # 6. NEO4J UPLOAD
     print("\n6. Connecting to Neo4j to upload Graph Database...")
     neo4j_games = [{"id": g["_id"]["$oid"], "name": g.get("name",""), "achievements": g.get("achievements",0), "image": g.get("image","")} for g in games_list]
     
@@ -517,11 +495,10 @@ def main():
     try:
         driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
             
-        # --- 2. POPOLAMENTO ---
         with driver.session() as session:
             clear_neo4j(session)
             
-            # CREA I CONSTRAINT PRIMA DEGLI INSERT
+
             manage_neo4j_indexes(session, "CREATE")
             
             print("   -> Inserting Game Nodes...")
@@ -542,16 +519,12 @@ def main():
         print("   -> Neo4j upload completed successfully!")
     except Exception as e:
         print(f"   -> ERROR during Neo4j operations: {e}")
-            # Keep the :User(id) and :Game(id) indexes for the application phase
-            # (created above) instead of dropping them after population.
-            # manage_neo4j_indexes(session, "DROP")
             
         driver.close()
         print("   -> Neo4j upload completed successfully!")
     except Exception as e:
         print(f"   -> ERROR during Neo4j operations: {e}")
 
-    # 7. MONGODB UPLOAD
     upload_to_mongodb(games_list, users_list, all_global_reviews)
 
     print("\n=== PIPELINE FINISHED SUCCESSFULLY! ===")
