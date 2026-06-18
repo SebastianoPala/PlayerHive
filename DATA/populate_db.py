@@ -19,10 +19,13 @@ MONGO_URI = "mongodb://localhost:27017/"
 MONGO_DB_NAME = "PlayerHive"
 
 NUM_USERS = 15000            # Number of users to generate
-NUM_ROUNDS = 12
+NUM_ROUNDS = 12              # The lower the value, the faster the population script. this value has to
+                             # match the value at line 94 in SecuritySpringBoot.java
 MAX_USER_REVIEWS = 40
 MAX_GAMES = 40
 MAX_FRIENDS = 20
+
+STATIC_USER = "aleach"
 
 fake = Faker()
 
@@ -45,9 +48,9 @@ admin_user = {
 
 default_user = {
     "_id": {"$oid": uuid.uuid4().hex[:24]},
-    "username": "aleach",
-    "password": bcrypt.hashpw("aleach".encode('utf-8'), bcrypt.gensalt(rounds=NUM_ROUNDS)).decode('utf-8'),
-    "email": "aleach@hotmail.com",
+    "username": STATIC_USER,
+    "password": bcrypt.hashpw(STATIC_USER.encode('utf-8'), bcrypt.gensalt(rounds=NUM_ROUNDS)).decode('utf-8'),
+    "email": STATIC_USER + "@hotmail.com",
     "birthdate": datetime(1776, 12, 4), 
     "registrationDate": datetime.now() - timedelta(days=5 * 365),
     "role": "USER",
@@ -329,7 +332,10 @@ def main():
     all_global_reviews = [] 
         
     for i, user in enumerate(users_list):
-        M = random.randint(0, MAX_USER_REVIEWS)
+        if(user["username"] == STATIC_USER):
+            M = MAX_USER_REVIEWS
+        else:
+            M = random.randint(0, MAX_USER_REVIEWS)
         user_reviews_temp = []
         
         for _ in range(M):
@@ -399,7 +405,11 @@ def main():
     game_playtime_stats = {g["_id"]["$oid"]: {"total_hours": 0.0, "user_count": 0} for g in games_list}
     
     for i, user in enumerate(users_list):
-        M = min(random.randint(0, MAX_GAMES), len(games_list))
+        if(user["username"] == STATIC_USER):
+            M = min(MAX_GAMES, len(games_list))
+        else: 
+            M = min(random.randint(0, MAX_GAMES), len(games_list))
+
         selected_games = random.sample(games_list, M)
         total_hours = 0.0
         
@@ -455,10 +465,15 @@ def main():
                        and (oid, u_id) not in pending_requests]
         
         if not valid_cands: continue
-        M = random.randint(0, min(MAX_FRIENDS, len(valid_cands)))
+        if(user["username"] == STATIC_USER):
+            M = min(MAX_FRIENDS, len(valid_cands))
+            N = M
+        else:
+            M = random.randint(0, min(MAX_FRIENDS, len(valid_cands)))
+            N = random.randint(0, M)
         if M == 0: continue
             
-        N = random.randint(0, M)
+        
         selected_ids = random.sample(valid_cands, M)
         req_targets = selected_ids[:N]
         friend_targets = selected_ids[N:]
